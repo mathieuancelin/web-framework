@@ -60,14 +60,6 @@ public class Request {
      */
     public String contentType;
     /**
-     * Controller to invoke
-     */
-    public String controller;
-    /**
-     * Action method name
-     */
-    public String actionMethod;
-    /**
      * HTTP port
      */
     public Integer port;
@@ -115,4 +107,12 @@ public class Request {
      * Request comes from loopback interface
      */
     public boolean isLoopback;
+
+    public String getControllerName() {
+        return "";
+    }
+
+    public String getCalledMethod() {
+        return "";
+    }
 }

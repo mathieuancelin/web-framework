@@ -5,6 +5,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   </head>
   <body>
-      <% 3.times { print "<h1>" + message + "</h1>" } %>
+      <h1>${message}</h1>
+      <% numbers.each { number -> %>
+          <div>${number}</div>
+      <% } %>
   </body>
 </html>

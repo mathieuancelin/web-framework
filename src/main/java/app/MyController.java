@@ -17,9 +17,10 @@
 
 package app;
 
-import cx.ath.mancel01.webframework.NamedAttribute;
 import cx.ath.mancel01.webframework.RenderView;
 import cx.ath.mancel01.webframework.annotation.Controller;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 
 /**
@@ -33,8 +34,22 @@ public class MyController {
     private Service service;
 
     public RenderView index() {
-//        return new RenderView("index.html",
-//                new NamedAttribute("message", service.hello("Boris")));
-        return new RenderView("index.html").param("message", service.hello("Boris"));
+        List<String> numbers = new ArrayList<String>();
+        numbers.add("one");
+        numbers.add("two");
+        numbers.add("three");
+        return new RenderView("index.html")
+                .param("message", service.hello("Boris"))
+                .param("numbers", numbers);
+    }
+
+    public RenderView other() {
+        List<String> numbers = new ArrayList<String>();
+        numbers.add("four");
+        numbers.add("five");
+        numbers.add("six");
+        return new RenderView("index.html")
+                .param("message", service.hello("Anonymous"))
+                .param("numbers", numbers);
     }
 }

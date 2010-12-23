@@ -14,7 +14,6 @@
  *  limitations under the License.
  *  under the License.
  */
-
 package cx.ath.mancel01.webframework;
 
 import cx.ath.mancel01.dependencyshot.DependencyShot;
@@ -25,11 +24,10 @@ import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  *
@@ -41,8 +39,9 @@ public class Dispatcher {
     private final WebBinder configBinder;
     private final TemplateRenderer renderer;
     private final FileGrabber grabber;
-
     private Map<String, Class> controllers;
+    private Class rootController;
+    private boolean started = false;
 
     public Dispatcher(Class<? extends Binder> binderClass, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
@@ -57,13 +56,38 @@ public class Dispatcher {
         }
     }
 
+    public void validate() {
+        if (rootController == null) {
+            throw new RuntimeException("You need to register a root controler");
+        } 
+    }
+
+    public void start() {
+        this.started = true;
+    }
+
+    public void stop() {
+        this.started = false;
+    }
+
+    public void setRootController(Class rootController) {
+        if (rootController.isAnnotationPresent(Controller.class)) {
+            this.rootController = rootController;
+            registrerController(rootController);
+        } else {
+            throw new RuntimeException("You can't register a controller without @Controller annotation");
+        }
+    }
+
     public synchronized void registrerController(Class<?> clazz) {
-        if(clazz.isAnnotationPresent(Controller.class)) {
+        if (clazz.isAnnotationPresent(Controller.class)) {
             Controller controller = clazz.getAnnotation(Controller.class);
             String name = controller.value();
+            if (name.contains("/")) {
+                throw new RuntimeException("You can't use / in controller name");
+            }
             if ("".equals(name)) {
-                name = clazz.getSimpleName().substring(0, 1).toLowerCase()
-                        + clazz.getSimpleName().substring(1);
+                name = clazz.getSimpleName().toLowerCase();
             }
             this.controllers.put(name, clazz);
         } else {
@@ -71,24 +95,44 @@ public class Dispatcher {
         }
     }
 
-    public Response process(Request context) throws Exception {
-        // on regarde l'url et on trouve le controleur
-        Object controller = injector.getInstance(controllers.get("myController"));
-        Method method = controller.getClass().getMethod("index");
+    public Response process(Request request) throws Exception {
+        if (started) {
+            Response res = new Response();
+            StringTokenizer tokenizer = new StringTokenizer(request.path, "/");
+            if (tokenizer.countTokens() >= 2) {
+                String context = tokenizer.nextToken();
+                String firstToken = tokenizer.nextToken();
+                String secondToken = "index";
+                if (tokenizer.hasMoreTokens()) {
+                    secondToken = tokenizer.nextToken();
+                }
+                if (controllers.containsKey(firstToken)) {
+                    res = render(controllers.get(firstToken), secondToken);
+                } else {
+                    throw new RuntimeException("Controller " + firstToken + " does not exist.");
+                    // TODO : return 404
+                }
+            } else {
+                if (rootController != null) {
+                    res = render(rootController, "index");
+                } else {
+                    throw new RuntimeException("You need to register a root controler");
+                }
+            }
+            return res;
+        } else {
+            throw new RuntimeException("Framework not started ...");
+        }
+    }
+
+    private Response render(Class controllerClass, String viewTemplate) throws Exception {
+        Object controller = injector.getInstance(controllerClass);
+        Method method = controller.getClass().getMethod(viewTemplate);
         RenderView view = (RenderView) method.invoke(controller);
         Response res = new Response();
         res.contentType = "text/html";
         res.out = new ByteArrayOutputStream();
         renderer.render(grabber.getFile(view.getViewName()), view.getContext(), res.out);
-
-        // si pas de méthode, on cherche une methode index
-        // sinon on cherche méthode via url
-        // si ok on appelle et on récup le render
-        // on fabrique le template
-        // on fabrique la response
-        // on retourne
-
-
         return res;
     }
 }
