@@ -19,41 +19,16 @@ package cx.ath.mancel01.webframework.http;
 import java.io.Serializable;
 
 /**
- *
+ * A cookie :)
+ * 
  * @author mathieuancelin
  */
 public class Cookie implements Serializable {
-
-    /**
-     * Cookie name
-     */
     public String name;
-    /**
-     * Cookie domain
-     */
     public String domain;
-    /**
-     * Cookie path
-     */
     public String path = "/";
-    /**
-     * for HTTPS ?
-     */
     public boolean secure = false;
-    /**
-     * Cookie value
-     */
     public String value;
-    /**
-     * Cookie max-age
-     */
     public Integer maxAge;
-    /**
-     * Don't use
-     */
-    public boolean sendOnError = false;
-    /**
-     * See http://www.owasp.org/index.php/HttpOnly
-     */
     public boolean httpOnly = false;
 }

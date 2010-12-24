@@ -64,15 +64,17 @@ public class ServletDispatcher extends HttpServlet {
             throw new RuntimeException("Your config class is not a good one ...", e);
         }
         final ServletContext context = this.getServletContext();
-        dispatcher = new Dispatcher((Class<? extends Binder>) binder, new FileGrabber() {
-            @Override
-            public File getFile(String file) {
-                try {
-                    return new File(context.getRealPath(file));
-                } catch (Exception e) {
-                    throw new RuntimeException("Error while grabbing file", e);
-                }
-            }
+        dispatcher = new Dispatcher((Class<? extends Binder>) binder,
+            getServletContext().getContextPath(),
+                new FileGrabber() {
+                    @Override
+                    public File getFile(String file) {
+                        try {
+                            return new File(context.getRealPath(file));
+                        } catch (Exception e) {
+                            throw new RuntimeException("Error while grabbing file", e);
+                        }
+                    }
         });
         dispatcher.start();
     }
@@ -82,10 +84,10 @@ public class ServletDispatcher extends HttpServlet {
         super.destroy();
         dispatcher.stop();
     }
-
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        System.out.println("start processing request ...");
         long start = System.currentTimeMillis();
         try {
             // process in a thread ?
@@ -95,9 +97,14 @@ public class ServletDispatcher extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            System.out.println("request processed in : " + (System.currentTimeMillis() - start) + " ms.");
+            System.out.println("request processed in : " + (System.currentTimeMillis() - start) + " ms.\n");
+            System.out.println("=======================================\n");
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

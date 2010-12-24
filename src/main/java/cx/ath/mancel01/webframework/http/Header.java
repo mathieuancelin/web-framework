@@ -26,13 +26,7 @@ import java.util.List;
  */
 public class Header implements Serializable {
 
-    /**
-     * Header name
-     */
     public String name;
-    /**
-     * Header value
-     */
     public List<String> values;
 
     public Header() {
@@ -50,10 +44,6 @@ public class Header implements Serializable {
         this.values = values;
     }
 
-    /**
-     * First value
-     * @return The first value
-     */
     public String value() {
         return values.get(0);
     }

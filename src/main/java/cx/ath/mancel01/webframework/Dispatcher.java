@@ -35,6 +35,7 @@ import java.util.StringTokenizer;
  */
 public class Dispatcher {
 
+    private static final String DEFAUTL_CONTENT_TYPE = "text/html";
     private final InjectorImpl injector;
     private final WebBinder configBinder;
     private final TemplateRenderer renderer;
@@ -42,10 +43,12 @@ public class Dispatcher {
     private Map<String, Class> controllers;
     private Class rootController;
     private boolean started = false;
+    private final String contextRoot;
 
-    public Dispatcher(Class<? extends Binder> binderClass, FileGrabber grabber) {
+    public Dispatcher(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
         renderer = new TemplateRenderer();
+        this.contextRoot = contextRoot;
         this.grabber = grabber;
         try {
             this.configBinder = (WebBinder) binderClass.newInstance();
@@ -98,9 +101,12 @@ public class Dispatcher {
     public Response process(Request request) throws Exception {
         if (started) {
             Response res = new Response();
-            StringTokenizer tokenizer = new StringTokenizer(request.path, "/");
-            if (tokenizer.countTokens() >= 2) {
-                String context = tokenizer.nextToken();
+            String path = request.path;
+            if (!"".equals(contextRoot)) {
+                path = path.replace(contextRoot, "");
+            }
+            StringTokenizer tokenizer = new StringTokenizer(path, "/");
+            if (tokenizer.countTokens() > 1) {
                 String firstToken = tokenizer.nextToken();
                 String secondToken = "index";
                 if (tokenizer.hasMoreTokens()) {
@@ -126,13 +132,20 @@ public class Dispatcher {
     }
 
     private Response render(Class controllerClass, String viewTemplate) throws Exception {
+        long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);
+        System.out.println("controller injection : " + (System.currentTimeMillis() - start) + " ms.");
+        start = System.currentTimeMillis();
         Method method = controller.getClass().getMethod(viewTemplate);
         RenderView view = (RenderView) method.invoke(controller);
+        System.out.println("controller method invocation : " + (System.currentTimeMillis() - start) + " ms.");
+        start = System.currentTimeMillis();
         Response res = new Response();
-        res.contentType = "text/html";
+        res.contentType = DEFAUTL_CONTENT_TYPE;
         res.out = new ByteArrayOutputStream();
         renderer.render(grabber.getFile(view.getViewName()), view.getContext(), res.out);
+        System.out.println("template view rendering : " + (System.currentTimeMillis() - start) + " ms.");
+        start = System.currentTimeMillis();
         return res;
     }
 }

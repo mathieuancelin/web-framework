@@ -16,6 +16,9 @@
  */
 package cx.ath.mancel01.webframework;
 
+import app.MyBinder;
+import cx.ath.mancel01.webframework.sun.WebServer;
+import java.io.File;
 import org.junit.Test;
 
 /**
@@ -26,7 +29,16 @@ public class TemplateTest {
 
     @Test
     public void template() throws Exception {
-//        TemplateRenderer renderer = new TemplateRenderer();
-//        renderer.test();
+        
+    }
+
+    @Test
+    public void httpServerTest() throws Exception {
+        WebServer dispatcher =
+                new WebServer("localhost", 8080,
+                "/", new MyBinder(), new File("src/main/webapp"));
+        dispatcher.start();
+        Thread.sleep(30000);
+        dispatcher.stop();
     }
 }

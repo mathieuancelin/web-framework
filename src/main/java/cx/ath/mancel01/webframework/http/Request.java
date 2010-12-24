@@ -27,87 +27,27 @@ import java.util.Map;
  */
 public class Request {
 
-    /**
-     * Server host
-     */
     public String host;
-    /**
-     * Request path
-     */
     public String path;
-    /**
-     * QueryString
-     */
     public String querystring;
-    /**
-     * Full url
-     */
     public String url;
-    /**
-     * HTTP method
-     */
     public String method;
-    /**
-     * Server domain
-     */
     public String domain;
-    /**
-     * Client address
-     */
     public String remoteAddress;
-    /**
-     * Request content-type
-     */
     public String contentType;
-    /**
-     * HTTP port
-     */
     public Integer port;
-    /**
-     * is HTTPS ?
-     */
     public Boolean secure = false;
-    /**
-     * HTTP Headers
-     */
     public Map<String, Header> headers = new HashMap<String, Header>(16);
-    /**
-     * HTTP Cookies
-     */
     public Map<String, Cookie> cookies = new HashMap<String, Cookie>(16);
-    /**
-     * Body stream
-     */
     public transient InputStream body;
-    /**
-     * Format (html,xml,json,text)
-     */
     public String format = null;
-    /**
-     * Free space to store your request specific data
-     */
     public Map<String, Object> args = new HashMap<String, Object>(16);
-    /**
-     * When the request has been received
-     */
     public Date date = new Date();
-    /**
-     * New request or already submitted
-     */
     public boolean isNew = true;
-    /**
-     * HTTP Basic User
-     */
     public String user;
-    /**
-     * HTTP Basic Password
-     */
     public String password;
-    /**
-     * Request comes from loopback interface
-     */
     public boolean isLoopback;
-
+    
     public String getControllerName() {
         return "";
     }
