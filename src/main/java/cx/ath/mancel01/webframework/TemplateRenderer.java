@@ -17,6 +17,7 @@
 
 package cx.ath.mancel01.webframework;
 
+import freemarker.template.Configuration;
 import groovy.text.SimpleTemplateEngine;
 import java.io.File;
 import java.io.OutputStream;
@@ -24,6 +25,9 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 
 /**
  *
@@ -31,26 +35,59 @@ import java.util.Map;
  */
 public class TemplateRenderer {
 
+    private static final String ENGINE = "velocity";
+
     private final SimpleTemplateEngine engine;
+    private final VelocityEngine ve;
 
     public TemplateRenderer() {
         this.engine = new SimpleTemplateEngine();
-    }
-
-    public String render(String fileName, Map<String, Object> context) throws Exception {
-        return render(new File(fileName), context);
+        this.ve = new VelocityEngine();
+        this.ve.init();
     }
 
     public Writer render(File file, Map<String, Object> context, OutputStream os) throws Exception {
+        if (ENGINE.equals("velocity")) {
+            return renderWithVelocity(file, context, os);
+        } else if (ENGINE.equals("groovy")) {
+            return renderWithGroovy(file, context, os);
+        } else if (ENGINE.equals("freemarker")) {
+            return renderWithFreemarker(file, context, os);
+        } else {
+            throw new RuntimeException("You nedd to use a render template");
+        }
+    }
+
+    private Writer renderWithGroovy(File file, Map<String, Object> context, OutputStream os) throws Exception {
         OutputStreamWriter osw = new OutputStreamWriter(os);
         return engine.createTemplate(file)
                 .make(context).writeTo(osw);
     }
 
-    public String render(File file, Map<String, Object> context) throws Exception {
-        StringWriter builder = new StringWriter();
-        engine.createTemplate(file)
-                .make(context).writeTo(builder);
-        return builder.toString();
+    private Writer renderWithVelocity(File file, Map<String, Object> context, OutputStream os) throws Exception {
+        OutputStreamWriter writer = new OutputStreamWriter(os);
+        Template template = ve.getTemplate(file.getPath());
+        template.merge(new VelocityContext(context), writer);
+        writer.flush();
+        return writer;
     }
+    
+    private Writer renderWithFreemarker(File file, Map<String, Object> context, OutputStream os) throws Exception {
+        OutputStreamWriter writer = new OutputStreamWriter(os);
+        Configuration cfg = new Configuration();
+        freemarker.template.Template tpl = cfg.getTemplate(file.getPath());
+        tpl.process(context, writer);
+        return writer;
+    }
+
+//    public String render(String fileName, Map<String, Object> context) throws Exception {
+//        return render(new File(fileName), context);
+//    }
+//    public String render(File file, Map<String, Object> context) throws Exception {
+//        StringWriter builder = new StringWriter();
+//        engine.createTemplate(file)
+//                .make(context).writeTo(builder);
+//        return builder.toString();
+//    }
+
 }
