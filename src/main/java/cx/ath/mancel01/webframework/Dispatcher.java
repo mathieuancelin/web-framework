@@ -131,13 +131,19 @@ public class Dispatcher {
         }
     }
 
-    private Response render(Class controllerClass, String viewTemplate) throws Exception {
+    private Response render(Class controllerClass, String methodName) throws Exception {
         long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);
         System.out.println("controller injection : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();
-        Method method = controller.getClass().getMethod(viewTemplate);
+
+        
+        // TODO : find methods with param if querystring not empty
+        Method method = controller.getClass().getMethod(methodName);
+        // TODO : if no param method, send on default
         RenderView view = (RenderView) method.invoke(controller);
+
+
         System.out.println("controller method invocation : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();
         Response res = new Response();

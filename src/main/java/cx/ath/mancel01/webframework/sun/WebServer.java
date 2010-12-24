@@ -107,6 +107,7 @@ public class WebServer {
         System.out.print("stopping http server ... ");
         server.stop(0);
         dispatcher.stop();
+        exec.shutdownNow();
         System.out.println("done !");
     }
 
