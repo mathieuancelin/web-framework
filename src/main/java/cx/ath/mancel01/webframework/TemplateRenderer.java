@@ -35,7 +35,10 @@ import org.apache.velocity.app.VelocityEngine;
  */
 public class TemplateRenderer {
 
-    private static final String ENGINE = "velocity";
+    private static final int VELOCITY = 1;
+    private static final int GROOVY = 2;
+    private static final int FREEMARKER = 3;
+    private static final int ENGINE = VELOCITY;
 
     private final SimpleTemplateEngine engine;
     private final VelocityEngine ve;
@@ -47,11 +50,11 @@ public class TemplateRenderer {
     }
 
     public Writer render(File file, Map<String, Object> context, OutputStream os) throws Exception {
-        if (ENGINE.equals("velocity")) {
+        if (ENGINE == VELOCITY) {
             return renderWithVelocity(file, context, os);
-        } else if (ENGINE.equals("groovy")) {
+        } else if (ENGINE == GROOVY) {
             return renderWithGroovy(file, context, os);
-        } else if (ENGINE.equals("freemarker")) {
+        } else if (ENGINE == FREEMARKER) {
             return renderWithFreemarker(file, context, os);
         } else {
             throw new RuntimeException("You nedd to use a render template");
