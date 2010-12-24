@@ -95,6 +95,7 @@ public class WebServer {
                     return new File(viewDirectory, file);
                 }
             });
+            Runtime.getRuntime().addShutdownHook(new Shutdown(dispatcher));
             server.start();
             dispatcher.start();
             System.out.println("done !");
@@ -109,6 +110,19 @@ public class WebServer {
         dispatcher.stop();
         exec.shutdownNow();
         System.out.println("done !");
+    }
+
+    private class Shutdown extends Thread {
+        private final Dispatcher dispatcher;
+
+        public Shutdown(Dispatcher dispatcher) {
+            this.dispatcher = dispatcher;
+        }
+
+        @Override
+        public void run() {
+            dispatcher.stop();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////

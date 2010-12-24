@@ -57,6 +57,8 @@ public class Dispatcher {
         } catch (Exception e) {
             throw new RuntimeException("Error at injector creation", e);
         }
+        this.injector.allowCircularDependencies(true);
+        this.injector.registerShutdownHook();
     }
 
     public void validate() {
@@ -71,6 +73,7 @@ public class Dispatcher {
 
     public void stop() {
         this.started = false;
+        this.injector.triggerLifecycleDestroyCallbacks();
     }
 
     public void setRootController(Class rootController) {
