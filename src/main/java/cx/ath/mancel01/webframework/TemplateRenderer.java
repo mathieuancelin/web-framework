@@ -17,14 +17,13 @@
 
 package cx.ath.mancel01.webframework;
 
-import freemarker.template.Configuration;
 import groovy.text.SimpleTemplateEngine;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -37,11 +36,12 @@ public class TemplateRenderer {
 
     private static final int VELOCITY = 1;
     private static final int GROOVY = 2;
-    private static final int FREEMARKER = 3;
-    private static final int ENGINE = VELOCITY;
+    private static final int ENGINE = GROOVY;
 
     private final SimpleTemplateEngine engine;
     private final VelocityEngine ve;
+    private final ConcurrentHashMap<String, groovy.text.Template> templates =
+            new ConcurrentHashMap<String, groovy.text.Template>();
 
     public TemplateRenderer() {
         this.engine = new SimpleTemplateEngine();
@@ -54,17 +54,20 @@ public class TemplateRenderer {
             return renderWithVelocity(file, context, os);
         } else if (ENGINE == GROOVY) {
             return renderWithGroovy(file, context, os);
-        } else if (ENGINE == FREEMARKER) {
-            return renderWithFreemarker(file, context, os);
         } else {
-            throw new RuntimeException("You nedd to use a render template");
+            // should never append :)
+            throw new RuntimeException("You need to use a render engine");
         }
     }
 
     private Writer renderWithGroovy(File file, Map<String, Object> context, OutputStream os) throws Exception {
+        // TODO : if file not exists, return 404
         OutputStreamWriter osw = new OutputStreamWriter(os);
-        return engine.createTemplate(file)
-                .make(context).writeTo(osw);
+        if (!templates.containsKey(file.getAbsolutePath())) {
+            templates.putIfAbsent(file.getAbsolutePath()
+                , engine.createTemplate(file));
+        }
+        return templates.get(file.getAbsolutePath()).make(context).writeTo(osw);
     }
 
     private Writer renderWithVelocity(File file, Map<String, Object> context, OutputStream os) throws Exception {
@@ -75,17 +78,6 @@ public class TemplateRenderer {
         return writer;
     }
     
-    private Writer renderWithFreemarker(File file, Map<String, Object> context, OutputStream os) throws Exception {
-        OutputStreamWriter writer = new OutputStreamWriter(os);
-        Configuration cfg = new Configuration();
-        freemarker.template.Template tpl = cfg.getTemplate(file.getPath());
-        tpl.process(context, writer);
-        return writer;
-    }
-
-//    public String render(String fileName, Map<String, Object> context) throws Exception {
-//        return render(new File(fileName), context);
-//    }
 //    public String render(File file, Map<String, Object> context) throws Exception {
 //        StringWriter builder = new StringWriter();
 //        engine.createTemplate(file)
@@ -94,3 +86,8 @@ public class TemplateRenderer {
 //    }
 
 }
+
+//
+//<!--#foreach( $number in $numbers )
+//      <div>${number}</div>
+//      #end-->

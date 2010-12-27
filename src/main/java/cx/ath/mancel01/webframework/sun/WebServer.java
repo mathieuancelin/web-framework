@@ -75,6 +75,7 @@ public class WebServer {
             server.createContext(rootContext, new HttpHandler() {
                 @Override
                 public void handle(HttpExchange he) throws IOException {
+                    System.out.println("start processing request ...");
                     long start = System.currentTimeMillis();
                     try {
                         Request req = parseRequest(he);
@@ -189,6 +190,7 @@ public class WebServer {
         URI uri = he.getRequestURI();
         request.method = he.getRequestMethod().intern();
         request.path = uri.getPath();
+        // TODO : replace tokenizer
         StringTokenizer tokenizer = new StringTokenizer(uri.toString(), "?");
         String queryString = "";
         if (tokenizer.countTokens() > 1) {

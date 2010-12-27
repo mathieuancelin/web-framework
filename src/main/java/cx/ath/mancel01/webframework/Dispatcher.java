@@ -27,7 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
  *
@@ -87,6 +86,9 @@ public class Dispatcher {
 
     public synchronized void registrerController(Class<?> clazz) {
         if (clazz.isAnnotationPresent(Controller.class)) {
+
+            // TODO : find JAX-RS annotations
+            
             Controller controller = clazz.getAnnotation(Controller.class);
             String name = controller.value();
             if (name.contains("/")) {
@@ -105,15 +107,19 @@ public class Dispatcher {
         if (started) {
             Response res = new Response();
             String path = request.path;
-            if (!"".equals(contextRoot)) {
+            if ("".endsWith(contextRoot)) {
+                throw new RuntimeException("Can't have an empty context root");
+            }
+            if (!"/".equals(contextRoot)) {
                 path = path.replace(contextRoot, "");
             }
-            StringTokenizer tokenizer = new StringTokenizer(path, "/");
-            if (tokenizer.countTokens() > 1) {
-                String firstToken = tokenizer.nextToken();
+            String[] tokens = path.split("/");
+            // if no corresponding @Path on controller, try to find it hte old way
+            if (tokens.length >= 2) {
+                String firstToken = tokens[1];
                 String secondToken = "index";
-                if (tokenizer.hasMoreTokens()) {
-                    secondToken = tokenizer.nextToken();
+                if (tokens.length >= 3) {
+                    secondToken = tokens[2];
                 }
                 if (controllers.containsKey(firstToken)) {
                     res = render(controllers.get(firstToken), secondToken);
@@ -140,12 +146,10 @@ public class Dispatcher {
         System.out.println("controller injection : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();
 
-        
         // TODO : find methods with param if querystring not empty
         Method method = controller.getClass().getMethod(methodName);
         // TODO : if no param method, send on default
         RenderView view = (RenderView) method.invoke(controller);
-
 
         System.out.println("controller method invocation : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();

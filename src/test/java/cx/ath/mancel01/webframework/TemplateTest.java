@@ -19,6 +19,7 @@ package cx.ath.mancel01.webframework;
 import app.MyBinder;
 import cx.ath.mancel01.webframework.sun.WebServer;
 import java.io.File;
+import java.io.IOException;
 import org.junit.Test;
 
 /**
@@ -38,7 +39,26 @@ public class TemplateTest {
                 new WebServer("localhost", 8080,
                 "/", new MyBinder(), new File("src/main/webapp"));
         dispatcher.start();
-        Thread.sleep(30000);
+        //Thread.sleep(30000);
         dispatcher.stop();
+    }
+
+    public static void main(String... args) {
+        try {
+            WebServer dispatcher 
+                    = new WebServer("localhost", 8080,
+                    "/", new MyBinder(), new File("src/main/webapp"));
+            dispatcher.start();
+            System.out.println("press return key to stop the http server ...");
+            char c = '\0';
+            while ((c = (char) System.in.read()) !='\n') {
+                System.out.println("return press catched !");
+            }
+            dispatcher.stop();
+            System.exit(0);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
     }
 }
