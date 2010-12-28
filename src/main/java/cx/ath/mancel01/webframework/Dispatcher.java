@@ -111,6 +111,9 @@ public class Dispatcher {
         if (started) {
             Response res = new Response();
             String path = request.path;
+            if (path.endsWith("favicon.ico")) {
+                path = "/public/img/favicon.ico";
+            }
             if (path.startsWith("/public/")) { 
                 File asked = new File(base, path.replace("/public/", ""));
                 res.direct = asked;
