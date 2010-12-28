@@ -127,6 +127,9 @@ public class Dispatcher {
                 path = path.replace(contextRoot, "");
             }
             String[] tokens = path.split("/");
+
+            // TODO find controller the JAX-RS way
+
             // if no corresponding @Path on controller, try to find it hte old way
             if (tokens.length >= 2) {
                 String firstToken = tokens[1];
