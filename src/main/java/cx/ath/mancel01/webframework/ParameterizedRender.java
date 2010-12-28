@@ -21,34 +21,10 @@ package cx.ath.mancel01.webframework;
  *
  * @author mathieuancelin
  */
-public class Render implements ParameterizedRender {
-    
-    private RenderView view;
+public interface ParameterizedRender {
 
-    private Render() {}
+    void go();
 
-    public static ParameterizedRender page(String name) {
-        Render render = new Render();
-        render.view = new RenderView(name);
-        return render;
-    }
+    ParameterizedRender with(String name, Object value);
 
-    public static ParameterizedRender withParam(String name, Object value) {
-        return new Render();
-    }
-
-    @Override
-    public ParameterizedRender with(String name, Object value) {
-        view.param(name, value);
-        return this;
-    }
-
-    @Override
-    public void go() {
-        throw new BreakFlowException(view);
-    }
-
-    RenderView getView() {
-        return view;
-    }
 }

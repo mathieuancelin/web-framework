@@ -17,6 +17,7 @@
 
 package app;
 
+import cx.ath.mancel01.webframework.Render;
 import cx.ath.mancel01.webframework.RenderView;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class MyController {
         numbers.add("one");
         numbers.add("two");
         numbers.add("three");
-        return new RenderView("index.html")
+        return new RenderView()
                 .param("message", service.hello("Boris"))
                 .param("numbers", numbers);
     }
@@ -51,5 +52,16 @@ public class MyController {
         return new RenderView("index.html")
                 .param("message", service.hello("Anonymous"))
                 .param("numbers", numbers);
+    }
+
+    public void foo() {
+        List<String> numbers = new ArrayList<String>();
+        numbers.add("seven");
+        numbers.add("height");
+        numbers.add("nine");
+        Render.page("index.html")
+            .with("message", service.hello("foo"))
+            .with("numbers", numbers)
+            .go();
     }
 }

@@ -24,6 +24,7 @@ import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -145,18 +146,36 @@ public class Dispatcher {
         Object controller = injector.getInstance(controllerClass);
         System.out.println("controller injection : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();
-
         // TODO : find methods with param if querystring not empty
         Method method = controller.getClass().getMethod(methodName);
         // TODO : if no param method, send on default
-        RenderView view = (RenderView) method.invoke(controller);
-
+        RenderView view = null;
+        try {
+            Object ret = method.invoke(controller);
+            if (ret instanceof RenderView) {
+                view = (RenderView) method.invoke(controller);
+            } else {
+                throw new RuntimeException("You can't return anything than RenderView");
+            }
+        } catch (InvocationTargetException ex) {
+            if (ex.getCause() instanceof BreakFlowException) {
+                BreakFlowException br = (BreakFlowException) ex.getCause();
+                view = br.getView();
+            } else {
+                throw ex;
+            }
+        }
         System.out.println("controller method invocation : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();
         Response res = new Response();
         res.contentType = DEFAUTL_CONTENT_TYPE;
         res.out = new ByteArrayOutputStream();
-        renderer.render(grabber.getFile(view.getViewName()), view.getContext(), res.out);
+        String viewName = view.getViewName();
+        if ( viewName == null ) {
+            // TODO : add extension based on content type
+            viewName = methodName + ".html";
+        }
+        renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
         System.out.println("template view rendering : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();
         return res;

@@ -29,6 +29,11 @@ public class RenderView {
     private final String viewName;
     private final Map<String, Object> context;
 
+    public RenderView() {
+        this.viewName = null;
+        this.context = new HashMap<String, Object>();
+    }
+
     public RenderView(String viewName) {
         this.viewName = viewName;
         this.context = new HashMap<String, Object>();
@@ -52,7 +57,7 @@ public class RenderView {
         return this;
     }
 
-    public Map<String, Object> getContext() {
+    Map<String, Object> getContext() {
         return context;
     }
 

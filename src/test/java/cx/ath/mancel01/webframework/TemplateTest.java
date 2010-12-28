@@ -49,7 +49,7 @@ public class TemplateTest {
                     = new WebServer("localhost", 8080,
                     "/", new MyBinder(), new File("src/main/webapp"));
             dispatcher.start();
-            System.out.println("press return key to stop the http server ...");
+            System.out.println("press return key or Ctrl-C to stop the http server ...");
             char c = '\0';
             while ((c = (char) System.in.read()) !='\n') {
                 System.out.println("return press catched !");
