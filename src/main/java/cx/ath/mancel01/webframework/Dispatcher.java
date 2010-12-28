@@ -110,21 +110,21 @@ public class Dispatcher {
     public Response process(Request request) throws Exception {
         if (started) {
             Response res = new Response();
-            String path = request.path;
-            if (path.endsWith("favicon.ico")) {
-                path = "/public/img/favicon.ico";
-            }
-            if (path.startsWith("/public/")) { 
-                File asked = new File(base, path.replace("/public/", ""));
-                res.direct = asked;
-                res.out = new ByteArrayOutputStream();
-                return res;
-            }
+            String path = request.path;           
             if ("".endsWith(contextRoot)) {
                 throw new RuntimeException("Can't have an empty context root");
             }
             if (!"/".equals(contextRoot)) {
                 path = path.replace(contextRoot, "");
+            }
+            if (path.endsWith("favicon.ico")) {
+                path = "/public/img/favicon.ico";
+            }
+            if (path.startsWith("/public/")) {
+                File asked = new File(base, path.replace("/public/", ""));
+                res.direct = asked;
+                res.out = new ByteArrayOutputStream();
+                return res;
             }
             String[] tokens = path.split("/");
 
