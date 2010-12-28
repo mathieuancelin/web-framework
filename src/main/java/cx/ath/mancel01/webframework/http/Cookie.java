@@ -31,4 +31,11 @@ public class Cookie implements Serializable {
     public String value;
     public Integer maxAge;
     public boolean httpOnly = false;
+
+    @Override
+    public String toString() {
+        return "Cookie{" + "name=" + name + ", domain=" + domain + ", path="
+                + path + ", secure=" + secure + ", value=" + value + ", maxAge="
+                + maxAge + ", httpOnly=" + httpOnly + '}';
+    }
 }

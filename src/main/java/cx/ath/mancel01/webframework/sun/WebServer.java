@@ -21,6 +21,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import cx.ath.mancel01.webframework.Dispatcher;
 import cx.ath.mancel01.webframework.WebBinder;
+import cx.ath.mancel01.webframework.http.Cookie;
 import cx.ath.mancel01.webframework.http.Header;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -150,19 +151,34 @@ public class WebServer {
                 he.getResponseHeaders().add(key, value);
             }
         }
-//        Map<String, Cookie> cookies = response.cookies;
-//        for (Cookie cookie : cookies.values()) {
-//            javax.servlet.http.Cookie c = new javax.servlet.http.Cookie(cookie.name, cookie.value);
-//            c.setSecure(cookie.secure);
-//            c.setPath(cookie.path);
-//            if (cookie.domain != null) {
-//                c.setDomain(cookie.domain);
-//            }
-//            if (cookie.maxAge != null) {
-//                c.setMaxAge(cookie.maxAge);
-//            }
-//            he.addCookie(c);
-//        }
+        Map<String, Cookie> cookies = response.cookies;
+        for (Cookie cookie : cookies.values()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(cookie.name);
+            builder.append("=");
+            builder.append(cookie.value);
+            if (cookie.domain != null) {
+                builder.append("; domain=");
+                builder.append(cookie.domain);
+            }          
+            if (cookie.maxAge != null) {
+                builder.append("; expires=");
+                builder.append(cookie.maxAge);
+            }
+            if (cookie.path != null) {
+                builder.append("; path=");
+                builder.append(cookie.path);
+            }
+            if (cookie.secure) {
+                builder.append("; secure");
+            }
+            if (cookie.httpOnly) {
+                builder.append("; HttpOnly");
+            }
+            he.getResponseHeaders().add("Set-Cookie", builder.toString());
+        }
+//        he.getResponseHeaders().add("Set-Cookie", "maurice=machin");
+//        he.getResponseHeaders().add("Set-Cookie", "john=truc");
         response.out.flush();
         if (response.direct != null && response.direct instanceof File) {
             File file = (File) response.direct;
@@ -231,20 +247,35 @@ public class WebServer {
             }
             request.headers.put(hd.name.toLowerCase(), hd);
         }
-
-//        javax.servlet.http.Cookie[] cookies = he..getCookies();
-//        if (cookies != null) {
-//            for (javax.servlet.http.Cookie cookie : cookies) {
-//                Cookie playCookie = new Cookie();
-//                playCookie.name = cookie.getName();
-//                playCookie.path = cookie.getPath();
-//                playCookie.domain = cookie.getDomain();
-//                playCookie.secure = cookie.getSecure();
-//                playCookie.value = cookie.getValue();
-//                playCookie.maxAge = cookie.getMaxAge();
-//                request.cookies.put(playCookie.name, playCookie);
-//            }
-//        }
+        List<String> cookieHeaders = he.getRequestHeaders().get("Cookie");
+        if (cookieHeaders != null) {
+            for (String cookieHeader : cookieHeaders) {
+                String[] tokens = cookieHeader.split("; ");
+                Cookie cookie = new Cookie();
+                for (String token : tokens) {
+                    if (token.startsWith("domain")) {
+                        String[] keyVal = token.split("=");
+                        cookie.domain = keyVal[1];
+                    } else if (token.startsWith("expires")) {
+                        // TODO : what to do here ?
+                    } else if (token.startsWith("path")) {
+                        String[] keyVal = token.split("=");
+                        cookie.path = keyVal[1];
+                    } else if (token.startsWith("secure")) {
+                        cookie.secure = true;
+                    } else if (token.startsWith("HttpOnly")) {
+                        cookie.httpOnly = true;
+                    } else {
+                        cookie = new Cookie();
+                        String[] keyVal = token.split("=");
+                        cookie.name = keyVal[0];
+                        cookie.value = keyVal[1];
+                    }
+                    //System.out.println(cookie);
+                    request.cookies.put(cookie.name, cookie);
+                }
+            }
+        }
         return request;
     }
 

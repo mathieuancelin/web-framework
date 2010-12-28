@@ -52,7 +52,7 @@ public class TemplateTest {
             System.out.println("press return key or Ctrl-C to stop the http server ...");
             char c = '\0';
             while ((c = (char) System.in.read()) !='\n') {
-                System.out.println("return press catched !");
+                //System.out.println("return press catched !");
             }
             dispatcher.stop();
             System.exit(0);
