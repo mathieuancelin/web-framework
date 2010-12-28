@@ -83,6 +83,7 @@ public class WebServer {
                         copyResponse(req, res, he);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        e.getCause().printStackTrace();
                     } finally {
                         he.close();
                         System.out.println("request processed in : " + (System.currentTimeMillis() - start) + " ms.\n");
@@ -166,6 +167,7 @@ public class WebServer {
         if (response.direct != null && response.direct instanceof File) {
             File file = (File) response.direct;
             he.getResponseHeaders().add("Content-Length", String.valueOf(file.length()));
+            he.sendResponseHeaders(response.status, file.length());
             if (!request.method.equals("HEAD")) {
                 copyStream(he, new FileInputStream(file));
             } else {

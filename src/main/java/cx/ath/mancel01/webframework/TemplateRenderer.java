@@ -38,6 +38,7 @@ public class TemplateRenderer {
     private static final int GROOVY = 2;
     private static final int ENGINE = GROOVY;
 
+    private final boolean devMode;
     private final SimpleTemplateEngine engine;
     private final VelocityEngine ve;
     private final ConcurrentHashMap<String, groovy.text.Template> templates =
@@ -47,6 +48,8 @@ public class TemplateRenderer {
         this.engine = new SimpleTemplateEngine();
         this.ve = new VelocityEngine();
         this.ve.init();
+        // TODO : change to read conf file
+        this.devMode = true;
     }
 
     public Writer render(File file, Map<String, Object> context, OutputStream os) throws Exception {
@@ -63,11 +66,15 @@ public class TemplateRenderer {
     private Writer renderWithGroovy(File file, Map<String, Object> context, OutputStream os) throws Exception {
         // TODO : if file not exists, return 404
         OutputStreamWriter osw = new OutputStreamWriter(os);
-        if (!templates.containsKey(file.getAbsolutePath())) {
-            templates.putIfAbsent(file.getAbsolutePath()
-                , engine.createTemplate(file));
+        if (devMode) {
+            return engine.createTemplate(file).make(context).writeTo(osw);
+        } else {
+            if (!templates.containsKey(file.getAbsolutePath())) {
+                templates.putIfAbsent(file.getAbsolutePath()
+                    , engine.createTemplate(file));
+            }
+            return templates.get(file.getAbsolutePath()).make(context).writeTo(osw);
         }
-        return templates.get(file.getAbsolutePath()).make(context).writeTo(osw);
     }
 
     private Writer renderWithVelocity(File file, Map<String, Object> context, OutputStream os) throws Exception {

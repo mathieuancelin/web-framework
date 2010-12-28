@@ -24,6 +24,7 @@ import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class Dispatcher {
     private Class rootController;
     private boolean started = false;
     private final String contextRoot;
+    private final File base;
 
     public Dispatcher(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
@@ -59,6 +61,7 @@ public class Dispatcher {
         }
         this.injector.allowCircularDependencies(true);
         this.injector.registerShutdownHook();
+        this.base = grabber.getFile("public");
     }
 
     public void validate() {
@@ -108,6 +111,12 @@ public class Dispatcher {
         if (started) {
             Response res = new Response();
             String path = request.path;
+            if (path.startsWith("/public/")) { 
+                File asked = new File(base, path.replace("/public/", ""));
+                res.direct = asked;
+                res.out = new ByteArrayOutputStream();
+                return res;
+            }
             if ("".endsWith(contextRoot)) {
                 throw new RuntimeException("Can't have an empty context root");
             }

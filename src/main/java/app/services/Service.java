@@ -15,20 +15,13 @@
  *  under the License.
  */
 
-package app;
-
-import cx.ath.mancel01.webframework.WebBinder;
+package app.services;
 
 /**
  *
  * @author mathieuancelin
  */
-public class MyBinder extends WebBinder {
+public interface Service {
 
-    @Override
-    public void configureBindings() {
-        bind(Service.class).to(ServiceImpl.class);
-        registerRootController(MyController.class);
-    }
-
+    String hello(String name);
 }

@@ -16,7 +16,7 @@
  */
 package cx.ath.mancel01.webframework;
 
-import app.MyBinder;
+import app.binder.MyBinder;
 import cx.ath.mancel01.webframework.sun.WebServer;
 import java.io.File;
 import java.io.IOException;

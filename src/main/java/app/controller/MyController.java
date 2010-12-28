@@ -15,8 +15,9 @@
  *  under the License.
  */
 
-package app;
+package app.controller;
 
+import app.services.Service;
 import cx.ath.mancel01.webframework.Render;
 import cx.ath.mancel01.webframework.RenderView;
 import cx.ath.mancel01.webframework.annotation.Controller;

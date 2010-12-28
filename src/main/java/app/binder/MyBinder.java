@@ -15,17 +15,23 @@
  *  under the License.
  */
 
-package app;
+package app.binder;
+
+import app.controller.MyController;
+import app.services.Service;
+import app.services.ServiceImpl;
+import cx.ath.mancel01.webframework.WebBinder;
 
 /**
  *
  * @author mathieuancelin
  */
-public class ServiceImpl implements Service {
+public class MyBinder extends WebBinder {
 
     @Override
-    public String hello(String name) {
-        return "Hello " + name + "!";
+    public void configureBindings() {
+        bind(Service.class).to(ServiceImpl.class);
+        registerRootController(MyController.class);
     }
 
 }

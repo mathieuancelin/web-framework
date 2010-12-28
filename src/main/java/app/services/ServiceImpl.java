@@ -15,13 +15,17 @@
  *  under the License.
  */
 
-package app;
+package app.services;
 
 /**
  *
  * @author mathieuancelin
  */
-public interface Service {
+public class ServiceImpl implements Service {
 
-    String hello(String name);
+    @Override
+    public String hello(String name) {
+        return "Hello " + name + "!";
+    }
+
 }
