@@ -175,6 +175,7 @@ public class Dispatcher {
             // TODO : add extension based on content type
             viewName = methodName + ".html";
         }
+        viewName = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + viewName;
         renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
         System.out.println("template view rendering : " + (System.currentTimeMillis() - start) + " ms.");
         start = System.currentTimeMillis();
