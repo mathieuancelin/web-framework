@@ -26,7 +26,7 @@ function launch()
 	esac	
 	echo "the application is located @" $APP_PATH
 	
-	## Computing of names and classpath
+	## Computing of names and classpath with ununderstandable
 	
 	WAR_NAME=`find $APP_PATH/target -type f -name \*.war`
 	WAR_NAME=${WAR_NAME#$APP_PATH/target/} 
@@ -36,25 +36,14 @@ function launch()
 	LIBS_CLASSPATH=`find $LIBS -type f -name \*.jar` 
 	LIBS_CLASSPATH=`echo $LIBS_CLASSPATH | tr ' ' ':'`
 	
-	## end of computing
+	## end of computing with ununderstandable bash commands
 	
 	if (test -e $APP_PATH/target)
 	then
-		#echo "as 'target' folder exists, we can start to do something :)"
 		echo " "
-		#java -classpath $WEBAPP_PATH/WEB-INF/classes:$LIBS/activation-1.1.jar:
-		#$LIBS/aopalliance-1.0.jar:$LIBS/commons-collections-2.1.jar:$LIBS/commons-logging-1.0.4.jar:
-		#$LIBS/dependency-shot-aop-1.0-SNAPSHOT.jar:$LIBS/dependency-shot-api-1.0-SNAPSHOT.jar:
-		#$LIBS/dependency-shot-core-1.0-SNAPSHOT.jar:$LIBS/dependency-shot-lifecycle-1.0-SNAPSHOT.jar:
-		#$LIBS/dependency-shot-utils-1.0-SNAPSHOT.jar:$LIBS/dom4j-1.6.1.jar:$LIBS/ehcache-1.2.3.jar:
-		#$LIBS/groovy-all-1.7.2.jar:$LIBS/gson-1.4.jar:$LIBS/javassist-3.8.0.GA.jar:$LIBS/javax.inject-1.jar:
-		#$LIBS/joda-time-1.6.2.jar:$LIBS/jsr311-api-1.1.1.jar:$LIBS/logback-classic-0.9.26.jar:$LIBS/logback-core-0.9.26.jar:
-		#$LIBS/mail-1.4.1.jar:$LIBS/slf4j-api-1.6.1.jar:$LIBS/snakeyaml-1.7.jar:
-		#$LIBS/xml-apis-1.0.b2.jar cx.ath.mancel01.webframework.sun.WebServerLauncher
-		
 		java -classpath $WEBAPP_PATH/WEB-INF/classes:$LIBS_CLASSPATH cx.ath.mancel01.webframework.sun.WebServerLauncher
 	else
-		echo "target not exists. run 'mvn clean install'"
+		echo "target not exists. run 'mvn clean install' to prepare application."
 		echo " "
 		exit 0
 	fi
