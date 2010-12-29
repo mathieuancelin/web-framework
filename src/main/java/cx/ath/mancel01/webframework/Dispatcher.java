@@ -109,6 +109,7 @@ public class Dispatcher {
 
     public Response process(Request request) throws Exception {
         if (started) {
+            System.out.println("asked resource => " + request.path);
             Response res = new Response();
             String path = request.path;           
             if ("".endsWith(contextRoot)) {

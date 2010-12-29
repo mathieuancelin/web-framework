@@ -32,7 +32,7 @@ public class WebServerLauncher {
                     = new WebServer("localhost", 8080,
                     "/", new app.binder.AppBinder(), new File("src/main/webapp"));
             dispatcher.start();
-            System.out.println("press return key or Ctrl-C to stop the http server ...");
+            System.out.println("press return key or Ctrl-C to stop the http server ...\n\n");
             char c = '\0';
             while ((c = (char) System.in.read()) !='\n') {}
             dispatcher.stop();
