@@ -21,6 +21,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import cx.ath.mancel01.webframework.Dispatcher;
 import cx.ath.mancel01.webframework.WebBinder;
+import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
@@ -59,13 +60,13 @@ public class WebServer {
 
     public void start() {
         try {
-            System.out.print("starting http server ... ");
+//            WebFramework.logger.info("starting http server ... ");
             server = HttpServer.create(new InetSocketAddress(host, port), 0);
             server.setExecutor(exec);
             server.createContext(rootContext, new HttpHandler() {
                 @Override
                 public void handle(HttpExchange he) throws IOException {
-                    System.out.println("start processing request ...");
+                    WebFramework.logger.debug("start processing request ...");
                     long start = System.currentTimeMillis();
                     try {
                         Request req = InOutBinder.extractRequest(he);
@@ -76,8 +77,9 @@ public class WebServer {
                         e.getCause().printStackTrace();
                     } finally {
                         he.close();
-                        System.out.println("request processed in : " + (System.currentTimeMillis() - start) + " ms.\n");
-                        System.out.println("=======================================\n");
+                        WebFramework.logger.debug("request processed in {} ms.\n"
+                                , (System.currentTimeMillis() - start));
+                        WebFramework.logger.debug("=======================================\n");
                     }
                 }
             });
@@ -90,18 +92,17 @@ public class WebServer {
             Runtime.getRuntime().addShutdownHook(new Shutdown(dispatcher));
             server.start();
             dispatcher.start();
-            System.out.println("done !");
+            WebFramework.logger.info("starting http server ... done !");
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
     public void stop() {
-        System.out.print("stopping http server ... ");
         server.stop(0);
         dispatcher.stop();
         exec.shutdownNow();
-        System.out.println("done !");
+        WebFramework.logger.info("stopping http server ... done !");
     }
 
     private class Shutdown extends Thread {

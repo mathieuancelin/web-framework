@@ -18,21 +18,12 @@ package cx.ath.mancel01.webframework.servlet;
 
 import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.webframework.Dispatcher;
-import cx.ath.mancel01.webframework.http.Cookie;
-import cx.ath.mancel01.webframework.http.Header;
+import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -87,7 +78,7 @@ public class ServletDispatcher extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("start processing request ...");
+        WebFramework.logger.debug("start processing request ...");
         long start = System.currentTimeMillis();
         try {
             // process in a thread ?
@@ -97,8 +88,8 @@ public class ServletDispatcher extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace(); // TODO : print something useless here
         } finally {
-            System.out.println("request processed in : " + (System.currentTimeMillis() - start) + " ms.\n");
-            System.out.println("=======================================\n");
+            WebFramework.logger.debug("request processed in {} ms.\n", (System.currentTimeMillis() - start));
+            WebFramework.logger.debug("=======================================\n");
         }
     }
 

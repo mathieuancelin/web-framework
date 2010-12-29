@@ -17,6 +17,7 @@
 package cx.ath.mancel01.webframework.sun;
 
 import com.sun.net.httpserver.HttpExchange;
+import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Cookie;
 import cx.ath.mancel01.webframework.http.Header;
 import cx.ath.mancel01.webframework.http.Request;
@@ -96,9 +97,7 @@ public class InOutBinder {
                             if (keyVal.length > 1)
                                 cookie.domain = keyVal[1];
                         } else if (token.startsWith("expires")) {
-                            // TODO : what to do here ? nothing
-                            //String[] keyVal = token.split("=");
-                            //System.out.println(keyVal[1]);
+                            // nothing
                         } else if (token.startsWith("path")) {
                             String[] keyVal = token.split("=");
                             if (keyVal.length > 1)
@@ -117,7 +116,7 @@ public class InOutBinder {
                         }
                     } catch (ArrayIndexOutOfBoundsException ex) {
                         cookie = new Cookie();
-                        System.out.println("error while parsing cookie : " + cookieHeader);
+                        WebFramework.logger.error("error while parsing cookie : {}", cookieHeader);
                     }
                     //System.out.println("put cookie : " + cookie);
                     request.cookies.put(cookie.name, cookie);

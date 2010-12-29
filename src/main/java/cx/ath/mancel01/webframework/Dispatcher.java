@@ -109,7 +109,7 @@ public class Dispatcher {
 
     public Response process(Request request) throws Exception {
         if (started) {
-            System.out.println("asked resource => " + request.path);
+            WebFramework.logger.debug("asked resource => {}", request.path);
             Response res = new Response();
             String path = request.path;           
             if ("".endsWith(contextRoot)) {
@@ -160,7 +160,8 @@ public class Dispatcher {
     private Response render(Class controllerClass, String methodName) throws Exception {
         long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);
-        System.out.println("controller injection : " + (System.currentTimeMillis() - start) + " ms.");
+        WebFramework.logger.info("controller injection : {} ms."
+                , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         // TODO : find methods with param if querystring not empty
         Method method = controller.getClass().getMethod(methodName);
@@ -181,7 +182,8 @@ public class Dispatcher {
                 throw ex;
             }
         }
-        System.out.println("controller method invocation : " + (System.currentTimeMillis() - start) + " ms.");
+        WebFramework.logger.info("controller method invocation : {} ms."
+                , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         Response res = new Response();
         res.contentType = DEFAUTL_CONTENT_TYPE;
@@ -193,7 +195,8 @@ public class Dispatcher {
         }
         viewName = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + viewName;
         renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
-        System.out.println("template view rendering : " + (System.currentTimeMillis() - start) + " ms.");
+        WebFramework.logger.info("template view rendering : {} ms."
+                , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         return res;
     }
