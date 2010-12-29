@@ -1,12 +1,14 @@
 #!/bin/bash
 
 APP_PATH=`pwd`
-
-echo "========================================="
 echo " "
-echo "Welcome in the web-framework framework !"
-echo " "
-echo "========================================="
+echo "|==========================================|"
+echo "|                                          |"
+echo "| Welcome in the web-framework framework ! |"
+echo "|                                          |"
+echo "|       web-framework version 0.1a         |"
+echo "|                                          |"
+echo "|==========================================|"
 echo " "
 
 function launch() 
@@ -38,9 +40,8 @@ function launch()
 	
 	if (test -e $APP_PATH/target)
 	then
-		echo "as 'target' folder exists, we can start to do something :)"
+		#echo "as 'target' folder exists, we can start to do something :)"
 		echo " "
-		
 		#java -classpath $WEBAPP_PATH/WEB-INF/classes:$LIBS/activation-1.1.jar:
 		#$LIBS/aopalliance-1.0.jar:$LIBS/commons-collections-2.1.jar:$LIBS/commons-logging-1.0.4.jar:
 		#$LIBS/dependency-shot-aop-1.0-SNAPSHOT.jar:$LIBS/dependency-shot-api-1.0-SNAPSHOT.jar:

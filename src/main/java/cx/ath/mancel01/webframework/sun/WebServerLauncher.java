@@ -32,6 +32,8 @@ public class WebServerLauncher {
                     = new WebServer("localhost", 8080,
                     "/", new app.binder.AppBinder(), new File("src/main/webapp"));
             dispatcher.start();
+            System.out.println("running the application in dev mode");
+            System.out.println("listening for HTTP on port 8080");
             System.out.println("press return key or Ctrl-C to stop the http server ...\n\n");
             char c = '\0';
             while ((c = (char) System.in.read()) !='\n') {}
