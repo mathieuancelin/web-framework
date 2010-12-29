@@ -90,27 +90,36 @@ public class InOutBinder {
                 String[] tokens = cookieHeader.split("; ");
                 Cookie cookie = new Cookie();
                 for (String token : tokens) {
-                    if (token.startsWith("domain")) {
-                        String[] keyVal = token.split("=");
-                        cookie.domain = keyVal[1];
-                    } else if (token.startsWith("expires")) {
-                        // TODO : what to do here ? nothing
-//                        String[] keyVal = token.split("=");
-//                        System.out.println(keyVal[1]);
-                    } else if (token.startsWith("path")) {
-                        String[] keyVal = token.split("=");
-                        cookie.path = keyVal[1];
-                    } else if (token.startsWith("secure")) {
-                        cookie.secure = true;
-                    } else if (token.startsWith("HttpOnly")) {
-                        cookie.httpOnly = true;
-                    } else {
+                    try {
+                        if (token.startsWith("domain")) {
+                            String[] keyVal = token.split("=");
+                            if (keyVal.length > 1)
+                                cookie.domain = keyVal[1];
+                        } else if (token.startsWith("expires")) {
+                            // TODO : what to do here ? nothing
+                            //String[] keyVal = token.split("=");
+                            //System.out.println(keyVal[1]);
+                        } else if (token.startsWith("path")) {
+                            String[] keyVal = token.split("=");
+                            if (keyVal.length > 1)
+                                cookie.path = keyVal[1];
+                        } else if (token.startsWith("secure")) {
+                            cookie.secure = true;
+                        } else if (token.startsWith("HttpOnly")) {
+                            cookie.httpOnly = true;
+                        } else {
+                            cookie = new Cookie();
+                            String[] keyVal = token.split("=");
+                            if (keyVal.length > 0)
+                                cookie.name = keyVal[0];
+                            if (keyVal.length > 1)
+                                cookie.value = keyVal[1];
+                        }
+                    } catch (ArrayIndexOutOfBoundsException ex) {
                         cookie = new Cookie();
-                        String[] keyVal = token.split("=");
-                        cookie.name = keyVal[0];
-                        cookie.value = keyVal[1];
+                        System.out.println("error while parsing cookie : " + cookieHeader);
                     }
-                    //System.out.println(cookie);
+                    //System.out.println("put cookie : " + cookie);
                     request.cookies.put(cookie.name, cookie);
                 }
             }
