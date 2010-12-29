@@ -70,7 +70,9 @@ public class WebServer {
                     long start = System.currentTimeMillis();
                     try {
                         Request req = InOutBinder.extractRequest(he);
+                        Request.current.set(req);
                         Response res = dispatcher.process(req);
+                        Response.current.set(res);
                         InOutBinder.flushResponse(req, res, he);
                     } catch (Exception e) {
                         e.printStackTrace(); // TODO : print something useless here

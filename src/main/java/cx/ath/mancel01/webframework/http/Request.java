@@ -47,6 +47,7 @@ public class Request {
     public String user;
     public String password;
     public boolean isLoopback;
+    public static ThreadLocal<Request> current = new ThreadLocal<Request>();
     
     public String getControllerName() {
         return "";

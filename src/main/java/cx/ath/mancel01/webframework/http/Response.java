@@ -28,30 +28,14 @@ import java.util.Map;
  */
 public class Response {
 
-    /**
-     * Response status code
-     */
     public Integer status = 200;
-    /**
-     * Response content type
-     */
     public String contentType;
-    /**
-     * Response headers
-     */
     public Map<String, Header> headers = new HashMap<String, Header>(16);
-    /**
-     * Response cookies
-     */
     public Map<String, Cookie> cookies = new HashMap<String, Cookie>(16);
-    /**
-     * Response body stream
-     */
     public ByteArrayOutputStream out;
-    /**
-     * Send this file directly
-     */
     public Object direct;
+
+    public static ThreadLocal<Response> current = new ThreadLocal<Response>();
 
     public String getHeader(String name) {
         for (String key : headers.keySet()) {
