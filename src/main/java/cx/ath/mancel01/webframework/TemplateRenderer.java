@@ -24,9 +24,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 
 /**
  *
@@ -40,27 +37,27 @@ public class TemplateRenderer {
 
     private final boolean devMode;
     private final SimpleTemplateEngine engine;
-    private final VelocityEngine ve;
+//    private final VelocityEngine ve;
     private final ConcurrentHashMap<String, groovy.text.Template> templates =
             new ConcurrentHashMap<String, groovy.text.Template>();
 
     public TemplateRenderer() {
         this.engine = new SimpleTemplateEngine();
-        this.ve = new VelocityEngine();
-        this.ve.init();
+//        this.ve = new VelocityEngine();
+//        this.ve.init();
         // TODO : change to read conf file
         this.devMode = true;
     }
 
     public Writer render(File file, Map<String, Object> context, OutputStream os) throws Exception {
-        if (ENGINE == VELOCITY) {
-            return renderWithVelocity(file, context, os);
-        } else if (ENGINE == GROOVY) {
+//        if (ENGINE == VELOCITY) {
+//            return renderWithVelocity(file, context, os);
+//        } else if (ENGINE == GROOVY) {
             return renderWithGroovy(file, context, os);
-        } else {
-            // should never append :)
-            throw new RuntimeException("You need to use a render engine");
-        }
+//        } else {
+//            // should never append :)
+//            throw new RuntimeException("You need to use a render engine");
+//        }
     }
 
     private Writer renderWithGroovy(File file, Map<String, Object> context, OutputStream os) throws Exception {
@@ -77,13 +74,13 @@ public class TemplateRenderer {
         }
     }
 
-    private Writer renderWithVelocity(File file, Map<String, Object> context, OutputStream os) throws Exception {
-        OutputStreamWriter writer = new OutputStreamWriter(os);
-        Template template = ve.getTemplate(file.getPath());
-        template.merge(new VelocityContext(context), writer);
-        writer.flush();
-        return writer;
-    }
+//    private Writer renderWithVelocity(File file, Map<String, Object> context, OutputStream os) throws Exception {
+//        OutputStreamWriter writer = new OutputStreamWriter(os);
+//        Template template = ve.getTemplate(file.getPath());
+//        template.merge(new VelocityContext(context), writer);
+//        writer.flush();
+//        return writer;
+//    }
     
 //    public String render(File file, Map<String, Object> context) throws Exception {
 //        StringWriter builder = new StringWriter();

@@ -92,11 +92,11 @@
             <artifactId>groovy-all</artifactId>
             <version>1.7.2</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
             <version>1.7</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -112,11 +112,11 @@
             <artifactId>snakeyaml</artifactId>
             <version>1.7</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>1.8.0.7</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -142,7 +142,7 @@
             <artifactId>joda-time</artifactId>
             <version>1.6.2</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.8.5</version>
@@ -191,7 +191,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>4.1.0.Final</version>
-        </dependency>
+        </dependency> -->
         <!-- for hhtp server : http://download.java.net/maven/2/com/sun/net/httpserver/http/20070405/ -->
         <dependency>
             <groupId>junit</groupId>
