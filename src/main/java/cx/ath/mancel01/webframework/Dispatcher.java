@@ -160,7 +160,7 @@ public class Dispatcher {
     private Response render(Class controllerClass, String methodName) throws Exception {
         long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);
-        WebFramework.logger.info("controller injection : {} ms."
+        WebFramework.logger.debug("controller injection : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         // TODO : find methods with param if querystring not empty
@@ -182,7 +182,7 @@ public class Dispatcher {
                 throw ex;
             }
         }
-        WebFramework.logger.info("controller method invocation : {} ms."
+        WebFramework.logger.debug("controller method invocation : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         Response res = new Response();
@@ -195,7 +195,7 @@ public class Dispatcher {
         }
         viewName = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + viewName;
         renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
-        WebFramework.logger.info("template view rendering : {} ms."
+        WebFramework.logger.debug("template view rendering : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         return res;
