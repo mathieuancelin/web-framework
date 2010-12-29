@@ -35,12 +35,12 @@ public class TemplateTest {
 
     @Test
     public void httpServerTest() throws Exception {
-        WebServer dispatcher =
-                new WebServer("localhost", 8080,
-                "/", new MyBinder(), new File("src/main/webapp"));
-        dispatcher.start();
-        //Thread.sleep(30000);
-        dispatcher.stop();
+//        WebServer dispatcher =
+//                new WebServer("localhost", 8080,
+//                "/", new MyBinder(), new File("src/main/webapp"));
+//        dispatcher.start();
+//        //Thread.sleep(30000);
+//        dispatcher.stop();
     }
 
     public static void main(String... args) {
