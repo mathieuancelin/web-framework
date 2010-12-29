@@ -194,6 +194,11 @@
         </dependency> -->
         <!-- for hhtp server : http://download.java.net/maven/2/com/sun/net/httpserver/http/20070405/ -->
         <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-webserver</artifactId>
+            <version>1.9.17</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.4</version>
@@ -204,6 +209,10 @@
         <repository>
             <id>hibernate</id>
             <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+        <repository>
+            <id>java</id>
+           <url>http://download.java.net/maven/2/</url>
         </repository>
     </repositories>
 </project>
