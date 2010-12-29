@@ -197,7 +197,6 @@ public class Dispatcher {
         renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
         WebFramework.logger.debug("template view rendering : {} ms."
                 , (System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
         return res;
     }
 }
