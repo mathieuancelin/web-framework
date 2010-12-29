@@ -41,7 +41,7 @@ function launch()
 	if (test -e $APP_PATH/target)
 	then
 		echo " "
-		java -classpath $WEBAPP_PATH/WEB-INF/classes:$LIBS_CLASSPATH cx.ath.mancel01.webframework.sun.WebServerLauncher
+		java -classpath $WEBAPP_PATH/WEB-INF/classes:$WEBAPP_PATH/conf:$LIBS_CLASSPATH cx.ath.mancel01.webframework.sun.WebServerLauncher
 	else
 		echo "target not exists. run 'mvn clean install' to prepare application."
 		echo " "
