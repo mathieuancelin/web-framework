@@ -31,39 +31,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TemplateRenderer {
 
-    private static final int VELOCITY = 1;
-    private static final int GROOVY = 2;
-    private static final int ENGINE = GROOVY;
-
-    private final boolean devMode;
     private final SimpleTemplateEngine engine;
-//    private final VelocityEngine ve;
     private final ConcurrentHashMap<String, groovy.text.Template> templates =
             new ConcurrentHashMap<String, groovy.text.Template>();
 
     public TemplateRenderer() {
         this.engine = new SimpleTemplateEngine();
-//        this.ve = new VelocityEngine();
-//        this.ve.init();
-        // TODO : change to read conf file
-        this.devMode = true;
     }
 
     public Writer render(File file, Map<String, Object> context, OutputStream os) throws Exception {
-//        if (ENGINE == VELOCITY) {
-//            return renderWithVelocity(file, context, os);
-//        } else if (ENGINE == GROOVY) {
-            return renderWithGroovy(file, context, os);
-//        } else {
-//            // should never append :)
-//            throw new RuntimeException("You need to use a render engine");
-//        }
+        return renderWithGroovy(file, context, os);
     }
 
     private Writer renderWithGroovy(File file, Map<String, Object> context, OutputStream os) throws Exception {
         // TODO : if file not exists, return 404
         OutputStreamWriter osw = new OutputStreamWriter(os);
-        if (devMode) {
+        if (WebFramework.dev) {
             return engine.createTemplate(file).make(context).writeTo(osw);
         } else {
             if (!templates.containsKey(file.getAbsolutePath())) {
@@ -73,25 +56,4 @@ public class TemplateRenderer {
             return templates.get(file.getAbsolutePath()).make(context).writeTo(osw);
         }
     }
-
-//    private Writer renderWithVelocity(File file, Map<String, Object> context, OutputStream os) throws Exception {
-//        OutputStreamWriter writer = new OutputStreamWriter(os);
-//        Template template = ve.getTemplate(file.getPath());
-//        template.merge(new VelocityContext(context), writer);
-//        writer.flush();
-//        return writer;
-//    }
-    
-//    public String render(File file, Map<String, Object> context) throws Exception {
-//        StringWriter builder = new StringWriter();
-//        engine.createTemplate(file)
-//                .make(context).writeTo(builder);
-//        return builder.toString();
-//    }
-
 }
-
-//
-//<!--#foreach( $number in $numbers )
-//      <div>${number}</div>
-//      #end-->
