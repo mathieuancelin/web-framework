@@ -17,6 +17,10 @@
 package cx.ath.mancel01.webframework.http;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A cookie :)
@@ -24,11 +28,16 @@ import java.io.Serializable;
  * @author mathieuancelin
  */
 public class Cookie implements Serializable {
+
+    public static final String DATE_FORMAT = "EEE, dd-MMM-yyyy hh:mm:ss z";
     public String name;
     public String domain;
     public String path = "/";
     public boolean secure = false;
     public String value;
+    /**
+     * Maximum age in seconds of the cookie.
+     */
     public Integer maxAge;
     public boolean httpOnly = false;
 
@@ -37,5 +46,12 @@ public class Cookie implements Serializable {
         return "Cookie{" + "name=" + name + ", domain=" + domain + ", path="
                 + path + ", secure=" + secure + ", value=" + value + ", maxAge="
                 + maxAge + ", httpOnly=" + httpOnly + '}';
+    }
+
+    public String getExpires() {
+        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);;
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, maxAge);
+        return dateFormat.format(calendar.getTime());
     }
 }
