@@ -17,6 +17,8 @@
 
 package cx.ath.mancel01.webframework;
 
+import java.io.IOException;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,5 +28,23 @@ import org.slf4j.LoggerFactory;
  */
 public class WebFramework {
 
-    public static Logger logger = LoggerFactory.getLogger(WebFramework.class);
+    public static final Logger logger = LoggerFactory.getLogger(WebFramework.class);
+    public static final Properties config = new Properties();
+    public static boolean dev;
+
+    static {
+        try {
+            config.load(WebFramework.class.getClassLoader()
+                    .getResourceAsStream("config.properties"));
+            String mode = config.getProperty("framework.mode", "dev");
+            if (mode.equals("dev")) {
+                dev = true;
+            } else {
+                dev = false;
+            }
+        } catch (IOException e) {
+            logger.error("Error while loading configuration file", e);
+        }
+    }
+
 }
