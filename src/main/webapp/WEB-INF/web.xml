@@ -3,7 +3,7 @@
     <display-name>web-test</display-name>
     <context-param>
         <param-name>config</param-name>
-        <param-value>app.binder.MyBinder</param-value>
+        <param-value>app.binder.AppBinder</param-value>
     </context-param>
     <servlet>
         <servlet-name>framework-dispatcher</servlet-name>

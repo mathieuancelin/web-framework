@@ -26,7 +26,7 @@ import cx.ath.mancel01.webframework.WebBinder;
  *
  * @author mathieuancelin
  */
-public class MyBinder extends WebBinder {
+public class AppBinder extends WebBinder {
 
     @Override
     public void configureBindings() {
