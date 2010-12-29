@@ -68,7 +68,7 @@ public class WebServer {
                     System.out.println("start processing request ...");
                     long start = System.currentTimeMillis();
                     try {
-                        Request req = InOutBinder.parseRequest(he);
+                        Request req = InOutBinder.extractRequest(he);
                         Response res = dispatcher.process(req);
                         InOutBinder.flushResponse(req, res, he);
                     } catch (Exception e) {

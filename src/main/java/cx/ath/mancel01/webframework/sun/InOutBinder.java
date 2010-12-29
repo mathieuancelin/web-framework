@@ -40,7 +40,7 @@ import java.util.StringTokenizer;
  */
 public class InOutBinder {
 
-    static Request parseRequest(HttpExchange he) throws Exception {
+    static Request extractRequest(HttpExchange he) throws Exception {
         Request request = new Request();
         URI uri = he.getRequestURI();
         request.method = he.getRequestMethod().intern();

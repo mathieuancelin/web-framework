@@ -91,7 +91,7 @@ public class ServletDispatcher extends HttpServlet {
         long start = System.currentTimeMillis();
         try {
             // process in a thread ?
-            Request req = ServletBinder.parseRequest(request);
+            Request req = ServletBinder.extractRequest(request);
             Response res = dispatcher.process(req);
             ServletBinder.flushResponse(req, res, request, response);
         } catch (Exception e) {

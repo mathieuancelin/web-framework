@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ServletBinder {
 
-    static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
+    static Request extractRequest(HttpServletRequest httpServletRequest) throws Exception {
         Request request = new Request();
         URI uri = new URI(httpServletRequest.getRequestURI());
         request.method = httpServletRequest.getMethod().intern();
