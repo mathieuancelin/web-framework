@@ -52,7 +52,6 @@ public class FrameworkHandler {
     private boolean started = false;
     private final String contextRoot;
     private final File base;
-    //private final ClassLoader loader;
 
     public FrameworkHandler(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
@@ -69,7 +68,6 @@ public class FrameworkHandler {
         this.injector.allowCircularDependencies(true);
         this.injector.registerShutdownHook();
         this.base = grabber.getFile("public");
-        //loader = new WebFrameworkClassLoader(getClass().getClassLoader());
     }
 
     public void validate() {
@@ -168,7 +166,7 @@ public class FrameworkHandler {
 
     private Response render(Class controllerClass, String methodName) throws Exception {
         if (WebFramework.dev) {
-            controllerClass = RequestCompiler.getCompilerClass(controllerClass);
+            controllerClass = RequestCompiler.getCompiledClass(controllerClass);
         }
         long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);
