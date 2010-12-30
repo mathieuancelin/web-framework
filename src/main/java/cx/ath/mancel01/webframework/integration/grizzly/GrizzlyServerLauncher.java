@@ -15,7 +15,7 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework.sun;
+package cx.ath.mancel01.webframework.integration.grizzly;
 
 import cx.ath.mancel01.webframework.WebFramework;
 import java.io.File;
@@ -25,12 +25,12 @@ import java.io.IOException;
  *
  * @author mathieuancelin
  */
-public class WebServerLauncher {
+public class GrizzlyServerLauncher {
 
     public static void main(String... args) {
         try {
-            WebServer dispatcher
-                    = new WebServer("localhost", 8080,
+            GrizzlyServer dispatcher
+                    = new GrizzlyServer(8080,
                     "/", new app.binder.AppBinder(), new File("src/main/webapp"));
             dispatcher.start();
             WebFramework.logger.info("running the application in dev mode");

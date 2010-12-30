@@ -17,7 +17,7 @@
 package cx.ath.mancel01.webframework;
 
 import app.binder.AppBinder;
-import cx.ath.mancel01.webframework.sun.WebServer;
+import cx.ath.mancel01.webframework.integration.httpserver.WebServer;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Test;

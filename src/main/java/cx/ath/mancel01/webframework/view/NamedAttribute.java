@@ -15,21 +15,20 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework;
+package cx.ath.mancel01.webframework.view;
 
 /**
  *
  * @author mathieuancelin
  */
-public class BreakFlowException extends RuntimeException {
+public class NamedAttribute {
 
-    private RenderView view;
+    public final String name;
 
-    public BreakFlowException(RenderView view) {
-        this.view = view;
-    }
+    public final Object value;
 
-    public RenderView getView() {
-        return view;
+    public NamedAttribute(String name, Object value) {
+        this.name = name;
+        this.value = value;
     }
 }

@@ -14,7 +14,7 @@
  *  limitations under the License.
  *  under the License.
  */
-package cx.ath.mancel01.webframework.servlet;
+package cx.ath.mancel01.webframework.integration.servlet;
 
 import cx.ath.mancel01.webframework.http.Cookie;
 import cx.ath.mancel01.webframework.http.Header;

@@ -16,10 +16,15 @@
  */
 package cx.ath.mancel01.webframework;
 
+import cx.ath.mancel01.webframework.view.TemplateRenderer;
+import cx.ath.mancel01.webframework.view.RenderView;
+import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
+import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.dependencyshot.DependencyShot;
 import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.annotation.Controller;
+import cx.ath.mancel01.webframework.compiler.RequestCompiler;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
@@ -34,7 +39,7 @@ import java.util.Map;
  *
  * @author mathieuancelin
  */
-public class Dispatcher {
+public class FrameworkHandler {
 
     private static final String DEFAUTL_CONTENT_TYPE = "text/html";
     private final InjectorImpl injector;
@@ -47,7 +52,7 @@ public class Dispatcher {
     private final String contextRoot;
     private final File base;
 
-    public Dispatcher(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
+    public FrameworkHandler(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
         renderer = new TemplateRenderer();
         this.contextRoot = contextRoot;
@@ -71,6 +76,7 @@ public class Dispatcher {
     }
 
     public void start() {
+        WebFramework.init();
         this.started = true;
     }
 
@@ -158,6 +164,9 @@ public class Dispatcher {
     }
 
     private Response render(Class controllerClass, String methodName) throws Exception {
+        if (WebFramework.dev) {
+            controllerClass = RequestCompiler.compile(controllerClass);
+        }
         long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);
         WebFramework.logger.debug("controller injection : {} ms."

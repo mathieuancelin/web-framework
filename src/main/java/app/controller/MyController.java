@@ -18,8 +18,8 @@
 package app.controller;
 
 import app.services.Service;
-import cx.ath.mancel01.webframework.Render;
-import cx.ath.mancel01.webframework.RenderView;
+import cx.ath.mancel01.webframework.view.Render;
+import cx.ath.mancel01.webframework.view.RenderView;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import java.util.ArrayList;
 import java.util.List;

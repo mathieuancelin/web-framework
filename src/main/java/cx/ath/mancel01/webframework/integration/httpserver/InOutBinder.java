@@ -14,7 +14,7 @@
  *  limitations under the License.
  *  under the License.
  */
-package cx.ath.mancel01.webframework.sun;
+package cx.ath.mancel01.webframework.integration.httpserver;
 
 import com.sun.net.httpserver.HttpExchange;
 import cx.ath.mancel01.webframework.WebFramework;

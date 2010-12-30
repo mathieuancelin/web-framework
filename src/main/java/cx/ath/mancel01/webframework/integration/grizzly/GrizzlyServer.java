@@ -14,14 +14,14 @@
  *  limitations under the License.
  *  under the License.
  */
-package cx.ath.mancel01.webframework.grizzly;
+package cx.ath.mancel01.webframework.integration.grizzly;
 
 import com.sun.grizzly.http.embed.GrizzlyWebServer;
 import com.sun.grizzly.tcp.http11.GrizzlyAdapter;
 import com.sun.grizzly.tcp.http11.GrizzlyRequest;
 import com.sun.grizzly.tcp.http11.GrizzlyResponse;
-import cx.ath.mancel01.webframework.Dispatcher;
-import cx.ath.mancel01.webframework.WebBinder;
+import cx.ath.mancel01.webframework.FrameworkHandler;
+import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -43,7 +43,7 @@ public class GrizzlyServer {
     private GrizzlyWebServer server;
     private final int port;
     private final String rootContext;
-    private Dispatcher dispatcher;
+    private FrameworkHandler dispatcher;
     private final WebBinder binder;
     private final File viewDirectory;
 
@@ -82,7 +82,7 @@ public class GrizzlyServer {
             };
             server.setMaxThreads(NTHREADS);
             server.addGrizzlyAdapter(adapter, new String[]{rootContext});
-            dispatcher = new Dispatcher(binder.getClass(), rootContext, new FileGrabber() {
+            dispatcher = new FrameworkHandler(binder.getClass(), rootContext, new FileGrabber() {
                 @Override
                 public File getFile(String file) {
                     return new File(viewDirectory, file);
@@ -105,9 +105,9 @@ public class GrizzlyServer {
 
     private class Shutdown extends Thread {
 
-        private final Dispatcher dispatcher;
+        private final FrameworkHandler dispatcher;
 
-        public Shutdown(Dispatcher dispatcher) {
+        public Shutdown(FrameworkHandler dispatcher) {
             this.dispatcher = dispatcher;
         }
 

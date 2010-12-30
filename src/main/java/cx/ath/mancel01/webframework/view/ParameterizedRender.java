@@ -15,7 +15,7 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework;
+package cx.ath.mancel01.webframework.view;
 
 /**
  *

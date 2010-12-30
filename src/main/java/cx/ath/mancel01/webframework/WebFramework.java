@@ -17,7 +17,10 @@
 
 package cx.ath.mancel01.webframework;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +33,24 @@ public class WebFramework {
 
     public static final Logger logger = LoggerFactory.getLogger(WebFramework.class);
     public static final Properties config = new Properties();
-    public static boolean dev;
+    public static boolean dev = false;
+    public static String classpath = "";
+    public static String compile = "javac -source 1.6 -target 1.6 -d {1} -classpath {2} {3}";
 
-    static {
+    public static void init() {
+        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
+        URL[] urls = ((URLClassLoader)sysClassLoader).getURLs();
+        StringBuilder builder = new StringBuilder();
+        for(int i=0; i< urls.length; i++) {
+            builder.append(urls[i].getFile());
+            builder.append(":");
+        }
+        classpath = builder.toString();
+        if (classpath.endsWith(":")) {
+            classpath = classpath.substring(0, classpath.length() - 1);
+        }
+        compile = compile.replace("{2}", classpath);
+        compile = compile.replace("{1}", new File("target/compclasses").getAbsolutePath());
         try {
             config.load(WebFramework.class.getClassLoader()
                     .getResourceAsStream("config.properties"));

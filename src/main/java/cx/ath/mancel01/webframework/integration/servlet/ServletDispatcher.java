@@ -14,10 +14,10 @@
  *  limitations under the License.
  *  under the License.
  */
-package cx.ath.mancel01.webframework.servlet;
+package cx.ath.mancel01.webframework.integration.servlet;
 
 import cx.ath.mancel01.dependencyshot.graph.Binder;
-import cx.ath.mancel01.webframework.Dispatcher;
+import cx.ath.mancel01.webframework.FrameworkHandler;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ServletDispatcher extends HttpServlet {
 
-    private Dispatcher dispatcher;
+    private FrameworkHandler dispatcher;
 
     @Override
     public void init() throws ServletException {
@@ -55,7 +55,7 @@ public class ServletDispatcher extends HttpServlet {
             throw new RuntimeException("Your config class is not a good one ...", e);
         }
         final ServletContext context = this.getServletContext();
-        dispatcher = new Dispatcher((Class<? extends Binder>) binder,
+        dispatcher = new FrameworkHandler((Class<? extends Binder>) binder,
             getServletContext().getContextPath(),
                 new FileGrabber() {
                     @Override

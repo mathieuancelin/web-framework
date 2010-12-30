@@ -20,7 +20,7 @@ package app.binder;
 import app.controller.MyController;
 import app.services.Service;
 import app.services.ServiceImpl;
-import cx.ath.mancel01.webframework.WebBinder;
+import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 
 /**
  *

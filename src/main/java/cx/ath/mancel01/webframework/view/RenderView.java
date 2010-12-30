@@ -15,7 +15,7 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework;
+package cx.ath.mancel01.webframework.view;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class RenderView {
         return this;
     }
 
-    Map<String, Object> getContext() {
+    public Map<String, Object> getContext() {
         return context;
     }
 

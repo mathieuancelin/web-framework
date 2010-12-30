@@ -15,20 +15,29 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework;
+package cx.ath.mancel01.webframework.integration.dependencyshot;
+
+import cx.ath.mancel01.dependencyshot.graph.Binder;
+import cx.ath.mancel01.webframework.FrameworkHandler;
 
 /**
  *
  * @author mathieuancelin
  */
-public class NamedAttribute {
+public abstract class WebBinder extends Binder {
 
-    public final String name;
+    private FrameworkHandler dispatcher;
 
-    public final Object value;
-
-    public NamedAttribute(String name, Object value) {
-        this.name = name;
-        this.value = value;
+    public void setDispatcher(FrameworkHandler dispatcher) {
+        this.dispatcher = dispatcher;
     }
+
+    public void registerController(Class<?> clazz) {
+        dispatcher.registrerController(clazz);
+    }
+
+    public void registerRootController(Class<?> clazz) {
+        dispatcher.setRootController(clazz);
+    }
+
 }

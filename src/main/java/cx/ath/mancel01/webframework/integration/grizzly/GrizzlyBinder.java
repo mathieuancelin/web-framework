@@ -14,7 +14,7 @@
  *  limitations under the License.
  *  under the License.
  */
-package cx.ath.mancel01.webframework.grizzly;
+package cx.ath.mancel01.webframework.integration.grizzly;
 
 import com.sun.grizzly.tcp.http11.GrizzlyRequest;
 import com.sun.grizzly.tcp.http11.GrizzlyResponse;

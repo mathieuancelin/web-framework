@@ -7,7 +7,7 @@
     </context-param>
     <servlet>
         <servlet-name>framework-dispatcher</servlet-name>
-        <servlet-class>cx.ath.mancel01.webframework.servlet.ServletDispatcher</servlet-class>
+        <servlet-class>cx.ath.mancel01.webframework.integration.servlet.ServletDispatcher</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>framework-dispatcher</servlet-name>

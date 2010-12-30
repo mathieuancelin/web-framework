@@ -14,13 +14,13 @@
  *  limitations under the License.
  *  under the License.
  */
-package cx.ath.mancel01.webframework.sun;
+package cx.ath.mancel01.webframework.integration.httpserver;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import cx.ath.mancel01.webframework.Dispatcher;
-import cx.ath.mancel01.webframework.WebBinder;
+import cx.ath.mancel01.webframework.FrameworkHandler;
+import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -44,7 +44,7 @@ public class WebServer {
     private final String host;
     private final int port;
     private final String rootContext;
-    private Dispatcher dispatcher;
+    private FrameworkHandler dispatcher;
     private final WebBinder binder;
     private final File viewDirectory;
 
@@ -85,7 +85,7 @@ public class WebServer {
                     }
                 }
             });
-            dispatcher = new Dispatcher(binder.getClass(), rootContext, new FileGrabber() {
+            dispatcher = new FrameworkHandler(binder.getClass(), rootContext, new FileGrabber() {
                 @Override
                 public File getFile(String file) {
                     return new File(viewDirectory, file);
@@ -108,9 +108,9 @@ public class WebServer {
     }
 
     private class Shutdown extends Thread {
-        private final Dispatcher dispatcher;
+        private final FrameworkHandler dispatcher;
         
-        public Shutdown(Dispatcher dispatcher) {
+        public Shutdown(FrameworkHandler dispatcher) {
             this.dispatcher = dispatcher;
         }
 
