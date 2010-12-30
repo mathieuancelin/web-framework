@@ -32,10 +32,6 @@ import javax.tools.ToolProvider;
 public class RequestCompiler {
 
     private static JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
-//    public void init() {
-//        JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
-//        //int rc = javac.run(null, null, null, args);
-//    }
 
     private static Map<File, Long> sourceFiles = new HashMap<File, Long>();
 
@@ -83,8 +79,8 @@ public class RequestCompiler {
 
     private static void compile(File source) {
         try {
-//            Process p = Runtime.getRuntime().exec(command);
-//            p.waitFor();
+            //Process p = Runtime.getRuntime().exec(command);
+            //p.waitFor();
             javac.run(null, null, null
                     , "-encoding", "utf-8", "-source", "1.6"
                     , "-target", "1.6", "-d"
