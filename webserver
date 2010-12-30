@@ -44,9 +44,12 @@ function launch()
 		
 		## starting the Grizzly server
 		
-		#java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n \
-		java -classpath $WEBAPP_PATH/WEB-INF/classes:$WEBAPP_PATH/conf:$LIBS_CLASSPATH \
+		java -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n \
+		-classpath $WEBAPP_PATH/WEB-INF/classes:$WEBAPP_PATH/conf:$LIBS_CLASSPATH \
 		cx.ath.mancel01.webframework.grizzly.GrizzlyServerLauncher
+		
+		## for starting the sun webserver
+		
 		#cx.ath.mancel01.webframework.sun.WebServerLauncher
 		
 	else
