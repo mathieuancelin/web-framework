@@ -50,12 +50,12 @@ public class RequestCompiler {
 
     private static boolean compileClassIfChanged(String path) {
         long start = System.currentTimeMillis();
-        File oldClass = new File("target/compclasses/" + path + ".class");
-        File source = new File("src/main/java/" + path + ".java");
+        File oldClass = new File(WebFramework.FWK_COMPILED_CLASSES_PATH, path + ".class");
+        File source = new File(WebFramework.JAVA_SOURCES, path + ".java");
         if (!sourceFiles.containsKey(source)) {
             sourceFiles.put(source, source.lastModified());
             compile(source);
-            WebFramework.logger.debug("controller compilation : {} ms."
+            WebFramework.logger.trace("controller compilation : {} ms."
                     , System.currentTimeMillis() - start);
             return true;
         } else {
@@ -70,7 +70,7 @@ public class RequestCompiler {
                 return false;
             }
         }
-        WebFramework.logger.debug("controller compilation : {} ms."
+        WebFramework.logger.trace("controller compilation : {} ms."
                 , System.currentTimeMillis() - start);
         return true;
     }
@@ -82,7 +82,7 @@ public class RequestCompiler {
             javac.run(null, null, null
                     , "-encoding", "utf-8", "-source", "1.6"
                     , "-target", "1.6", "-d"
-                    , new File("target/compclasses").getAbsolutePath()
+                    , WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
                     , "-classpath", WebFramework.classpath, source.getAbsolutePath());
         } catch (Exception e) {
             throw new RuntimeException(e);

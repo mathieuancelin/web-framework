@@ -16,6 +16,7 @@
  */
 package cx.ath.mancel01.webframework.compiler;
 
+import cx.ath.mancel01.webframework.WebFramework;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,7 +50,7 @@ public class WebFrameworkClassLoader extends ClassLoader {
         if (name.startsWith("app.")) {
             String path = name.replace(".", "/");
             RequestCompiler.compile(path);
-            File clazz = new File("target/compclasses/" + path + ".class");
+            File clazz = new File(WebFramework.FWK_COMPILED_CLASSES_PATH, path + ".class");
             byte[] b = getClassDefinition(clazz);
             return defineClass(name, b, 0, b.length);
         } else {

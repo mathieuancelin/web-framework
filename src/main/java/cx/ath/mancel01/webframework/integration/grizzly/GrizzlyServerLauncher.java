@@ -31,7 +31,7 @@ public class GrizzlyServerLauncher {
         try {
             GrizzlyServer dispatcher
                     = new GrizzlyServer(8080,
-                    "/", new app.binder.AppBinder(), new File("src/main/webapp"));
+                    "/", new app.binder.AppBinder(), WebFramework.WEB_SOURCES);
             dispatcher.start();
             WebFramework.logger.info("running the application in dev mode");
             WebFramework.logger.info("listening for HTTP on port 8080");

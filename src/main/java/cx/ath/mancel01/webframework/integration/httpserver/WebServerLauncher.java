@@ -18,7 +18,6 @@
 package cx.ath.mancel01.webframework.integration.httpserver;
 
 import cx.ath.mancel01.webframework.WebFramework;
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -31,7 +30,7 @@ public class WebServerLauncher {
         try {
             WebServer dispatcher
                     = new WebServer("localhost", 8080,
-                    "/", new app.binder.AppBinder(), new File("src/main/webapp"));
+                    "/", new app.binder.AppBinder(), WebFramework.WEB_SOURCES);
             dispatcher.start();
             WebFramework.logger.info("running the application in dev mode");
             WebFramework.logger.info("listening for HTTP on port 8080");
