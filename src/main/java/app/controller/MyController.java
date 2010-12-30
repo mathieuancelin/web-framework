@@ -21,6 +21,7 @@ import app.services.Service;
 import cx.ath.mancel01.webframework.view.Render;
 import cx.ath.mancel01.webframework.view.RenderView;
 import cx.ath.mancel01.webframework.annotation.Controller;
+import cx.ath.mancel01.webframework.http.Request;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -34,6 +35,9 @@ public class MyController {
 
     @Inject
     private Service service;
+
+    @Inject
+    private Request request;
 
     public RenderView index() {
         List<String> numbers = new ArrayList<String>();
