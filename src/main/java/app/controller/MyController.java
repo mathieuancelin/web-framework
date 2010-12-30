@@ -17,7 +17,7 @@
 
 package app.controller;
 
-import app.services.Service;
+import app.services.ServiceImpl;
 import cx.ath.mancel01.webframework.view.Render;
 import cx.ath.mancel01.webframework.view.RenderView;
 import cx.ath.mancel01.webframework.annotation.Controller;
@@ -34,7 +34,7 @@ import javax.inject.Inject;
 public class MyController {
 
     @Inject
-    private Service service;
+    private ServiceImpl service;
 
     @Inject
     private Request request;

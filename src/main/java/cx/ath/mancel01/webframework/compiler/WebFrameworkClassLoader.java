@@ -38,7 +38,8 @@ public class WebFrameworkClassLoader extends ClassLoader {
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        if (name.startsWith("app.controller")) {
+        //System.out.println("ask for class " + name);
+        if (name.startsWith("app.")) {
             return findClass(name);
         } else {
             return super.loadClass(name);

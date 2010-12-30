@@ -55,8 +55,8 @@ public class RequestCompiler {
         if (!sourceFiles.containsKey(source)) {
             sourceFiles.put(source, source.lastModified());
             compile(source);
-            WebFramework.logger.trace("controller compilation : {} ms."
-                    , System.currentTimeMillis() - start);
+            WebFramework.logger.trace("class {} compilation : {} ms."
+                    , path.replace("/", "."), System.currentTimeMillis() - start);
             return true;
         } else {
             long knownSourceModif = sourceFiles.get(source);
@@ -70,8 +70,8 @@ public class RequestCompiler {
                 return false;
             }
         }
-        WebFramework.logger.trace("controller compilation : {} ms."
-                , System.currentTimeMillis() - start);
+        WebFramework.logger.trace("class {} compilation : {} ms."
+                , path.replace("/", "."), System.currentTimeMillis() - start);
         return true;
     }
 
