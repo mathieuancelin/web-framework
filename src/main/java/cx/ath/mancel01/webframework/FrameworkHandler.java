@@ -179,7 +179,7 @@ public class FrameworkHandler {
         try {
             Object ret = method.invoke(controller);
             if (ret instanceof RenderView) {
-                view = (RenderView) method.invoke(controller);
+                view = (RenderView) ret;
             } else {
                 throw new RuntimeException("You can't return anything than RenderView");
             }
