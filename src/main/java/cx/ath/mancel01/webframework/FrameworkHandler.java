@@ -25,6 +25,7 @@ import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.compiler.RequestCompiler;
+import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
@@ -51,6 +52,7 @@ public class FrameworkHandler {
     private boolean started = false;
     private final String contextRoot;
     private final File base;
+    //private final ClassLoader loader;
 
     public FrameworkHandler(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
@@ -67,6 +69,7 @@ public class FrameworkHandler {
         this.injector.allowCircularDependencies(true);
         this.injector.registerShutdownHook();
         this.base = grabber.getFile("public");
+        //loader = new WebFrameworkClassLoader(getClass().getClassLoader());
     }
 
     public void validate() {
@@ -165,7 +168,7 @@ public class FrameworkHandler {
 
     private Response render(Class controllerClass, String methodName) throws Exception {
         if (WebFramework.dev) {
-            controllerClass = RequestCompiler.compile(controllerClass);
+            controllerClass = RequestCompiler.getCompilerClass(controllerClass);
         }
         long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);

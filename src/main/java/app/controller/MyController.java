@@ -39,6 +39,7 @@ public class MyController {
         List<String> numbers = new ArrayList<String>();
         numbers.add("one");
         numbers.add("two");
+        System.out.println("hello world !!!!");
         numbers.add("three");
         return new RenderView()
                 .param("message", service.hello("Boris"))

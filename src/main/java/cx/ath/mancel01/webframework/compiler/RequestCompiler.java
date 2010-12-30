@@ -17,70 +17,72 @@
 package cx.ath.mancel01.webframework.compiler;
 
 import cx.ath.mancel01.webframework.WebFramework;
-import cx.ath.mancel01.webframework.util.FileUtils;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author mathieuancelin
  */
 public class RequestCompiler {
-//
+
 //    public void init() {
 //        JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
 //        //int rc = javac.run(null, null, null, args);
 //    }
 
-    public static Class<?> compile(Class<?> clazz) {
+    private static Map<File, Long> sourceFiles = new HashMap<File, Long>();
+
+    public static Class<?> getCompilerClass(Class<?> clazz) {
         try {
-            long start = System.currentTimeMillis();
-            String path = clazz.getName().replace(".", "/");
-            File oldClass = new File("target/compclasses/" + path + ".class");
-            File source = new File("src/main/java/" + path + ".java");
-            if (oldClass.exists()) {
-                oldClass.delete();
-            }
-            String command = WebFramework.compile;
-            Process p = Runtime.getRuntime().exec(command.replace("{3}", source.getAbsolutePath()));
-            p.waitFor();
-            ClassLoader loader = new ClassLoader(RequestCompiler.class.getClassLoader()) {
-
-                @Override
-                public Class<?> loadClass(String name) throws ClassNotFoundException {
-                    if (name.startsWith("app.")) {
-                        return findClass(name);
-                    } else {
-                        return super.loadClass(name);
-                    }
-                }
-                
-                @Override
-                protected Class<?> findClass(String name) throws ClassNotFoundException {
-                    if (name.startsWith("app.")) {
-                        String path = name.replace(".", "/");
-                        File clazz = new File("target/compclasses/" + path + ".class");
-                        byte[] b = loadClassData(clazz);
-                        return defineClass(name, b, 0, b.length);
-                    } else {
-                        return super.findClass(name);
-                    }
-                }
-
-                private byte[] loadClassData(File file) {
-                    return FileUtils.readFileAsString(file).getBytes();
-                }
-            };
+            ClassLoader loader = new WebFrameworkClassLoader(RequestCompiler.class.getClassLoader());
             Class<?> loadedClazz = loader.loadClass(clazz.getName());
-            WebFramework.logger.debug("controller compilation : {} ms."
-                , (System.currentTimeMillis() - start));
             return loadedClazz;
-        } catch (Exception ex) {
-            Logger.getLogger(RequestCompiler.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    public static boolean compile(String clazz) {
+        return compileClassIfChanged(clazz);
+    }
+
+    private static boolean compileClassIfChanged(String path) {
+        long start = System.currentTimeMillis();
+        File oldClass = new File("target/compclasses/" + path + ".class");
+        File source = new File("src/main/java/" + path + ".java");
+        if (!sourceFiles.containsKey(source)) {
+            sourceFiles.put(source, source.lastModified());
+            compile(source);
+            WebFramework.logger.debug("controller compilation : {} ms."
+                    , System.currentTimeMillis() - start);
+            return true;
+        } else {
+            long knownSourceModif = sourceFiles.get(source);
+            if (knownSourceModif != source.lastModified()) {
+                if (oldClass.exists()) {
+                    oldClass.delete();
+                }
+                compile(source);
+                sourceFiles.put(source, source.lastModified());
+            } else {
+                return false;
+            }
+        }
+        WebFramework.logger.debug("controller compilation : {} ms."
+                , System.currentTimeMillis() - start);
+        return true;
+    }
+
+    private static void compile(File source) {
+        String command = WebFramework.compile;
+        try {
+            Process p = Runtime.getRuntime().exec(command.replace("{3}"
+                    , source.getAbsolutePath()));
+            p.waitFor();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
