@@ -66,7 +66,7 @@ public class WebServer {
             server.createContext(rootContext, new HttpHandler() {
                 @Override
                 public void handle(HttpExchange he) throws IOException {
-                    WebFramework.logger.debug("start processing request ...");
+                    WebFramework.logger.trace("start processing request ...");
                     long start = System.currentTimeMillis();
                     try {
                         Request req = InOutBinder.extractRequest(he);
@@ -79,9 +79,9 @@ public class WebServer {
                         e.getCause().printStackTrace();
                     } finally {
                         he.close();
-                        WebFramework.logger.debug("request processed in {} ms.\n"
+                        WebFramework.logger.trace("request processed in {} ms.\n"
                                 , (System.currentTimeMillis() - start));
-                        WebFramework.logger.debug("=======================================\n");
+                        WebFramework.logger.trace("=======================================\n");
                     }
                 }
             });

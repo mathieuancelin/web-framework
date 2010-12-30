@@ -62,7 +62,7 @@ public class GrizzlyServer {
             GrizzlyAdapter adapter = new GrizzlyAdapter() {
                 @Override
                 public void service(GrizzlyRequest request, GrizzlyResponse response) {
-                    WebFramework.logger.debug("start processing request ...");
+                    WebFramework.logger.trace("start processing request ...");
                     long start = System.currentTimeMillis();
                     try {
                         Request req = GrizzlyBinder.extractRequest(request);
@@ -75,8 +75,8 @@ public class GrizzlyServer {
                         e.getCause().printStackTrace();
                     } finally {
                         // response..close();
-                        WebFramework.logger.debug("request processed in {} ms.\n", (System.currentTimeMillis() - start));
-                        WebFramework.logger.debug("=======================================\n");
+                        WebFramework.logger.trace("request processed in {} ms.\n", (System.currentTimeMillis() - start));
+                        WebFramework.logger.trace("=======================================\n");
                     }
                 }
             };

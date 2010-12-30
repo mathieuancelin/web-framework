@@ -78,7 +78,7 @@ public class ServletDispatcher extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        WebFramework.logger.debug("start processing request ...");
+        WebFramework.logger.trace("start processing request ...");
         long start = System.currentTimeMillis();
         try {
             // process in a thread ?
@@ -90,8 +90,8 @@ public class ServletDispatcher extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace(); // TODO : print something useless here
         } finally {
-            WebFramework.logger.debug("request processed in {} ms.\n", (System.currentTimeMillis() - start));
-            WebFramework.logger.debug("=======================================\n");
+            WebFramework.logger.trace("request processed in {} ms.\n", (System.currentTimeMillis() - start));
+            WebFramework.logger.trace("=======================================\n");
         }
     }
 

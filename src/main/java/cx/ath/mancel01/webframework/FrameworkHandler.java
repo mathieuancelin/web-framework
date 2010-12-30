@@ -25,9 +25,9 @@ import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.compiler.RequestCompiler;
-import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -67,6 +67,7 @@ public class FrameworkHandler {
         }
         this.injector.allowCircularDependencies(true);
         this.injector.registerShutdownHook();
+        new DependencyShotIntegrator(injector).registerBindings();
         this.base = grabber.getFile("public");
     }
 
@@ -116,7 +117,7 @@ public class FrameworkHandler {
 
     public Response process(Request request) throws Exception {
         if (started) {
-            WebFramework.logger.debug("asked resource => {}", request.path);
+            WebFramework.logger.trace("asked resource => {}", request.path);
             Response res = new Response();
             String path = request.path;           
             if ("".endsWith(contextRoot)) {
@@ -170,7 +171,7 @@ public class FrameworkHandler {
         }
         long start = System.currentTimeMillis();
         Object controller = injector.getInstance(controllerClass);
-        WebFramework.logger.debug("controller injection : {} ms."
+        WebFramework.logger.trace("controller injection : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         // TODO : find methods with param if querystring not empty
@@ -192,7 +193,7 @@ public class FrameworkHandler {
                 throw ex;
             }
         }
-        WebFramework.logger.debug("controller method invocation : {} ms."
+        WebFramework.logger.trace("controller method invocation : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         Response res = new Response();
@@ -205,7 +206,7 @@ public class FrameworkHandler {
         }
         viewName = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + viewName;
         renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
-        WebFramework.logger.debug("template view rendering : {} ms."
+        WebFramework.logger.trace("template view rendering : {} ms."
                 , (System.currentTimeMillis() - start));
         return res;
     }
