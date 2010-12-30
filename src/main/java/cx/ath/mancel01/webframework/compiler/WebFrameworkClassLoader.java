@@ -16,15 +16,12 @@
  */
 package cx.ath.mancel01.webframework.compiler;
 
-import cx.ath.mancel01.webframework.WebFramework;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,8 +30,6 @@ import java.util.logging.Logger;
  * @author mathieuancelin
  */
 public class WebFrameworkClassLoader extends ClassLoader {
-
-    
 
     public WebFrameworkClassLoader(ClassLoader parent) {
         super(parent);

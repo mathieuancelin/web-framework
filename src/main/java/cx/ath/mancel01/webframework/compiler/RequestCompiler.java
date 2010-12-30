@@ -34,10 +34,11 @@ public class RequestCompiler {
 
     private static Map<File, Long> sourceFiles = new HashMap<File, Long>();
 
-    public static Class<?> getCompilerClass(Class<?> clazz) {
+    public static Class<?> getCompiledClass(Class<?> clazz) {
         try {
             ClassLoader loader = new WebFrameworkClassLoader(RequestCompiler.class.getClassLoader());
             Class<?> loadedClazz = loader.loadClass(clazz.getName());
+            loader = null;
             return loadedClazz;
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException(ex);
