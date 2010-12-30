@@ -18,8 +18,12 @@ package cx.ath.mancel01.webframework.compiler;
 
 import cx.ath.mancel01.webframework.WebFramework;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 
 /**
  *
@@ -27,6 +31,7 @@ import java.util.Map;
  */
 public class RequestCompiler {
 
+    private static JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
 //    public void init() {
 //        JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
 //        //int rc = javac.run(null, null, null, args);
@@ -77,11 +82,14 @@ public class RequestCompiler {
     }
 
     private static void compile(File source) {
-        String command = WebFramework.compile;
         try {
-            Process p = Runtime.getRuntime().exec(command.replace("{3}"
-                    , source.getAbsolutePath()));
-            p.waitFor();
+//            Process p = Runtime.getRuntime().exec(command);
+//            p.waitFor();
+            javac.run(null, null, null
+                    , "-encoding", "utf-8", "-source", "1.6"
+                    , "-target", "1.6", "-d"
+                    , new File("target/compclasses").getAbsolutePath()
+                    , "-classpath", WebFramework.classpath, source.getAbsolutePath());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
