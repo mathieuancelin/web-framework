@@ -36,7 +36,7 @@ public class WebFramework {
     public static boolean dev = false;
     public static String classpath = "";
     //public static String compile = "javac -encoding utf-8 -source 1.6 -target 1.6 -d {1} -classpath {2} {3}";
-    public static String compile = "-encoding utf-8 -source 1.6 -target 1.6 -d {1} -classpath {2}";
+    //public static String compile = "-encoding utf-8 -source 1.6 -target 1.6 -d {1} -classpath {2}";
 
     public static void init() {
         ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
@@ -50,8 +50,8 @@ public class WebFramework {
         if (classpath.endsWith(":")) {
             classpath = classpath.substring(0, classpath.length() - 1);
         }
-        compile = compile.replace("{2}", classpath);
-        compile = compile.replace("{1}", new File("target/compclasses").getAbsolutePath());
+        //compile = compile.replace("{2}", classpath);
+        //compile = compile.replace("{1}", new File("target/compclasses").getAbsolutePath());
         try {
             config.load(WebFramework.class.getClassLoader()
                     .getResourceAsStream("config.properties"));
