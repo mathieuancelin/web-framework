@@ -41,7 +41,7 @@ public class MyController {
         numbers.add("two");
         numbers.add("three");
         return new RenderView()
-                .param("message", service.hello("Marcel"))
+                .param("message", service.hello("One eyed Jack"))
                 .param("numbers", numbers);
     }
 

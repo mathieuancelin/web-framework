@@ -61,9 +61,9 @@ public class RequestCompiler {
         } else {
             long knownSourceModif = sourceFiles.get(source);
             if (knownSourceModif != source.lastModified()) {
-                if (oldClass.exists()) {
-                    oldClass.delete();
-                }
+                /**if (oldClass.exists()) {
+                    //oldClass.delete();
+                }**/
                 compile(source);
                 sourceFiles.put(source, source.lastModified());
             } else {
