@@ -15,23 +15,29 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework.exception;
+package cx.ath.mancel01.webframework.view;
 
-import cx.ath.mancel01.webframework.view.Renderable;
+import cx.ath.mancel01.webframework.http.Header;
 
 /**
  *
  * @author mathieuancelin
  */
-public class BreakFlowException extends RuntimeException {
+public class Redirect extends Renderable {
 
-    private Renderable renderable;
+    private final String url;
 
-    public BreakFlowException(Renderable renderable) {
-        this.renderable = renderable;
+    public Redirect(String url) {
+        this.url = url;
+        this.contentType = "text/html";
     }
 
-    public Renderable getRenderable() {
-        return renderable;
+    public Header getHeader() {
+        return new Header("Refresh", "0; url=" + url);
     }
+
+    public String getMessage() {
+        return "<html><body>please follow <a href=\"" + url + "\">" + url + "</a></body></html>";
+    }
+
 }

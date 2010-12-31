@@ -24,27 +24,32 @@ import java.util.Map;
  *
  * @author mathieuancelin
  */
-public class View {
+public class View extends Renderable {
 
+    private static final String TYPE = "text/html";
     private final String viewName;
     private final Map<String, Object> context;
 
     public View() {
+        this.contentType = TYPE;
         this.viewName = null;
         this.context = new HashMap<String, Object>();
     }
 
     public View(String viewName) {
+        this.contentType = TYPE;
         this.viewName = viewName;
         this.context = new HashMap<String, Object>();
     }
 
     public View(String viewName, Map<String, Object> context) {
+        this.contentType = TYPE;
         this.viewName = viewName;
         this.context = context;
     }
 
     public View(String viewName, NamedAttribute... attributes) {
+        this.contentType = TYPE;
         this.viewName = viewName;
         this.context = new HashMap<String, Object>();
         for (NamedAttribute attribute : attributes) {

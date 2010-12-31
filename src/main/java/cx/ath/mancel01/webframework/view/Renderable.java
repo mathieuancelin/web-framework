@@ -15,23 +15,25 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework.exception;
+package cx.ath.mancel01.webframework.view;
 
-import cx.ath.mancel01.webframework.view.Renderable;
+import cx.ath.mancel01.webframework.http.StatusCodes;
 
 /**
  *
  * @author mathieuancelin
  */
-public class BreakFlowException extends RuntimeException {
+public class Renderable {
 
-    private Renderable renderable;
+    protected int statusCode = StatusCodes.OK;
+    protected String contentType = "application/octet-stream";
 
-    public BreakFlowException(Renderable renderable) {
-        this.renderable = renderable;
+    public int getStatusCode() {
+        return statusCode;
     }
 
-    public Renderable getRenderable() {
-        return renderable;
+    public String getContentType() {
+        return contentType;
     }
+
 }

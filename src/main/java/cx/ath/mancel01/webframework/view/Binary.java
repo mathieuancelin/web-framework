@@ -15,23 +15,28 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework.exception;
+package cx.ath.mancel01.webframework.view;
 
-import cx.ath.mancel01.webframework.view.Renderable;
+import java.io.File;
 
 /**
  *
  * @author mathieuancelin
  */
-public class BreakFlowException extends RuntimeException {
+public class Binary extends Renderable {
 
-    private Renderable renderable;
+    private final File file;
 
-    public BreakFlowException(Renderable renderable) {
-        this.renderable = renderable;
+    public Binary(File file) {
+        this.file = file;
     }
 
-    public Renderable getRenderable() {
-        return renderable;
+    public Binary(String file) {
+        this.file = new File(file);
     }
+
+    public File getFile() {
+        return file;
+    }
+
 }

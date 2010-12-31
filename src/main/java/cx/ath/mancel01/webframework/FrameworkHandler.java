@@ -16,6 +16,7 @@
  */
 package cx.ath.mancel01.webframework;
 
+import com.google.gson.Gson;
 import cx.ath.mancel01.webframework.view.TemplateRenderer;
 import cx.ath.mancel01.webframework.view.View;
 import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
@@ -31,18 +32,27 @@ import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
+import cx.ath.mancel01.webframework.view.Binary;
+import cx.ath.mancel01.webframework.view.JSON;
+import cx.ath.mancel01.webframework.view.Page;
+import cx.ath.mancel01.webframework.view.Redirect;
+import cx.ath.mancel01.webframework.view.XML;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
 
 /**
  *
  * @author mathieuancelin
  */
 public class FrameworkHandler {
+
+    // see: http://wikis.sun.com/display/Jersey/Overview+of+JAX-RS+1.0+Features
 
     private static final String DEFAUTL_CONTENT_TYPE = "text/html";
     private InjectorImpl injector;
@@ -208,18 +218,13 @@ public class FrameworkHandler {
         // TODO : find methods with param if querystring not empty
         Method method = controller.getClass().getMethod(methodName);
         // TODO : if no param method, send on default
-        View view = null;
+        Object ret = null;
         try {
-            Object ret = method.invoke(controller);
-            if (ret instanceof View) {
-                view = (View) ret;
-            } else {
-                throw new RuntimeException("You can't return anything than RenderView");
-            }
+            ret = method.invoke(controller);
         } catch (InvocationTargetException ex) {
             if (ex.getCause() instanceof BreakFlowException) {
                 BreakFlowException br = (BreakFlowException) ex.getCause();
-                view = br.getView();
+                ret = br.getRenderable();
             } else {
                 throw ex;
             }
@@ -230,15 +235,60 @@ public class FrameworkHandler {
         Response res = new Response();
         res.contentType = DEFAUTL_CONTENT_TYPE;
         res.out = new ByteArrayOutputStream();
-        String viewName = view.getViewName();
-        if ( viewName == null ) {
-            // TODO : add extension based on content type
-            viewName = methodName + ".html";
+
+        // Render view
+        if (ret instanceof View) {
+            View view = (View) ret;
+            String viewName = view.getViewName();
+            if ( viewName == null ) {
+                // TODO : add extension based on content type
+                viewName = methodName + ".html";
+            }
+            viewName = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + viewName;
+            renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
+            WebFramework.logger.trace("template view rendering : {} ms."
+                    , (System.currentTimeMillis() - start));
+        } else if (ret instanceof Binary) {
+            Binary bin = (Binary) ret;
+            res.contentType = bin.getContentType();
+            res.direct = bin.getFile();
+            WebFramework.logger.trace("binary file rendering : {} ms."
+                    , (System.currentTimeMillis() - start));
+        } else if (ret instanceof JSON) {
+            JSON json = (JSON) ret;
+            res.contentType = json.getContentType();
+            Gson gson = new Gson();
+            String jsonRepresentation = gson.toJson(json.getJsonObject());
+            res.out.write(jsonRepresentation.getBytes(), 0, jsonRepresentation.length());
+            WebFramework.logger.trace("JSON object rendering : {} ms."
+                    , (System.currentTimeMillis() - start));
+        } else if (ret instanceof Page) {
+            Page page = (Page) ret;
+            res.contentType = page.getContentType();
+            String message = page.getMessage();
+            res.out.write(message.getBytes(), 0, message.length());
+            WebFramework.logger.trace("page rendering : {} ms."
+                    , (System.currentTimeMillis() - start));
+        } else if (ret instanceof XML) {
+            XML xml = (XML) ret;
+            res.contentType = xml.getContentType();
+            JAXBContext context = JAXBContext.newInstance(xml.getXmlObjectClass());
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            m.marshal(xml.getXmlObject(), res.out);
+            WebFramework.logger.trace("XML object rendering : {} ms."
+                    , (System.currentTimeMillis() - start));
+        } else if (ret instanceof Redirect) {
+            Redirect red = (Redirect) ret;
+            res.contentType = red.getContentType();
+            res.headers.put("Refresh", red.getHeader());
+            String message = red.getMessage();
+            res.out.write(message.getBytes(), 0, message.length());
+            WebFramework.logger.trace("redirection : {} ms."
+                    , (System.currentTimeMillis() - start));
+        } else {
+            throw new RuntimeException("You can't render object of type " + ret.getClass().getName());
         }
-        viewName = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + viewName;
-        renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
-        WebFramework.logger.trace("template view rendering : {} ms."
-                , (System.currentTimeMillis() - start));
         return res;
     }
 

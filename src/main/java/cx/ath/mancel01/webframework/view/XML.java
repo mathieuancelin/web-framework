@@ -15,23 +15,27 @@
  *  under the License.
  */
 
-package cx.ath.mancel01.webframework.exception;
-
-import cx.ath.mancel01.webframework.view.Renderable;
+package cx.ath.mancel01.webframework.view;
 
 /**
  *
  * @author mathieuancelin
  */
-public class BreakFlowException extends RuntimeException {
+public class XML extends Renderable {
 
-    private Renderable renderable;
+    private final Object xmlObject;
 
-    public BreakFlowException(Renderable renderable) {
-        this.renderable = renderable;
+    public XML(Object xmlObject) {
+        this.xmlObject = xmlObject;
+        this.contentType = "application/xml";
     }
 
-    public Renderable getRenderable() {
-        return renderable;
+    public Object getXmlObject() {
+        return xmlObject;
     }
+
+    public Class<?> getXmlObjectClass() {
+        return xmlObject.getClass();
+    }
+
 }

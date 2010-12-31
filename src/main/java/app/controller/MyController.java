@@ -17,12 +17,18 @@
 
 package app.controller;
 
+import app.model.Person;
 import app.services.Service;
 import app.services.ServiceImpl;
 import cx.ath.mancel01.webframework.view.Render;
 import cx.ath.mancel01.webframework.view.View;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.http.Request;
+import cx.ath.mancel01.webframework.view.Binary;
+import cx.ath.mancel01.webframework.view.JSON;
+import cx.ath.mancel01.webframework.view.Page;
+import cx.ath.mancel01.webframework.view.Redirect;
+import cx.ath.mancel01.webframework.view.XML;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -62,6 +68,7 @@ public class MyController {
                 .param("numbers", numbers);
     }
 
+    // don't like this way
     public void foo() {
         List<String> numbers = new ArrayList<String>();
         numbers.add("seven");
@@ -71,5 +78,25 @@ public class MyController {
             .with("message", service.hello("foo"))
             .with("numbers", numbers)
             .go();
+    }
+
+    public XML personxml() {
+        return Render.xml(new Person("john", "smith", "nowhere"));
+    }
+
+    public JSON personjson() {
+        return Render.json(new Person("john", "smith", "nowhere"));
+    }
+
+    public Page text() {
+        return Render.text("Hello World!");
+    }
+
+    public Binary file() {
+        return Render.binary("pom.xml");
+    }
+
+    public Redirect test() {
+        return Render.redirect("http://www.google.fr");
     }
 }
