@@ -17,6 +17,7 @@
 
 package cx.ath.mancel01.webframework.view;
 
+import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.http.StatusCodes;
 
@@ -38,5 +39,9 @@ public abstract class Renderable {
     }
 
     public abstract Response render();
+
+    public void go() {
+        throw new BreakFlowException(this);
+    }
 
 }

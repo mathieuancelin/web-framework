@@ -68,7 +68,6 @@ public class MyController {
                 .param("numbers", numbers);
     }
 
-    // don't like this way
     public void foo() {
         List<String> numbers = new ArrayList<String>();
         numbers.add("seven");
@@ -98,5 +97,9 @@ public class MyController {
 
     public Redirect test() {
         return Render.redirect("http://www.google.fr");
+    }
+
+    public void say() {
+        Render.text("Hello billy boy :)").go();
     }
 }
