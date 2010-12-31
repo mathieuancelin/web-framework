@@ -30,7 +30,7 @@ public class HtmlPage extends Page {
     private final String html;
     private final String title;
 
-    public HtmlPage(String html, String title) {
+    public HtmlPage(String title, String html) {
         this.html = html;
         this.title = title;
     }
