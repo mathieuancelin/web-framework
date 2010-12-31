@@ -17,13 +17,14 @@
 
 package cx.ath.mancel01.webframework.view;
 
+import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.http.StatusCodes;
 
 /**
  *
  * @author mathieuancelin
  */
-public class Renderable {
+public abstract class Renderable {
 
     protected int statusCode = StatusCodes.OK;
     protected String contentType = "application/octet-stream";
@@ -35,5 +36,7 @@ public class Renderable {
     public String getContentType() {
         return contentType;
     }
+
+    public abstract Response render();
 
 }

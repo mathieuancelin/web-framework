@@ -17,6 +17,9 @@
 
 package cx.ath.mancel01.webframework.view;
 
+import cx.ath.mancel01.webframework.WebFramework;
+import cx.ath.mancel01.webframework.http.Response;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 /**
@@ -37,6 +40,18 @@ public class Binary extends Renderable {
 
     public File getFile() {
         return file;
+    }
+
+    @Override
+    public Response render() {
+        long start = System.currentTimeMillis();
+        Response res = new Response();
+        res.out = new ByteArrayOutputStream();
+        res.contentType = this.getContentType();
+        res.direct = this.getFile();
+        WebFramework.logger.trace("binary file rendering : {} ms."
+                , (System.currentTimeMillis() - start));
+        return res;
     }
 
 }

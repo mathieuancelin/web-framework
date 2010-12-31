@@ -17,6 +17,15 @@
 
 package cx.ath.mancel01.webframework.view;
 
+import cx.ath.mancel01.webframework.WebFramework;
+import cx.ath.mancel01.webframework.http.Response;
+import java.io.ByteArrayOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 /**
  *
  * @author mathieuancelin
@@ -36,6 +45,24 @@ public class XML extends Renderable {
 
     public Class<?> getXmlObjectClass() {
         return xmlObject.getClass();
+    }
+
+    @Override
+    public Response render() {
+        try {
+            long start = System.currentTimeMillis();
+            Response res = new Response();
+            res.out = new ByteArrayOutputStream();
+            res.contentType = this.getContentType();
+            JAXBContext context = JAXBContext.newInstance(this.getXmlObjectClass());
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            m.marshal(this.getXmlObject(), res.out);
+            WebFramework.logger.trace("XML object rendering : {} ms.", System.currentTimeMillis() - start);
+            return res;
+        } catch (JAXBException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
 }

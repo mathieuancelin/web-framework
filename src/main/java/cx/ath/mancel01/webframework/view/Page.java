@@ -14,8 +14,11 @@
  *  limitations under the License.
  *  under the License.
  */
-
 package cx.ath.mancel01.webframework.view;
+
+import cx.ath.mancel01.webframework.WebFramework;
+import cx.ath.mancel01.webframework.http.Response;
+import java.io.ByteArrayOutputStream;
 
 /**
  *
@@ -25,7 +28,21 @@ public abstract class Page extends Renderable {
 
     @Override
     public abstract int getStatusCode();
+
     @Override
     public abstract String getContentType();
+
     public abstract String getMessage();
+
+    @Override
+    public Response render() {
+        long start = System.currentTimeMillis();
+        Response res = new Response();
+        res.out = new ByteArrayOutputStream();
+        res.contentType = this.getContentType();
+        String message = this.getMessage();
+        res.out.write(message.getBytes(), 0, message.length());
+        WebFramework.logger.trace("page rendering : {} ms.", (System.currentTimeMillis() - start));
+        return res;
+    }
 }

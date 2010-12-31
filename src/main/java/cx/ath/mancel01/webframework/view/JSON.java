@@ -14,8 +14,12 @@
  *  limitations under the License.
  *  under the License.
  */
-
 package cx.ath.mancel01.webframework.view;
+
+import com.google.gson.Gson;
+import cx.ath.mancel01.webframework.WebFramework;
+import cx.ath.mancel01.webframework.http.Response;
+import java.io.ByteArrayOutputStream;
 
 /**
  *
@@ -34,4 +38,16 @@ public class JSON extends Renderable {
         return jsonObject;
     }
 
+    @Override
+    public Response render() {
+        long start = System.currentTimeMillis();
+        Response res = new Response();
+        res.out = new ByteArrayOutputStream();
+        res.contentType = this.getContentType();
+        Gson gson = new Gson();
+        String jsonRepresentation = gson.toJson(this.getJsonObject());
+        res.out.write(jsonRepresentation.getBytes(), 0, jsonRepresentation.length());
+        WebFramework.logger.trace("JSON object rendering : {} ms.", (System.currentTimeMillis() - start));
+        return res;
+    }
 }

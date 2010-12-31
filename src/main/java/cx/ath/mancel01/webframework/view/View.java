@@ -14,11 +14,16 @@
  *  limitations under the License.
  *  under the License.
  */
-
 package cx.ath.mancel01.webframework.view;
 
+import cx.ath.mancel01.webframework.WebFramework;
+import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -26,9 +31,13 @@ import java.util.Map;
  */
 public class View extends Renderable {
 
+    private static final TemplateRenderer renderer = new TemplateRenderer();
     private static final String TYPE = "text/html";
     private final String viewName;
     private final Map<String, Object> context;
+    private String methodName;
+    private Class controllerClass;
+    private FileGrabber grabber;
 
     public View() {
         this.contentType = TYPE;
@@ -68,5 +77,33 @@ public class View extends Renderable {
 
     public String getViewName() {
         return viewName;
+    }
+
+    public Response render(String methodName, Class controllerClass, FileGrabber grabber) {
+        this.methodName = methodName;
+        this.controllerClass = controllerClass;
+        this.grabber = grabber;
+        return render();
+    }
+
+    @Override
+    public Response render() {
+        try {
+            long start = System.currentTimeMillis();
+            Response res = new Response();
+            res.out = new ByteArrayOutputStream();
+            res.contentType = this.getContentType();
+            String name = viewName;
+            if (name == null) {
+                // TODO : add extension based on content type
+                name = methodName + ".html";
+            }
+            name = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + name;
+            renderer.render(grabber.getFile(name), this.getContext(), res.out);
+            WebFramework.logger.trace("template view rendering : {} ms.", System.currentTimeMillis() - start);
+            return res;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

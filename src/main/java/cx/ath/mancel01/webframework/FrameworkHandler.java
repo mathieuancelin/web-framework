@@ -16,9 +16,7 @@
  */
 package cx.ath.mancel01.webframework;
 
-import com.google.gson.Gson;
 import cx.ath.mancel01.webframework.view.TemplateRenderer;
-import cx.ath.mancel01.webframework.view.View;
 import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.dependencyshot.DependencyShot;
@@ -30,21 +28,19 @@ import cx.ath.mancel01.webframework.compiler.CompilationException;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.http.StatusCodes;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
-import cx.ath.mancel01.webframework.view.Binary;
-import cx.ath.mancel01.webframework.view.JSON;
 import cx.ath.mancel01.webframework.view.Page;
-import cx.ath.mancel01.webframework.view.Redirect;
-import cx.ath.mancel01.webframework.view.XML;
+import cx.ath.mancel01.webframework.view.Render;
+import cx.ath.mancel01.webframework.view.Renderable;
+import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 
 /**
  *
@@ -64,11 +60,13 @@ public class FrameworkHandler {
     private boolean started = false;
     private final String contextRoot;
     private final File base;
-    //private WebFrameworkClassLoader loader;
 
     public FrameworkHandler(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
         renderer = new TemplateRenderer();
+        if ("".equals(contextRoot)) {
+            throw new RuntimeException("Can't have an empty context root");
+        }
         this.contextRoot = contextRoot;
         this.grabber = grabber;
         try {
@@ -80,7 +78,6 @@ public class FrameworkHandler {
         }
         configureInjector();
         this.base = grabber.getFile("public");
-        //loader = new WebFrameworkClassLoader(getClass().getClassLoader());
     }
 
     private void configureInjector() {
@@ -116,9 +113,7 @@ public class FrameworkHandler {
 
     public synchronized void registrerController(Class<?> clazz) {
         if (clazz.isAnnotationPresent(Controller.class)) {
-
             // TODO : find JAX-RS annotations
-            
             Controller controller = clazz.getAnnotation(Controller.class);
             String name = controller.value();
             if (name.contains("/")) {
@@ -139,9 +134,6 @@ public class FrameworkHandler {
                 WebFramework.logger.trace("asked resource => {}", request.path);
                 Response res = new Response();
                 String path = request.path;
-                if ("".endsWith(contextRoot)) {
-                    throw new RuntimeException("Can't have an empty context root");
-                }
                 if (!"/".equals(contextRoot)) {
                     path = path.replace(contextRoot, "");
                 }
@@ -155,9 +147,7 @@ public class FrameworkHandler {
                     return res;
                 }
                 String[] tokens = path.split("/");
-
                 // TODO find controller the JAX-RS way
-
                 // if no corresponding @Path on controller, try to find it hte old way
                 if (tokens.length >= 2) {
                     String firstToken = tokens[1];
@@ -168,14 +158,28 @@ public class FrameworkHandler {
                     if (controllers.containsKey(firstToken)) {
                         res = render(controllers.get(firstToken), secondToken);
                     } else {
-                        throw new RuntimeException("Controller " + firstToken + " does not exist.");
-                        // TODO : return 404
+                        WebFramework.logger.error("Controller {} does not exist.", firstToken);
+                        return Render.notFound().render();
                     }
                 } else {
                     if (rootController != null) {
                         res = render(rootController, "index");
                     } else {
-                        throw new RuntimeException("You need to register a root controler");
+                        return new Page() {
+                            @Override
+                            public int getStatusCode() {
+                                return StatusCodes.OK;
+                            }
+                            @Override
+                            public String getContentType() {
+                                return "text/html";
+                            }
+                            @Override
+                            public String getMessage() { // TODO : show the all stack
+                                return "<html><head><title>Error</title></head>"
+                                    + "<body><h1>You need to register a root controller</h1></body></html>";
+                            }
+                        }.render();
                     }
                 }
                 return res;
@@ -183,7 +187,22 @@ public class FrameworkHandler {
                 throw new RuntimeException("Framework not started ...");
             }
         } catch (Throwable t) {
-            return null; // TODO : return error page
+            final Throwable ex = t;
+            return new Page() {
+                @Override
+                public int getStatusCode() {
+                    return StatusCodes.OK;
+                }
+                @Override
+                public String getContentType() {
+                    return "text/html";
+                }
+                @Override
+                public String getMessage() { // TODO : show the all stack
+                    return "<html><head><title>Error</title></head>"
+                        + "<body><h1>Ooops, can't render an object of type : " + ex.getMessage() + "</h1></body></html>";
+                }
+            }.render();
         }
     }
 
@@ -192,8 +211,6 @@ public class FrameworkHandler {
         if (WebFramework.dev) {
             //controllerClass = RequestCompiler.getCompiledClass(controllerClass);
             //controllerClass = loader.loadClass(controllerClass.getName());
-            //this.injector = DependencyShot.getInjector(configBinder);
-            //configureInjector();
             try {
                 controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
             } catch (Throwable ex) {
@@ -231,65 +248,30 @@ public class FrameworkHandler {
         }
         WebFramework.logger.trace("controller method invocation : {} ms."
                 , (System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
-        Response res = new Response();
-        res.contentType = DEFAUTL_CONTENT_TYPE;
-        res.out = new ByteArrayOutputStream();
-
-        // Render view
-        if (ret instanceof View) {
-            View view = (View) ret;
-            String viewName = view.getViewName();
-            if ( viewName == null ) {
-                // TODO : add extension based on content type
-                viewName = methodName + ".html";
+        if (ret instanceof Renderable) {
+            Renderable renderable = (Renderable) ret;
+            if (renderable instanceof View) { // ok that's not really OO but what the hell !
+                return ((View) renderable).render(methodName, controllerClass, grabber);
             }
-            viewName = "views/" + controllerClass.getSimpleName().toLowerCase() + "/" + viewName;
-            renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
-            WebFramework.logger.trace("template view rendering : {} ms."
-                    , (System.currentTimeMillis() - start));
-        } else if (ret instanceof Binary) {
-            Binary bin = (Binary) ret;
-            res.contentType = bin.getContentType();
-            res.direct = bin.getFile();
-            WebFramework.logger.trace("binary file rendering : {} ms."
-                    , (System.currentTimeMillis() - start));
-        } else if (ret instanceof JSON) {
-            JSON json = (JSON) ret;
-            res.contentType = json.getContentType();
-            Gson gson = new Gson();
-            String jsonRepresentation = gson.toJson(json.getJsonObject());
-            res.out.write(jsonRepresentation.getBytes(), 0, jsonRepresentation.length());
-            WebFramework.logger.trace("JSON object rendering : {} ms."
-                    , (System.currentTimeMillis() - start));
-        } else if (ret instanceof Page) {
-            Page page = (Page) ret;
-            res.contentType = page.getContentType();
-            String message = page.getMessage();
-            res.out.write(message.getBytes(), 0, message.length());
-            WebFramework.logger.trace("page rendering : {} ms."
-                    , (System.currentTimeMillis() - start));
-        } else if (ret instanceof XML) {
-            XML xml = (XML) ret;
-            res.contentType = xml.getContentType();
-            JAXBContext context = JAXBContext.newInstance(xml.getXmlObjectClass());
-            Marshaller m = context.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            m.marshal(xml.getXmlObject(), res.out);
-            WebFramework.logger.trace("XML object rendering : {} ms."
-                    , (System.currentTimeMillis() - start));
-        } else if (ret instanceof Redirect) {
-            Redirect red = (Redirect) ret;
-            res.contentType = red.getContentType();
-            res.headers.put("Refresh", red.getHeader());
-            String message = red.getMessage();
-            res.out.write(message.getBytes(), 0, message.length());
-            WebFramework.logger.trace("redirection : {} ms."
-                    , (System.currentTimeMillis() - start));
+            return renderable.render();
         } else {
-            throw new RuntimeException("You can't render object of type " + ret.getClass().getName());
+            final Class type = ret.getClass();
+            return new Page() {
+                @Override
+                public int getStatusCode() {
+                    return StatusCodes.OK;
+                }
+                @Override
+                public String getContentType() {
+                    return "text/html";
+                }
+                @Override
+                public String getMessage() {
+                    return "<html><head><title>Can't render</title></head>"
+                        + "<body><h1>Ooops, can't render an object of type : " + type.getName() + "</h1></body></html>";
+                }
+            }.render();
         }
-        return res;
     }
 
     private Response createErrorResponse(Throwable t) {
