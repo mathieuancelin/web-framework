@@ -26,6 +26,8 @@ import cx.ath.mancel01.webframework.FrameworkHandler;
  */
 public abstract class WebBinder extends Binder {
 
+    public static final String BINDER_DEFAULT_NAME = "app.binder.AppBinder";
+
     private FrameworkHandler dispatcher;
 
     public void setDispatcher(FrameworkHandler dispatcher) {

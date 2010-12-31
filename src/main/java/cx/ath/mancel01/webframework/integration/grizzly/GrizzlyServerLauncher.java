@@ -18,7 +18,7 @@
 package cx.ath.mancel01.webframework.integration.grizzly;
 
 import cx.ath.mancel01.webframework.WebFramework;
-import java.io.File;
+import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import java.io.IOException;
 
 /**
@@ -31,7 +31,7 @@ public class GrizzlyServerLauncher {
         try {
             GrizzlyServer dispatcher
                     = new GrizzlyServer(8080,
-                    "/", new app.binder.AppBinder(), WebFramework.WEB_SOURCES);
+                    "/", WebBinder.BINDER_DEFAULT_NAME, WebFramework.WEB_SOURCES);
             dispatcher.start();
             WebFramework.logger.info("running the application in dev mode");
             WebFramework.logger.info("listening for HTTP on port 8080");

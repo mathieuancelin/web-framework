@@ -49,7 +49,6 @@ public class WebFramework {
     public static String classpath = "";
 
     public static void init() {
-
         initClasspath();
         initConfig();
         initLogger();
@@ -74,7 +73,7 @@ public class WebFramework {
         }
     }
 
-    private static void initConfig() {
+    static void initConfig() {
         try {
             config.load(WebFramework.class.getClassLoader().getResourceAsStream("config.properties"));
             String mode = config.getProperty("framework.mode", "dev");

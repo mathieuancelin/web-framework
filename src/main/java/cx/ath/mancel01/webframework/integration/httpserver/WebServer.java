@@ -45,12 +45,12 @@ public class WebServer {
     private final int port;
     private final String rootContext;
     private FrameworkHandler dispatcher;
-    private final WebBinder binder;
+    private final String binder;
     private final File viewDirectory;
 
     public WebServer(String host,
             int port, String rootContext,
-            WebBinder binder, File viewDirectory) {
+            String binder, File viewDirectory) {
         this.host = host;
         this.port = port;
         this.rootContext = rootContext;
@@ -85,7 +85,7 @@ public class WebServer {
                     }
                 }
             });
-            dispatcher = new FrameworkHandler(binder.getClass(), rootContext, new FileGrabber() {
+            dispatcher = new FrameworkHandler(binder, rootContext, new FileGrabber() {
                 @Override
                 public File getFile(String file) {
                     return new File(viewDirectory, file);
