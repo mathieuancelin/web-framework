@@ -25,6 +25,7 @@ import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.annotation.Controller;
+import cx.ath.mancel01.webframework.compiler.CompilationException;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -179,13 +180,21 @@ public class FrameworkHandler {
             //controllerClass = loader.loadClass(controllerClass.getName());
             //this.injector = DependencyShot.getInjector(configBinder);
             //configureInjector();
-            controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
+            try {
+                controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
+            } catch (Throwable ex) {
+                return createErrorResponse(ex);
+            }
             controllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
         }
         long start = System.currentTimeMillis();
         Object controller = null;
         if (WebFramework.dev) {
-            controller = controllerBinding.getInstance(injector, null);
+            try {
+                controller = controllerBinding.getInstance(injector, null);
+            } catch (Throwable ex) {
+                return createErrorResponse(ex);
+            }
         } else {
             controller = injector.getInstance(controllerClass);
         }
@@ -226,6 +235,29 @@ public class FrameworkHandler {
         renderer.render(grabber.getFile(viewName), view.getContext(), res.out);
         WebFramework.logger.trace("template view rendering : {} ms."
                 , (System.currentTimeMillis() - start));
+        return res;
+    }
+
+    private Response createErrorResponse(Throwable t) {
+        Throwable original = t;
+        Throwable cause = null;
+        while (cause == null) {
+            t = t.getCause();
+            if (t == null) {
+                break;
+            }
+            if (t instanceof CompilationException) {
+                cause = t;
+            }
+        }
+        if (cause == null) {
+            cause = original;
+        }
+        Response res = new Response();
+        res.contentType = DEFAUTL_CONTENT_TYPE;
+        res.out = new ByteArrayOutputStream();
+        String html = "<html><head><title>Compilation error</title></head><body>" + cause.getMessage().replace("\n", "<br/>") + "</body></html>";
+        res.out.write(html.getBytes(), 0, html.length());
         return res;
     }
 }

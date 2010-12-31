@@ -79,13 +79,17 @@ public class RequestCompiler {
         try {
             //Process p = Runtime.getRuntime().exec(command);
             //p.waitFor();
-            javac.run(null, null, null
+            ErrorOutputStream err = new ErrorOutputStream();
+            javac.run(null, null, err
                     , "-encoding", "utf-8", "-source", "1.6"
                     , "-target", "1.6", "-d"
                     , WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
                     , "-classpath"
                     , WebFramework.classpath + WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
                     , source.getAbsolutePath());
+            if (!err.toString().isEmpty()) {
+                throw new CompilationException(err.toString());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
