@@ -52,27 +52,31 @@ public class RequestCompiler {
         long start = System.currentTimeMillis();
         File oldClass = new File(WebFramework.FWK_COMPILED_CLASSES_PATH, path + ".class");
         File source = new File(WebFramework.JAVA_SOURCES, path + ".java");
+        boolean ret = false;
         if (!sourceFiles.containsKey(source)) {
-            sourceFiles.put(source, source.lastModified());
             compile(source);
-            WebFramework.logger.trace("class {} compilation : {} ms."
-                    , path.replace("/", "."), System.currentTimeMillis() - start);
-            return true;
+            sourceFiles.put(source, source.lastModified());
+            ret = true;
         } else {
             long knownSourceModif = sourceFiles.get(source);
             if (knownSourceModif != source.lastModified()) {
-                /**if (oldClass.exists()) {
-                    //oldClass.delete();
-                }**/
                 compile(source);
                 sourceFiles.put(source, source.lastModified());
+                ret = true;
             } else {
-                return false;
+                if (!oldClass.exists()) {
+                    compile(source);
+                    sourceFiles.put(source, source.lastModified());
+                    ret = true;
+                }
+                ret = false;
             }
         }
-        WebFramework.logger.trace("class {} compilation : {} ms."
+        if (ret) {
+            WebFramework.logger.trace("class {} compilation : {} ms."
                 , path.replace("/", "."), System.currentTimeMillis() - start);
-        return true;
+        }
+        return ret;
     }
 
     private static void compile(File source) {
