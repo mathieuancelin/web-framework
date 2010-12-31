@@ -25,7 +25,7 @@ public class ServiceImpl implements Service {
 
     @Override
     public String hello(String name) {
-        return "Hello " + name + "!";
+        return "Hello " + name + " !";
     }
 
 }

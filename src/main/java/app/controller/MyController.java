@@ -33,6 +33,8 @@ import javax.inject.Inject;
 @Controller
 public class MyController {
 
+    //private Service service = new ServiceImpl();
+
     @Inject
     private Service service;
 
