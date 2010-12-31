@@ -30,13 +30,6 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>maven-jetty-plugin</artifactId>
-                <configuration>
-                    <webApp>${basedir}/target/vdm</webApp>
-                </configuration>
-            </plugin>
         </plugins>
         <finalName>web-framework</finalName>
     </build>
