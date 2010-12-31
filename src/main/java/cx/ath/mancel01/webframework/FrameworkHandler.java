@@ -31,6 +31,7 @@ import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.http.StatusCodes;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
+import cx.ath.mancel01.webframework.view.HtmlPage;
 import cx.ath.mancel01.webframework.view.Page;
 import cx.ath.mancel01.webframework.view.Render;
 import cx.ath.mancel01.webframework.view.Renderable;
@@ -165,21 +166,9 @@ public class FrameworkHandler {
                     if (rootController != null) {
                         res = render(rootController, "index");
                     } else {
-                        return new Page() {
-                            @Override
-                            public int getStatusCode() {
-                                return StatusCodes.OK;
-                            }
-                            @Override
-                            public String getContentType() {
-                                return "text/html";
-                            }
-                            @Override
-                            public String getMessage() { // TODO : show the all stack
-                                return "<html><head><title>Error</title></head>"
-                                    + "<body><h1>You need to register a root controller</h1></body></html>";
-                            }
-                        }.render();
+                        return new HtmlPage("Error",
+                                "<h1>You need to register a root controller</h1>")
+                                .render();
                     }
                 }
                 return res;
@@ -188,21 +177,9 @@ public class FrameworkHandler {
             }
         } catch (Throwable t) {
             final Throwable ex = t;
-            return new Page() {
-                @Override
-                public int getStatusCode() {
-                    return StatusCodes.OK;
-                }
-                @Override
-                public String getContentType() {
-                    return "text/html";
-                }
-                @Override
-                public String getMessage() { // TODO : show the all stack
-                    return "<html><head><title>Error</title></head>"
-                        + "<body><h1>Ooops, can't render an object of type : " + ex.getMessage() + "</h1></body></html>";
-                }
-            }.render();
+            return new HtmlPage("Error"
+                    , "<h1>Ooops, can't render an object of type : "
+                    + ex.getMessage() + "</h1>").render();
         }
     }
 
@@ -255,22 +232,8 @@ public class FrameworkHandler {
             }
             return renderable.render();
         } else {
-            final Class type = ret.getClass();
-            return new Page() {
-                @Override
-                public int getStatusCode() {
-                    return StatusCodes.OK;
-                }
-                @Override
-                public String getContentType() {
-                    return "text/html";
-                }
-                @Override
-                public String getMessage() {
-                    return "<html><head><title>Can't render</title></head>"
-                        + "<body><h1>Ooops, can't render an object of type : " + type.getName() + "</h1></body></html>";
-                }
-            }.render();
+            return new HtmlPage("Can't render", "<h1>Ooops, can't render an object of type : "
+                    + ret.getClass().getName() + "</h1>").render();
         }
     }
 
@@ -287,13 +250,12 @@ public class FrameworkHandler {
             }
         }
         if (cause == null) {
-            cause = original;
+            return new HtmlPage("Error"
+                , "<h1>Compilation error :</h1><br/>"
+                + original.getMessage().replace("\n", "<br/>")).render();
         }
-        Response res = new Response();
-        res.contentType = DEFAUTL_CONTENT_TYPE;
-        res.out = new ByteArrayOutputStream();
-        String html = "<html><head><title>Compilation error</title></head><body>" + cause.getMessage().replace("\n", "<br/>") + "</body></html>";
-        res.out.write(html.getBytes(), 0, html.length());
-        return res;
+        return new HtmlPage("Compilation error"
+                , "<h1>Compilation error :</h1><br/>"
+                + cause.getMessage().replace("\n", "<br/>")).render();
     }
 }
