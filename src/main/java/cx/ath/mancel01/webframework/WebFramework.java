@@ -48,10 +48,16 @@ public class WebFramework {
     public static boolean recompileServices = true;
     public static String classpath = "";
 
-    public static void init() {    
+    public static void init() {
+
         initClasspath();
         initConfig();
         initLogger();
+        if (dev) {
+            if (!FWK_COMPILED_CLASSES_PATH.exists()) {
+                FWK_COMPILED_CLASSES_PATH.mkdir();
+            }
+        }
     }
     
     private static void initClasspath() {

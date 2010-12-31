@@ -42,8 +42,8 @@ public class MyController {
 
     private Service service = new ServiceImpl();
 
-    //@Inject
-    //private Service service;
+//    @Inject
+//    private Service service;
 
     @Inject
     private Request request;

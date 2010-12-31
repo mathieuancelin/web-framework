@@ -61,6 +61,7 @@ public class FrameworkHandler {
     private boolean started = false;
     private final String contextRoot;
     private final File base;
+    private final Class<? extends Binder> binderClass;
 
     public FrameworkHandler(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
@@ -71,20 +72,21 @@ public class FrameworkHandler {
         this.contextRoot = contextRoot;
         this.grabber = grabber;
         try {
+            this.binderClass = binderClass;
             this.configBinder = (WebBinder) binderClass.newInstance();
             this.configBinder.setDispatcher(this);
             this.injector = DependencyShot.getInjector(configBinder);
         } catch (Exception e) {
             throw new RuntimeException("Error at injector creation", e);
         }
-        configureInjector();
+        configureInjector(this.injector);
         this.base = grabber.getFile("public");
     }
 
-    private void configureInjector() {
-        this.injector.allowCircularDependencies(true);
-        this.injector.registerShutdownHook();
-        new DependencyShotIntegrator(injector).registerBindings();
+    private void configureInjector(InjectorImpl inj) {
+        inj.allowCircularDependencies(true);
+        inj.registerShutdownHook();
+        new DependencyShotIntegrator(inj).registerBindings();
     }
 
     public void validate() {
@@ -184,22 +186,26 @@ public class FrameworkHandler {
     }
 
     private Response render(Class controllerClass, String methodName) throws Exception {
-        Binding controllerBinding = null;
+        Binding devControllerBinding = null;
+        InjectorImpl devInjector = null;
         if (WebFramework.dev) {
-            //controllerClass = RequestCompiler.getCompiledClass(controllerClass);
-            //controllerClass = loader.loadClass(controllerClass.getName());
             try {
+                Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClass.getName());
+                WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
+                devBinder.setDispatcher(this);
+                devInjector = DependencyShot.getInjector(devBinder);
                 controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
             } catch (Throwable ex) {
                 return createErrorResponse(ex);
             }
-            controllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
+            devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
         }
         long start = System.currentTimeMillis();
         Object controller = null;
         if (WebFramework.dev) {
             try {
-                controller = controllerBinding.getInstance(injector, null);
+                controller = devControllerBinding.getInstance(devInjector, null);
+                //controller = controllerBinding.getInstance(injector, null);
             } catch (Throwable ex) {
                 return createErrorResponse(ex);
             }
@@ -249,9 +255,9 @@ public class FrameworkHandler {
                 cause = t;
             }
         }
-        if (cause == null) {
+        if (cause == null) { // TODO : error page with stacktrace
             return new HtmlPage("Error"
-                , "<h1>Compilation error :</h1><br/>"
+                , "<h1>Error :</h1><br/>"
                 + original.getMessage().replace("\n", "<br/>")).render();
         }
         return new HtmlPage("Compilation error"
