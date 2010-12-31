@@ -83,7 +83,9 @@ public class RequestCompiler {
                     , "-encoding", "utf-8", "-source", "1.6"
                     , "-target", "1.6", "-d"
                     , WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
-                    , "-classpath", WebFramework.classpath, source.getAbsolutePath());
+                    , "-classpath"
+                    , WebFramework.classpath + WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
+                    , source.getAbsolutePath());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

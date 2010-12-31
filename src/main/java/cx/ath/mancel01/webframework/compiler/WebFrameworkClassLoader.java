@@ -32,14 +32,26 @@ import java.util.logging.Logger;
  */
 public class WebFrameworkClassLoader extends ClassLoader {
 
+    public WebFrameworkClassLoader() {
+        super();
+    }
+
     public WebFrameworkClassLoader(ClassLoader parent) {
         super(parent);
     }
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
+        if (!WebFramework.dev) {
+            return super.loadClass(name);
+        }
+        if (!WebFramework.recompileServices) {
+            if (name.startsWith("app.services")) {
+                return super.loadClass(name);
+            }
+        }
         //System.out.println("ask for class " + name);
-        if (name.startsWith("app.controller")) {
+        if (name.startsWith("app.")) {
             return findClass(name);
         } else {
             return super.loadClass(name);

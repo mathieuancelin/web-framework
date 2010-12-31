@@ -44,6 +44,8 @@ public class WebFramework {
     public static final File MVN_COMPILED_CLASSES_PATH = new File("target/classes");
     public static final File FWK_COMPILED_CLASSES_PATH = new File("target/compclasses");
     public static boolean dev = false;
+    public static boolean proxyInjectionForCompilation = false;
+    public static boolean recompileServices = true;
     public static String classpath = "";
 
     public static void init() {    
@@ -74,6 +76,12 @@ public class WebFramework {
                 dev = true;
             } else {
                 dev = false;
+            }
+            String recServ = config.getProperty("framework.recompile.services", "false");
+            if (recServ.equals("true")) {
+                recompileServices = true;
+            } else {
+                recompileServices = false;
             }
         } catch (IOException e) {
             logger.error("Error while loading configuration file", e);

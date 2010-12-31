@@ -24,12 +24,12 @@ import cx.ath.mancel01.dependencyshot.spi.ImplementationValidator;
 import cx.ath.mancel01.dependencyshot.spi.InstanceHandler;
 import cx.ath.mancel01.dependencyshot.util.ReflectionUtil;
 import cx.ath.mancel01.webframework.WebFramework;
-import cx.ath.mancel01.webframework.compiler.RequestCompiler;
+import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyObject;
+import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  *
@@ -38,29 +38,15 @@ import java.util.logging.Logger;
 public class OnTheFlyCompiledInstanceHandler extends InstanceHandler {
 
     private static ThreadLocal<Class<?>> clazzHandler = new ThreadLocal<Class<?>>() {
-
         @Override
         protected Class<?> initialValue() {
             return null;
         }
-
     };
-
-    private Method getBinding;
-
-    public OnTheFlyCompiledInstanceHandler() {
-        try {
-            getBinding =
-                    InjectorImpl.class.getDeclaredMethod("getBinding", Class.class, Annotation.class);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
 
     @Override
     public <T extends ImplementationValidator> T getValidator() {
         return (T) new ImplementationValidator() {
-
             @Override
             public boolean isValid(Object o) {
                 return isInstanceValid(o);
@@ -70,10 +56,16 @@ public class OnTheFlyCompiledInstanceHandler extends InstanceHandler {
 
     @Override
     public boolean isInstanceValid(Object instance) {
+        if (!WebFramework.proxyInjectionForCompilation) {
+            return false;
+        }
         if (!WebFramework.dev) {
             return false;
         }
         if (clazzHandler.get() != null) {
+            return false;
+        }
+        if (instance.getClass().getName().contains("_javassist_")) {
             return false;
         }
         if (instance.getClass().getName().startsWith("app.")) {
@@ -84,23 +76,59 @@ public class OnTheFlyCompiledInstanceHandler extends InstanceHandler {
 
     @Override
     public Object manipulateInstance(Object instance, Class interf, InjectorImpl injector, InjectionPoint point) {
-        System.out.println("handle :)");
-        Annotation qualifier = ReflectionUtil.getQualifier(point.getAnnotations());
-        Class<?> clazz = RequestCompiler.getCompiledClass(instance.getClass());
+        System.out.println("handle " + instance.getClass().getName() + " :)");
+        Class<?> clazz = null;
         try {
-            getBinding.setAccessible(true);
-            Binding binding = (Binding) getBinding.invoke(injector, interf, qualifier);
-            getBinding.setAccessible(false);
-            binding.setTo(clazz);
-        } catch (Exception ex) {
-            Logger.getLogger(OnTheFlyCompiledInstanceHandler.class.getName()).log(Level.SEVERE, null, ex);
+            clazz = new WebFrameworkClassLoader().loadClass(instance.getClass().getName());
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
         }
-        //Binding targetBinding = injector.bindings().get(instance);
-        
-        clazzHandler.set(clazz);
-        Object obj = injector.getInstance(clazz);
-        clazzHandler.set(null);
-        return obj;
+        if (clazz != null) {
+            clazzHandler.set(clazz);
+            Annotation qualifier = null;
+            if (point != null)
+                qualifier = ReflectionUtil.getQualifier(point.getAnnotations());
+            Named named = null;
+            if (point != null)
+                named = ReflectionUtil.getNamed(point.getAnnotations());
+            Annotation annotation = qualifier;
+            String name = null;
+            if (named != null) {
+                annotation = named;
+                name = named.value();
+            }
+            Binding b = injector.bindings().get(Binding.lookup(clazz, annotation));
+            Provider p = null;
+            if (b != null) {
+                p = b.getProvider();
+            }
+            Class qualif = null;
+            if (qualifier != null) {
+                qualif = qualifier.annotationType();
+            }
+            Object obj = new Binding(qualif, name, clazz, clazz, p, null)
+                    .getInstance(injector, point);
+            MethodInvocationHandler handler = new MethodInvocationHandler(obj);
+            ProxyFactory fact = new ProxyFactory();
+            Class from = interf;
+            Class to = clazz;
+            if (from.isInterface()) {
+                fact.setInterfaces(new Class[] {from});
+            } 
+            fact.setSuperclass(to);
+            fact.setFilter(handler);
+            Class newBeanClass = fact.createClass();
+            Object scopedObject = null;
+            try {
+                scopedObject = newBeanClass.cast(newBeanClass.newInstance());
+            } catch (Exception ex) {
+                throw new IllegalStateException("Unable to create proxy for object " + from.getSimpleName(), ex);
+            }
+            ((ProxyObject) scopedObject).setHandler(handler);
+            clazzHandler.set(null);
+            return scopedObject;
+        } else {
+            return instance;
+        }
     }
-
 }

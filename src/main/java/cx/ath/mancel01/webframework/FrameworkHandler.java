@@ -22,9 +22,10 @@ import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.dependencyshot.DependencyShot;
 import cx.ath.mancel01.dependencyshot.graph.Binder;
+import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.annotation.Controller;
-import cx.ath.mancel01.webframework.compiler.RequestCompiler;
+import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
@@ -43,7 +44,7 @@ import java.util.Map;
 public class FrameworkHandler {
 
     private static final String DEFAUTL_CONTENT_TYPE = "text/html";
-    private final InjectorImpl injector;
+    private InjectorImpl injector;
     private final WebBinder configBinder;
     private final TemplateRenderer renderer;
     private final FileGrabber grabber;
@@ -52,6 +53,7 @@ public class FrameworkHandler {
     private boolean started = false;
     private final String contextRoot;
     private final File base;
+    //private WebFrameworkClassLoader loader;
 
     public FrameworkHandler(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
         controllers = new HashMap<String, Class>();
@@ -65,10 +67,15 @@ public class FrameworkHandler {
         } catch (Exception e) {
             throw new RuntimeException("Error at injector creation", e);
         }
+        configureInjector();
+        this.base = grabber.getFile("public");
+        //loader = new WebFrameworkClassLoader(getClass().getClassLoader());
+    }
+
+    private void configureInjector() {
         this.injector.allowCircularDependencies(true);
         this.injector.registerShutdownHook();
         new DependencyShotIntegrator(injector).registerBindings();
-        this.base = grabber.getFile("public");
     }
 
     public void validate() {
@@ -166,11 +173,22 @@ public class FrameworkHandler {
     }
 
     private Response render(Class controllerClass, String methodName) throws Exception {
+        Binding controllerBinding = null;
         if (WebFramework.dev) {
-            controllerClass = RequestCompiler.getCompiledClass(controllerClass);
+            //controllerClass = RequestCompiler.getCompiledClass(controllerClass);
+            //controllerClass = loader.loadClass(controllerClass.getName());
+            //this.injector = DependencyShot.getInjector(configBinder);
+            //configureInjector();
+            controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
+            controllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
         }
         long start = System.currentTimeMillis();
-        Object controller = injector.getInstance(controllerClass);
+        Object controller = null;
+        if (WebFramework.dev) {
+            controller = controllerBinding.getInstance(injector, null);
+        } else {
+            controller = injector.getInstance(controllerClass);
+        }
         WebFramework.logger.trace("controller injection : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
