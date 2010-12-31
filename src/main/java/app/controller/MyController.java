@@ -20,7 +20,7 @@ package app.controller;
 import app.services.Service;
 import app.services.ServiceImpl;
 import cx.ath.mancel01.webframework.view.Render;
-import cx.ath.mancel01.webframework.view.RenderView;
+import cx.ath.mancel01.webframework.view.View;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.http.Request;
 import java.util.ArrayList;
@@ -42,22 +42,22 @@ public class MyController {
     @Inject
     private Request request;
 
-    public RenderView index() {
+    public View index() {
         List<String> numbers = new ArrayList<String>();
         numbers.add("one");
         numbers.add("two");
         numbers.add("three");
-        return new RenderView()
+        return new View()
                 .param("message", service.hello("One eyed Jack"))
                 .param("numbers", numbers);
     }
 
-    public RenderView other() {
+    public View other() {
         List<String> numbers = new ArrayList<String>();
         numbers.add("four");
         numbers.add("five");
         numbers.add("six");
-        return new RenderView("index.html")
+        return new View("index.html")
                 .param("message", service.hello("Anonymous"))
                 .param("numbers", numbers);
     }

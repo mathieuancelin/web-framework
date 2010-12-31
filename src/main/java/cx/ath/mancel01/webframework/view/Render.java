@@ -25,13 +25,13 @@ import cx.ath.mancel01.webframework.exception.BreakFlowException;
  */
 public class Render implements ParameterizedRender {
     
-    private RenderView view;
+    private View view;
 
     private Render() {}
 
     public static ParameterizedRender page(String name) {
         Render render = new Render();
-        render.view = new RenderView(name);
+        render.view = new View(name);
         return render;
     }
 
@@ -50,7 +50,7 @@ public class Render implements ParameterizedRender {
         throw new BreakFlowException(view);
     }
 
-    RenderView getView() {
+    public View getView() {
         return view;
     }
 }

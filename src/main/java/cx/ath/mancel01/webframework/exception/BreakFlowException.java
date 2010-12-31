@@ -17,7 +17,7 @@
 
 package cx.ath.mancel01.webframework.exception;
 
-import cx.ath.mancel01.webframework.view.RenderView;
+import cx.ath.mancel01.webframework.view.View;
 
 /**
  *
@@ -25,13 +25,13 @@ import cx.ath.mancel01.webframework.view.RenderView;
  */
 public class BreakFlowException extends RuntimeException {
 
-    private RenderView view;
+    private View view;
 
-    public BreakFlowException(RenderView view) {
+    public BreakFlowException(View view) {
         this.view = view;
     }
 
-    public RenderView getView() {
+    public View getView() {
         return view;
     }
 }

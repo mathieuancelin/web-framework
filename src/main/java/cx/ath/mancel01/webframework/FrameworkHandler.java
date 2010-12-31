@@ -17,7 +17,7 @@
 package cx.ath.mancel01.webframework;
 
 import cx.ath.mancel01.webframework.view.TemplateRenderer;
-import cx.ath.mancel01.webframework.view.RenderView;
+import cx.ath.mancel01.webframework.view.View;
 import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.dependencyshot.DependencyShot;
@@ -123,53 +123,57 @@ public class FrameworkHandler {
         }
     }
 
-    public Response process(Request request) throws Exception {
-        if (started) {
-            WebFramework.logger.trace("asked resource => {}", request.path);
-            Response res = new Response();
-            String path = request.path;           
-            if ("".endsWith(contextRoot)) {
-                throw new RuntimeException("Can't have an empty context root");
-            }
-            if (!"/".equals(contextRoot)) {
-                path = path.replace(contextRoot, "");
-            }
-            if (path.endsWith("favicon.ico")) {
-                path = "/public/img/favicon.ico";
-            }
-            if (path.startsWith("/public/")) {
-                File asked = new File(base, path.replace("/public/", ""));
-                res.direct = asked;
-                res.out = new ByteArrayOutputStream();
+    public Response process(Request request) {
+        try {
+            if (started) {
+                WebFramework.logger.trace("asked resource => {}", request.path);
+                Response res = new Response();
+                String path = request.path;
+                if ("".endsWith(contextRoot)) {
+                    throw new RuntimeException("Can't have an empty context root");
+                }
+                if (!"/".equals(contextRoot)) {
+                    path = path.replace(contextRoot, "");
+                }
+                if (path.endsWith("favicon.ico")) {
+                    path = "/public/img/favicon.ico";
+                }
+                if (path.startsWith("/public/")) {
+                    File asked = new File(base, path.replace("/public/", ""));
+                    res.direct = asked;
+                    res.out = new ByteArrayOutputStream();
+                    return res;
+                }
+                String[] tokens = path.split("/");
+
+                // TODO find controller the JAX-RS way
+
+                // if no corresponding @Path on controller, try to find it hte old way
+                if (tokens.length >= 2) {
+                    String firstToken = tokens[1];
+                    String secondToken = "index";
+                    if (tokens.length >= 3) {
+                        secondToken = tokens[2];
+                    }
+                    if (controllers.containsKey(firstToken)) {
+                        res = render(controllers.get(firstToken), secondToken);
+                    } else {
+                        throw new RuntimeException("Controller " + firstToken + " does not exist.");
+                        // TODO : return 404
+                    }
+                } else {
+                    if (rootController != null) {
+                        res = render(rootController, "index");
+                    } else {
+                        throw new RuntimeException("You need to register a root controler");
+                    }
+                }
                 return res;
-            }
-            String[] tokens = path.split("/");
-
-            // TODO find controller the JAX-RS way
-
-            // if no corresponding @Path on controller, try to find it hte old way
-            if (tokens.length >= 2) {
-                String firstToken = tokens[1];
-                String secondToken = "index";
-                if (tokens.length >= 3) {
-                    secondToken = tokens[2];
-                }
-                if (controllers.containsKey(firstToken)) {
-                    res = render(controllers.get(firstToken), secondToken);
-                } else {
-                    throw new RuntimeException("Controller " + firstToken + " does not exist.");
-                    // TODO : return 404
-                }
             } else {
-                if (rootController != null) {
-                    res = render(rootController, "index");
-                } else {
-                    throw new RuntimeException("You need to register a root controler");
-                }
+                throw new RuntimeException("Framework not started ...");
             }
-            return res;
-        } else {
-            throw new RuntimeException("Framework not started ...");
+        } catch (Throwable t) {
+            return null; // TODO : return error page
         }
     }
 
@@ -204,11 +208,11 @@ public class FrameworkHandler {
         // TODO : find methods with param if querystring not empty
         Method method = controller.getClass().getMethod(methodName);
         // TODO : if no param method, send on default
-        RenderView view = null;
+        View view = null;
         try {
             Object ret = method.invoke(controller);
-            if (ret instanceof RenderView) {
-                view = (RenderView) ret;
+            if (ret instanceof View) {
+                view = (View) ret;
             } else {
                 throw new RuntimeException("You can't return anything than RenderView");
             }

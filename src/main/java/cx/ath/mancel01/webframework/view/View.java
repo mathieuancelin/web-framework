@@ -24,27 +24,27 @@ import java.util.Map;
  *
  * @author mathieuancelin
  */
-public class RenderView {
+public class View {
 
     private final String viewName;
     private final Map<String, Object> context;
 
-    public RenderView() {
+    public View() {
         this.viewName = null;
         this.context = new HashMap<String, Object>();
     }
 
-    public RenderView(String viewName) {
+    public View(String viewName) {
         this.viewName = viewName;
         this.context = new HashMap<String, Object>();
     }
 
-    public RenderView(String viewName, Map<String, Object> context) {
+    public View(String viewName, Map<String, Object> context) {
         this.viewName = viewName;
         this.context = context;
     }
 
-    public RenderView(String viewName, NamedAttribute... attributes) {
+    public View(String viewName, NamedAttribute... attributes) {
         this.viewName = viewName;
         this.context = new HashMap<String, Object>();
         for (NamedAttribute attribute : attributes) {
@@ -52,7 +52,7 @@ public class RenderView {
         }
     }
 
-    public RenderView param(String name, Object value) {
+    public View param(String name, Object value) {
         this.context.put(name, value);
         return this;
     }
