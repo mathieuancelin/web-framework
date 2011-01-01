@@ -46,14 +46,7 @@ public class InOutBinder {
         URI uri = he.getRequestURI();
         request.method = he.getRequestMethod().intern();
         request.path = uri.getPath();
-        // TODO : replace tokenizer
-        StringTokenizer tokenizer = new StringTokenizer(uri.toString(), "?");
-        String queryString = "";
-        if (tokenizer.countTokens() > 1) {
-            tokenizer.nextToken();
-            queryString = tokenizer.nextToken();
-        }
-        request.querystring = queryString == null ? "" : queryString;
+        request.querystring = uri.getQuery() == null ? "" : uri.getQuery();
         if (he.getRequestHeaders().getFirst("Content-Type") != null) {
             request.contentType = he.getRequestHeaders().getFirst("Content-Type").split(";")[0].trim().toLowerCase().intern();
         } else {
@@ -64,7 +57,7 @@ public class InOutBinder {
             request.method = he.getRequestHeaders().getFirst("X-HTTP-Method-Override").intern();
         }
         request.body = he.getRequestBody();
-        request.url = uri.toString() + (queryString == null ? "" : "?" + queryString);
+        request.url = uri.toString() + (request.querystring == null ? "" : "?" + request.querystring);
         request.host = he.getRequestHeaders().getFirst("host");
         if (request.host.contains(":")) {
             request.port = Integer.parseInt(request.host.split(":")[1]);

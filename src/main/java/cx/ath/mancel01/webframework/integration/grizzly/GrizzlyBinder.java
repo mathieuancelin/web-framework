@@ -45,14 +45,7 @@ public class GrizzlyBinder {
         URI uri = new URI(req.getRequestURI());
         request.method = req.getMethod().intern();
         request.path = uri.getPath();
-        // TODO : replace tokenizer
-        StringTokenizer tokenizer = new StringTokenizer(uri.toString(), "?");
-        String queryString = "";
-        if (tokenizer.countTokens() > 1) {
-            tokenizer.nextToken();
-            queryString = tokenizer.nextToken();
-        }
-        request.querystring = queryString == null ? "" : queryString;
+        request.querystring = req.getQueryString() == null ? "" : req.getQueryString();
         if (req.getHeader("Content-Type") != null) {
             request.contentType = req.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
         } else {
@@ -63,7 +56,7 @@ public class GrizzlyBinder {
             request.method = req.getHeader("X-HTTP-Method-Override").intern();
         }
         request.body = req.getStream();
-        request.url = uri.toString() + (queryString == null ? "" : "?" + queryString);
+        request.url = uri.toString() + (request.querystring == null ? "" : "?" + request.querystring);
         request.host = req.getHeader("host");
         if (request.host.contains(":")) {
             request.port = Integer.parseInt(request.host.split(":")[1]);
