@@ -55,7 +55,7 @@ public class MyController {
         numbers.add("three");
         return new View()
                 .param("message", service.hello("One eyed Jack"))
-                .param("numbers", numbers);
+                .param("numbers", numbers).param("request", request);
     }
 
     public View other() {
@@ -65,7 +65,7 @@ public class MyController {
         numbers.add("six");
         return new View("index.html")
                 .param("message", service.hello("Anonymous"))
-                .param("numbers", numbers);
+                .param("numbers", numbers).param("request", request);
     }
 
     public void foo() {
@@ -75,7 +75,7 @@ public class MyController {
         numbers.add("nine");
         Render.page("index.html")
             .with("message", service.hello("foo"))
-            .with("numbers", numbers)
+            .with("numbers", numbers).with("request", request)
             .go();
     }
 
