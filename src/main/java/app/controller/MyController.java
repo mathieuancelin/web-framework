@@ -32,6 +32,7 @@ import cx.ath.mancel01.webframework.view.XML;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import javax.ws.rs.Path;
 
 /**
  *
@@ -48,6 +49,7 @@ public class MyController {
     @Inject
     private Request request;
 
+    @Path("/")
     public View index() {
         List<String> numbers = new ArrayList<String>();
         numbers.add("one");

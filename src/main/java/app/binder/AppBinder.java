@@ -31,7 +31,6 @@ public class AppBinder extends WebBinder {
     @Override
     public void configureBindings() {
         bind(Service.class).to(ServiceImpl.class);
-        registerRootController(MyController.class);
+        registerController(MyController.class);
     }
-
 }

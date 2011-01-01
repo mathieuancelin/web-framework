@@ -44,6 +44,7 @@ public class WebFramework {
     public static final File MVN_COMPILED_CLASSES_PATH = new File("target/classes");
     public static final File FWK_COMPILED_CLASSES_PATH = new File("target/compclasses");
     public static boolean dev = false;
+    public static boolean keepDefaultRoutes = true;
     public static boolean proxyInjectionForCompilation = false;
     public static boolean recompileServices = true;
     public static String classpath = "";
@@ -87,6 +88,12 @@ public class WebFramework {
                 recompileServices = true;
             } else {
                 recompileServices = false;
+            }
+            String keep = config.getProperty("framework.keep.default.routes", "true");
+            if (keep.equals("true")) {
+                keepDefaultRoutes = true;
+            } else {
+                keepDefaultRoutes = false;
             }
         } catch (IOException e) {
             logger.error("Error while loading configuration file", e);

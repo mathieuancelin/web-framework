@@ -14,14 +14,16 @@
  *  limitations under the License.
  *  under the License.
  */
-
 package cx.ath.mancel01.webframework.routing;
 
+import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.http.Request;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -36,52 +38,73 @@ import javax.ws.rs.QueryParam;
  */
 public class Router {
 
-    private Map<String, WebMethod> registeredControllers;
-    private WebMethod rootController;
+    private Map<String, WebMethod> registeredControllers = new HashMap<String, WebMethod>();
+    private List<String> uselessMethods = new ArrayList<String>();
 
-    public WebMethod route(Request request) {
-        return null;
+    public Router() {
+        List<Method> methods = Arrays.asList(Object.class.getMethods());
+        for (Method m : methods) {
+            uselessMethods.add(m.getName());
+        }
+    }
+
+    public void reset() {
+        this.registeredControllers.clear();
+    }
+
+    public WebMethod route(Request request, String contextRoot) {
+        String path = request.path;
+        if (!"/".equals(contextRoot)) {
+            path = path.replace(contextRoot, "");
+        }
+        for (String url : registeredControllers.keySet()) {
+            if (path.matches(url)) {
+                return registeredControllers.get(url);
+            }
+        }
+        throw new RuntimeException("Can't find an applicable controller method for " + path);
     }
 
     public void registrerController(Class<?> clazz) {
         if (clazz.isAnnotationPresent(Controller.class)) {
             String prefix = "";
-            boolean isRootController = false;
             if (clazz.isAnnotationPresent(Path.class)) {
                 Path path = clazz.getAnnotation(Path.class);
                 prefix = path.value().trim();
                 if (!prefix.startsWith("/")) {
                     prefix = "/" + prefix;
                 }
-                if ("/".equals(prefix)) {
-                    isRootController = true;
-                }
             } else {
                 prefix = clazz.getSimpleName().toLowerCase();
             }
+            
             for (Method method : clazz.getMethods()) {
-                if (method.isAnnotationPresent(Path.class)) {
-                    Path methodPath = method.getAnnotation(Path.class);
-                    String value = methodPath.value().trim();
-                    if (value.startsWith("/")) {
-                        registerRoute(value, clazz, method, isRootController);
-                    } else {
+                if (!uselessMethods.contains(method.getName())) {
+                    if (method.isAnnotationPresent(Path.class)) {
+                        Path methodPath = method.getAnnotation(Path.class);
+                        String value = methodPath.value().trim();
+                        if (value.startsWith("/")) {
+                            registerRoute(value, clazz, method);
+                        } else {
+                            String url = "";
+                            if (prefix.endsWith("/")) {
+                                url = prefix + value;
+                            } else {
+                                url = prefix + "/" + value;
+                            }
+                            registerRoute(url, clazz, method);
+                        }
+                    }
+                    if (WebFramework.keepDefaultRoutes) {
                         String url = "";
                         if (prefix.endsWith("/")) {
-                            url = prefix + value;
+                            url = prefix + method.getName();
                         } else {
-                            url = prefix + "/" + value;
+                            url = prefix + "/" + method.getName();
                         }
-                        registerRoute(url, clazz, method, isRootController);
-                        }
-                } else {
-                    String url = "";
-                    if (prefix.endsWith("/")) {
-                        url = prefix + method.getName();
-                    } else {
-                        url = prefix + "/" + method.getName();
+                        registerRoute(url, clazz, method);
+                        // TODO : register without @Path prefix
                     }
-                    registerRoute(url, clazz, method, isRootController);
                 }
             }
         } else {
@@ -89,12 +112,16 @@ public class Router {
         }
     }
 
-    private void registerRoute(String url, Class clazz, Method method, boolean isRoot) {
+    private void registerRoute(String url, Class clazz, Method method) {
         WebMethod webMethod = new WebMethod();
         webMethod.setClazz(clazz);
         webMethod.setFullUrl(url);
         webMethod.setMethod(method);
-        webMethod.setComparisonUrl(Param.replaceParamsWithWildcard(url));
+        if (url.equals("/")) {
+            webMethod.setComparisonUrl(Param.replaceParamsWithWildcard(url));
+        } else {
+            webMethod.setComparisonUrl("/" + Param.replaceParamsWithWildcard(url));
+        }
         Annotation[][] annotations = method.getParameterAnnotations();
         if (annotations != null) {
             List<PathParam> pathParams = new ArrayList<PathParam>();
@@ -130,9 +157,16 @@ public class Router {
                         + " doesn't have the right number of path params.");
             }
         }
-        registeredControllers.put(Param.replaceParamsWithWildcard(url), webMethod);
-        if (isRoot && method.getName().equals("index")) {
-            rootController = webMethod;
+        String niceUrl = null;
+        if (url.equals("/")) {
+            niceUrl = Param.replaceParamsWithWildcard(url);
+        } else {
+            niceUrl = "/" + Param.replaceParamsWithWildcard(url);
+        }
+        if (!registeredControllers.containsKey(niceUrl)) {
+            registeredControllers.put(niceUrl, webMethod);
+        } else {
+            throw new RuntimeException("the url " + url + " is already registered.");
         }
     }
 }

@@ -22,15 +22,15 @@ import cx.ath.mancel01.dependencyshot.DependencyShot;
 import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
-import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.compiler.CompilationException;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
+import cx.ath.mancel01.webframework.routing.Router;
+import cx.ath.mancel01.webframework.routing.WebMethod;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import cx.ath.mancel01.webframework.view.HtmlPage;
-import cx.ath.mancel01.webframework.view.Render;
 import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
@@ -56,6 +56,7 @@ public class FrameworkHandler {
     private final File base;
     private Class<? extends Binder> binderClass;
     private String binderClassName;
+    private Router router;
 
     public FrameworkHandler(String binderClassName, String contextRoot, FileGrabber grabber) {
         this.binderClassName = binderClassName;
@@ -66,6 +67,7 @@ public class FrameworkHandler {
         this.contextRoot = contextRoot;
         this.grabber = grabber;
         this.base = grabber.getFile("public");
+        this.router = new Router();
     }
 
     private void configureInjector(InjectorImpl inj) {
@@ -108,30 +110,8 @@ public class FrameworkHandler {
         this.injector.triggerLifecycleDestroyCallbacks();
     }
 
-    public void setRootController(Class rootController) {
-        if (rootController.isAnnotationPresent(Controller.class)) {
-            this.rootController = rootController;
-            registrerController(rootController);
-        } else {
-            throw new RuntimeException("You can't register a controller without @Controller annotation");
-        }
-    }
-
-    public synchronized void registrerController(Class<?> clazz) {
-        if (clazz.isAnnotationPresent(Controller.class)) {
-            // TODO : find JAX-RS annotations
-            Controller controller = clazz.getAnnotation(Controller.class);
-            String name = controller.value();
-            if (name.contains("/")) {
-                throw new RuntimeException("You can't use / in controller name");
-            }
-            if ("".equals(name)) {
-                name = clazz.getSimpleName().toLowerCase();
-            }
-            this.controllers.put(name, clazz);
-        } else {
-            throw new RuntimeException("You can't register a controller without @Controller annotation");
-        }
+    public void registrerController(Class<?> clazz) {
+        router.registrerController(clazz);
     }
 
     public Response process(Request request) {
@@ -152,47 +132,28 @@ public class FrameworkHandler {
                     res.out = new ByteArrayOutputStream();
                     return res;
                 }
-                String[] tokens = path.split("/");
-                // TODO find controller the JAX-RS way
-                // if no corresponding @Path on controller, try to find it hte old way
-                if (tokens.length >= 2) {
-                    String firstToken = tokens[1];
-                    String secondToken = "index";
-                    if (tokens.length >= 3) {
-                        secondToken = tokens[2];
-                    }
-                    if (controllers.containsKey(firstToken)) {
-                        res = render(controllers.get(firstToken), secondToken);
-                    } else {
-                        WebFramework.logger.error("Controller {} does not exist.", firstToken);
-                        return Render.notFound().render();
-                    }
-                } else {
-                    if (rootController != null) {
-                        res = render(rootController, "index");
-                    } else {
-                        return new HtmlPage("Error",
-                                "<h1>You need to register a root controller</h1>")
-                                .render();
-                    }
-                }
-                return res;
+                WebMethod webMethod = router.route(request, contextRoot);
+                return render(request, webMethod);
             } else {
                 throw new RuntimeException("Framework not started ...");
             }
         } catch (Throwable t) {
             final Throwable ex = t;
+            t.printStackTrace();
             return new HtmlPage("Error"
-                    , "<h1>Ooops, can't render an object of type : "
+                    , "<h1>Ooops, an error occured : "
                     + ex.getMessage() + "</h1>").render();
         }
     }
 
-    private Response render(Class controllerClass, String methodName) throws Exception {
+    private Response render(Request request, WebMethod webMethod) throws Exception {
+        Class controllerClass = webMethod.getClazz();
+        String methodName = webMethod.getMethod().getName();
         Binding devControllerBinding = null;
         InjectorImpl devInjector = null;
         if (WebFramework.dev) {
             try {
+                router.reset();
                 Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClassName);
                 WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
                 devBinder.setDispatcher(this);
@@ -218,20 +179,9 @@ public class FrameworkHandler {
         WebFramework.logger.trace("controller injection : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
-        // TODO : find methods with param if querystring not empty
-        Method method = controller.getClass().getMethod(methodName);
-        // TODO : if no param method, send on default
-        Object ret = null;
-        try {
-            ret = method.invoke(controller);
-        } catch (InvocationTargetException ex) {
-            if (ex.getCause() instanceof BreakFlowException) {
-                BreakFlowException br = (BreakFlowException) ex.getCause();
-                ret = br.getRenderable();
-            } else {
-                throw ex;
-            }
-        }
+
+        Object ret = webMethod.invoke(request, controller);
+        
         WebFramework.logger.trace("controller method invocation : {} ms."
                 , (System.currentTimeMillis() - start));
         if (ret instanceof Renderable) {

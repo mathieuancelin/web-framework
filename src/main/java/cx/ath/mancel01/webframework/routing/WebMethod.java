@@ -17,7 +17,9 @@
 
 package cx.ath.mancel01.webframework.routing;
 
+import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.webframework.http.Request;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,8 +96,20 @@ public class WebMethod {
         this.queryParamsNames = queryParamsNames;
     }
 
-    public Object invoke(Request req) {
-        return null;
+    public Object invoke(Request req, Object controller) {
+        Object ret = null;
+        try {
+            //ret = method.invoke(controller);
+            ret = controller.getClass().getMethod(method.getName()).invoke(controller);
+        } catch (Exception ex) {
+            if (ex.getCause() instanceof BreakFlowException) {
+                BreakFlowException br = (BreakFlowException) ex.getCause();
+                ret = br.getRenderable();
+            } else {
+                throw new RuntimeException(ex);
+            }
+        }
+        return ret;
     }
 
 }

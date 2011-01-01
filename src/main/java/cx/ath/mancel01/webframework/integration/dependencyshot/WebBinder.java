@@ -38,8 +38,4 @@ public abstract class WebBinder extends Binder {
         dispatcher.registrerController(clazz);
     }
 
-    public void registerRootController(Class<?> clazz) {
-        dispatcher.setRootController(clazz);
-    }
-
 }
