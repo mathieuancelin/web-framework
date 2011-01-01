@@ -33,9 +33,9 @@ import javax.ws.rs.QueryParam;
 public class Param {
 
     public enum ParamType {
+
         PATH, QUERY, FORM
     }
-
     public static final Pattern PATH_PARAM_DECLARATION = Pattern.compile("\\{[a-zA-Zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0-9]+\\}");
     private final String name;
     private String prefix;
@@ -70,17 +70,22 @@ public class Param {
         suffix = replaceParamsWithWildcard(suffix);
     }
 
-    public String value(Request req) {
-        if(this.paramType.equals(ParamType.PATH)) {
+    public Object value(Request req) {
+        Object ret = null;
+        if (this.paramType.equals(ParamType.PATH)) {
             if (matchesRoute(req.getPath(), urlRoute)) {
-                return req.getPath().replaceAll(prefix, "").replaceAll(suffix, "");
+                ret = req.getPath().replaceAll(prefix, "").replaceAll(suffix, "");
+            } else {
+                throw new RuntimeException("url " + req.getPath() + " doesn't match route url pattern" + urlRoute);
             }
-            throw new RuntimeException("url " + req.getPath() + "doesn't match route url pattern" + urlRoute);
         } else if (this.paramType.equals(ParamType.QUERY)) {
-            return getQueryParam(this.name, req);
-        } else {
-            throw new RuntimeException("can't manage params of type : " + paramType);
+            ret = getQueryParam(this.name, req);
         }
+        return mapProperlyValue(ret);
+    }
+
+    private Object mapProperlyValue(Object value) {
+        return value;
     }
 
     private String getQueryParam(String name, Request req) {
