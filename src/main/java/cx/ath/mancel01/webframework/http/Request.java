@@ -35,6 +35,7 @@ public class Request {
     public String domain;
     public String remoteAddress;
     public String contentType;
+    public String contextRoot;
     public Integer port;
     public Boolean secure = false;
     public Map<String, Header> headers = new HashMap<String, Header>(16);
@@ -48,7 +49,15 @@ public class Request {
     public String password;
     public boolean isLoopback;
     public static ThreadLocal<Request> current = new ThreadLocal<Request>();
-    
+
+    public String getPath() {
+        String tmppath = path;
+        if (!"/".equals(contextRoot)) {
+            path = path.replace(contextRoot, "/");
+        }
+        return tmppath;
+    }
+
     public String getControllerName() {
         return "";
     }
