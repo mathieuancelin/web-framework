@@ -90,7 +90,6 @@ public class Router {
     }
 
     private void registerRoute(String url, Class clazz, Method method, boolean isRoot) {
-        
         WebMethod webMethod = new WebMethod();
         webMethod.setClazz(clazz);
         webMethod.setFullUrl(url);
