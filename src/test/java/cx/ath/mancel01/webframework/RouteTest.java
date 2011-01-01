@@ -16,8 +16,7 @@
  */
 package cx.ath.mancel01.webframework;
 
-import java.util.ArrayList;
-import java.util.List;
+import cx.ath.mancel01.webframework.routing.Param;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.Test;
@@ -35,60 +34,19 @@ public class RouteTest {
         Pattern pattern = Pattern.compile("\\{[a-zA-Z0-9]+\\}");
         Matcher matcher = pattern.matcher(urlRoute);
         while (matcher.find()) {
-            if (url.matches(replaceParamsWithWildcard(urlRoute))) {
-                Param param = new Param(urlRoute, matcher);
-                System.out.print("key : " + param.name() + ", ");
-                System.out.println("value : " + param.value(url));
-            } else {
-                System.out.println("given url doesn't match route url !");
-            }
+            Param param = new Param(urlRoute, matcher);
+            System.out.print("key : " + param.name() + ", ");
+            System.out.println("value : " + param.value(url));
         }
     }
 
     @Test
     public void findQueryParam() {
         String url = "person/info/important?id=1234&type=civic";
-        System.out.println("key : id, values : " + getParamValues("id", url));
-        System.out.println("key : type, values : " + getParamValues("type", url));
-    }
-
-    private static List<String> getParamValues(String name, String url) {
-        List<String> values = new ArrayList<String>();
-        Pattern pattern = Pattern.compile("[\\?&]" + name + "=([^&#]*)");
-        Matcher matcher = pattern.matcher(url);
-        while (matcher.find()) {
-            values.add(matcher.group().replaceAll("[\\?&]" + name + "=", ""));
-        }
-        return values;
-    }
-
-    private class Param {
-
-        private final String name;
-        private String prefix;
-        private String suffix;
-
-        public Param(String urlRoute, Matcher matcher) {
-            this.name = matcher.group().replaceAll("\\{|\\}", "");
-            prefix = urlRoute.substring(0, matcher.start());
-            suffix = urlRoute.substring(matcher.end());
-            prefix = replaceParamsWithWildcard(prefix);
-            suffix = replaceParamsWithWildcard(suffix);
-        }
-
-        public String value(String url) {
-            return url.replaceAll(prefix, "").replaceAll(suffix, "");
-        }
-
-        public String name() {
-            return name;
-        }
+        System.out.println("key : id, values : " + Param.getQueryValues("id", url));
+        System.out.println("key : type, values : " + Param.getQueryValues("type", url));
     }
     
-    private static String replaceParamsWithWildcard(String value) {
-        return value.replaceAll("\\{[a-zA-Z0-9]+\\}", "[a-zA-Z0-9]+");
-    }
-
     private static void showParams(String url) {
         String[] urlParts = url.split("\\?");
         if (urlParts.length > 1) {
