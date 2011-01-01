@@ -16,7 +16,6 @@
  */
 package cx.ath.mancel01.webframework;
 
-import cx.ath.mancel01.webframework.view.TemplateRenderer;
 import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.dependencyshot.DependencyShot;
@@ -25,7 +24,6 @@ import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.compiler.CompilationException;
-import cx.ath.mancel01.webframework.compiler.RequestCompiler;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -48,7 +46,6 @@ import java.util.Map;
  */
 public class FrameworkHandler {
 
-    // see: http://wikis.sun.com/display/Jersey/Overview+of+JAX-RS+1.0+Features
     private InjectorImpl injector;
     private WebBinder configBinder;
     private final FileGrabber grabber;
