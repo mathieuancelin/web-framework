@@ -17,7 +17,6 @@
 package cx.ath.mancel01.webframework;
 
 import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
-import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.dependencyshot.DependencyShot;
 import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.graph.Binding;
@@ -35,8 +34,6 @@ import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -119,9 +116,10 @@ public class FrameworkHandler {
             if (started) {
                 WebFramework.logger.trace("asked resource => {}", request.path);
                 Response res = new Response();
+                request.contextRoot = contextRoot;
                 String path = request.path;
                 if (!"/".equals(contextRoot)) {
-                    path = path.replace(contextRoot, "");
+                    path = path.replace(contextRoot, "/");
                 }
                 if (path.endsWith("favicon.ico")) {
                     path = "/public/img/favicon.ico";
