@@ -20,10 +20,12 @@ package cx.ath.mancel01.webframework.integration.dependencyshot;
 import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.graph.BindingBuilder;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
+import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.cache.CacheService;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import javax.inject.Provider;
+import org.slf4j.Logger;
 
 /**
  *
@@ -59,9 +61,17 @@ public class DependencyShotIntegrator {
                     return CacheService.getInstance();
                 }
             }).build();
+        Binding loggerBinding =
+            BindingBuilder.prepareBindingThat().bind(Logger.class).providedBy(new Provider<Logger>() {
+                @Override
+                public Logger get() {
+                    return WebFramework.logger;
+                }
+            }).build();
         injector.bindings().put(cacheBinding, cacheBinding);
         injector.bindings().put(responseBinding, responseBinding);
         injector.bindings().put(requestBinding, requestBinding);
+        injector.bindings().put(loggerBinding, loggerBinding);
     }
 
 }
