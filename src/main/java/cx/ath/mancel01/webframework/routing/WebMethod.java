@@ -80,7 +80,6 @@ public class WebMethod {
     public Object invoke(Request req, Object controller) {
         Object ret = null;
         try {
-            //ret = method.invoke(controller);
             List<Class<?>> types = new ArrayList<Class<?>>();
             List<Object> objects = new ArrayList<Object>();
             for(Param p : params.values()) {
@@ -103,5 +102,4 @@ public class WebMethod {
         }
         return ret;
     }
-
 }
