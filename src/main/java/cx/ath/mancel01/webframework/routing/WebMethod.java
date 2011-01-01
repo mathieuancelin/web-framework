@@ -19,7 +19,6 @@ package cx.ath.mancel01.webframework.routing;
 
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.webframework.http.Request;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,9 +35,7 @@ public class WebMethod {
     private Method method;
     private String fullUrl;
     private String comparisonUrl;
-    private List<String> queryParamsNames = new ArrayList<String>();
-    private List<String> formParamsNames = new ArrayList<String>();
-    private Map<String, Param> pathParams = new HashMap<String, Param>();
+    private Map<String, Param> params = new HashMap<String, Param>();
 
     public Class<?> getClazz() {
         return clazz;
@@ -54,14 +51,6 @@ public class WebMethod {
 
     public void setComparisonUrl(String comparisonUrl) {
         this.comparisonUrl = comparisonUrl;
-    }
-
-    public List<String> getFormParamsNames() {
-        return formParamsNames;
-    }
-
-    public void setFormParamsNames(List<String> formParamsNames) {
-        this.formParamsNames = formParamsNames;
     }
 
     public String getFullUrl() {
@@ -80,27 +69,30 @@ public class WebMethod {
         this.method = method;
     }
 
-    public Map<String, Param> getPathParams() {
-        return pathParams;
+    public Map<String, Param> getParams() {
+        return params;
     }
 
-    public void setPathParams(Map<String, Param> pathParams) {
-        this.pathParams = pathParams;
-    }
-
-    public List<String> getQueryParamsNames() {
-        return queryParamsNames;
-    }
-
-    public void setQueryParamsNames(List<String> queryParamsNames) {
-        this.queryParamsNames = queryParamsNames;
+    public void setParams(Map<String, Param> params) {
+        this.params = params;
     }
 
     public Object invoke(Request req, Object controller) {
         Object ret = null;
         try {
             //ret = method.invoke(controller);
-            ret = controller.getClass().getMethod(method.getName()).invoke(controller);
+            List<Class<?>> types = new ArrayList<Class<?>>();
+            List<Object> objects = new ArrayList<Object>();
+            for(Param p : params.values()) {
+                types.add(p.type());
+                objects.add(p.value(req));
+            }
+            Object[] args = new Object[objects.size()];
+            Class<?>[] argsTypes = new Class<?>[types.size()];
+            args = objects.toArray(args);
+            argsTypes = types.toArray(argsTypes);
+            Method m = controller.getClass().getMethod(method.getName(), argsTypes);
+            ret = m.invoke(controller, args);
         } catch (Exception ex) {
             if (ex.getCause() instanceof BreakFlowException) {
                 BreakFlowException br = (BreakFlowException) ex.getCause();

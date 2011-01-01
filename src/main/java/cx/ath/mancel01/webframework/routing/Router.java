@@ -75,7 +75,7 @@ public class Router {
                     prefix = "/" + prefix;
                 }
             } else {
-                prefix = clazz.getSimpleName().toLowerCase();
+                prefix = "/" + clazz.getSimpleName().toLowerCase();
             }
             
             for (Method method : clazz.getMethods()) {
@@ -117,53 +117,40 @@ public class Router {
         webMethod.setClazz(clazz);
         webMethod.setFullUrl(url);
         webMethod.setMethod(method);
-        if (url.equals("/")) {
+        if (url.startsWith("/")) {
             webMethod.setComparisonUrl(Param.replaceParamsWithWildcard(url));
         } else {
             webMethod.setComparisonUrl("/" + Param.replaceParamsWithWildcard(url));
         }
         Annotation[][] annotations = method.getParameterAnnotations();
+        Class<?>[] types = method.getParameterTypes();
         if (annotations != null) {
-            List<PathParam> pathParams = new ArrayList<PathParam>();
-            List<QueryParam> queryParams = new ArrayList<QueryParam>();
-            List<FormParam> formParams = new ArrayList<FormParam>();
             for (int i = 0; i < annotations.length; i++) {
                 for (int j = 0; j < annotations[i].length; j++) {
                     Annotation annotation = annotations[i][j];
-                    if (annotation instanceof PathParam) {
-                        pathParams.add((PathParam) annotation);
-                    }
-                    if (annotation instanceof QueryParam) {
-                        queryParams.add((QueryParam) annotation);
-                    }
-                    if (annotation instanceof FormParam) {
-                        formParams.add((FormParam) annotation);
-                    }
+                    Param param = new Param(annotation, url, types[i]);
+                    webMethod.getParams().put(param.name(), param);
                 }
-            }
-            for (QueryParam queryParam : queryParams) {
-                webMethod.getQueryParamsNames().add(queryParam.value());
-            }
-            for (FormParam formParam : formParams) {
-                webMethod.getFormParamsNames().add(formParam.value());
             }
             Matcher matcher = Param.PATH_PARAM_DECLARATION.matcher(url);
             while (matcher.find()) {
-                Param param = new Param(url, matcher);
-                webMethod.getPathParams().put(param.name(), param);
-            }
-            if (webMethod.getPathParams().size() != pathParams.size()) {
-                throw new RuntimeException("the method " + method.getName()
-                        + " doesn't have the right number of path params.");
+                String name = matcher.group().replaceAll("\\{|\\}", "");
+                if (webMethod.getParams().containsKey(name)) {
+                    webMethod.getParams().get(name).setPathParamName(matcher);
+                } else {
+                    throw new RuntimeException("the @Path on method " + method.getName()
+                        + " is missing path param : " + name);
+                }
             }
         }
         String niceUrl = null;
-        if (url.equals("/")) {
+        if (url.startsWith("/")) {
             niceUrl = Param.replaceParamsWithWildcard(url);
         } else {
             niceUrl = "/" + Param.replaceParamsWithWildcard(url);
         }
         if (!registeredControllers.containsKey(niceUrl)) {
+            WebFramework.logger.trace("route registered @ " + niceUrl);
             registeredControllers.put(niceUrl, webMethod);
         } else {
             throw new RuntimeException("the url " + url + " is already registered.");

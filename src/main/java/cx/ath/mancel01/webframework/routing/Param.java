@@ -16,10 +16,15 @@
  */
 package cx.ath.mancel01.webframework.routing;
 
+import cx.ath.mancel01.webframework.http.Request;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 /**
  *
@@ -27,30 +32,71 @@ import java.util.regex.Pattern;
  */
 public class Param {
 
-    public static final Pattern PATH_PARAM_DECLARATION = Pattern.compile("\\{[a-zA-Z0-9]+\\}");
+    public enum ParamType {
+        PATH, QUERY, FORM
+    }
+
+    public static final Pattern PATH_PARAM_DECLARATION = Pattern.compile("\\{[a-zA-Zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0-9]+\\}");
     private final String name;
     private String prefix;
     private String suffix;
     private final String urlRoute;
+    private final ParamType paramType;
+    private final Class<?> type;
 
-    public Param(String urlRoute, Matcher matcher) {
+    public Param(Annotation annotation, String urlRoute, Class<?> type) {
+        if (annotation instanceof PathParam) {
+            this.name = ((PathParam) annotation).value();
+            this.paramType = ParamType.PATH;
+        } else if (annotation instanceof QueryParam) {
+            this.name = ((QueryParam) annotation).value();
+            this.paramType = ParamType.QUERY;
+        } else if (annotation instanceof FormParam) {
+            this.name = ((FormParam) annotation).value();
+            this.paramType = ParamType.FORM;
+        } else {
+            this.name = ""; // TODO : remove that
+            this.paramType = ParamType.QUERY;
+        }
         this.urlRoute = urlRoute;
-        this.name = matcher.group().replaceAll("\\{|\\}", "");
+        this.type = type;
+    }
+
+    public void setPathParamName(Matcher matcher) {
+        //this.name = matcher.group().replaceAll("\\{|\\}", "");
         prefix = urlRoute.substring(0, matcher.start());
         suffix = urlRoute.substring(matcher.end());
         prefix = replaceParamsWithWildcard(prefix);
         suffix = replaceParamsWithWildcard(suffix);
     }
 
-    public String value(String url) {
-        if (matchesRoute(url, urlRoute)) {
-            return url.replaceAll(prefix, "").replaceAll(suffix, "");
+    public String value(Request req) {
+        if(this.paramType.equals(ParamType.PATH)) {
+            if (matchesRoute(req.getPath(), urlRoute)) {
+                return req.getPath().replaceAll(prefix, "").replaceAll(suffix, "");
+            }
+            throw new RuntimeException("url " + req.getPath() + "doesn't match route url pattern" + urlRoute);
+        } else if (this.paramType.equals(ParamType.QUERY)) {
+            return getQueryParam(this.name, req);
+        } else {
+            throw new RuntimeException("can't manage params of type : " + paramType);
         }
-        throw new RuntimeException("url " + url + "doesn't match route url pattern" + urlRoute);
+    }
+
+    private String getQueryParam(String name, Request req) {
+        List<String> values = Param.getQueryValues(name, "?" + req.querystring);
+        if (!values.isEmpty()) {
+            return values.iterator().next();
+        }
+        return "";
     }
 
     public String name() {
         return name;
+    }
+
+    public Class<?> type() {
+        return type;
     }
 
     public static List<String> getQueryValues(String name, String url) {
@@ -68,6 +114,6 @@ public class Param {
     }
 
     public static String replaceParamsWithWildcard(String value) {
-        return value.replaceAll("\\{[a-zA-Z0-9]+\\}", "[a-zA-Z0-9]+");
+        return value.replaceAll("\\{[a-zA-Zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0-9]+\\}", "[a-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿA-Z0-9]+");
     }
 }
