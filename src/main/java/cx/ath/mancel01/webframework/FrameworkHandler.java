@@ -49,11 +49,8 @@ import java.util.Map;
 public class FrameworkHandler {
 
     // see: http://wikis.sun.com/display/Jersey/Overview+of+JAX-RS+1.0+Features
-
-    private static final String DEFAUTL_CONTENT_TYPE = "text/html";
     private InjectorImpl injector;
     private WebBinder configBinder;
-    private final TemplateRenderer renderer;
     private final FileGrabber grabber;
     private Map<String, Class> controllers;
     private Class rootController;
@@ -66,12 +63,27 @@ public class FrameworkHandler {
     public FrameworkHandler(String binderClassName, String contextRoot, FileGrabber grabber) {
         this.binderClassName = binderClassName;
         controllers = new HashMap<String, Class>();
-        renderer = new TemplateRenderer();
         if ("".equals(contextRoot)) {
             throw new RuntimeException("Can't have an empty context root");
         }
         this.contextRoot = contextRoot;
         this.grabber = grabber;
+        this.base = grabber.getFile("public");
+    }
+
+    private void configureInjector(InjectorImpl inj) {
+        inj.allowCircularDependencies(true);
+        inj.registerShutdownHook();
+        new DependencyShotIntegrator(inj).registerBindings();
+    }
+
+    public void validate() {
+        if (rootController == null) {
+            throw new RuntimeException("You need to register a root controler");
+        } 
+    }
+
+    public void start() {
         WebFramework.init();
         try {
             if (!WebFramework.dev) {
@@ -91,22 +103,6 @@ public class FrameworkHandler {
         } catch (Exception e) {
             throw new RuntimeException("Error at injector creation", e);
         }
-        this.base = grabber.getFile("public");
-    }
-
-    private void configureInjector(InjectorImpl inj) {
-        inj.allowCircularDependencies(true);
-        inj.registerShutdownHook();
-        new DependencyShotIntegrator(inj).registerBindings();
-    }
-
-    public void validate() {
-        if (rootController == null) {
-            throw new RuntimeException("You need to register a root controler");
-        } 
-    }
-
-    public void start() {
         this.started = true;
     }
 
