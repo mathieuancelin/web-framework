@@ -147,7 +147,7 @@ public class Router {
             niceUrl = "/" + Param.replaceParamsWithWildcard(url);
         }
         if (!registeredControllers.containsKey(niceUrl)) {
-            WebFramework.logger.trace("route registered @ " + niceUrl);
+            //WebFramework.logger.trace("route registered @ " + niceUrl);
             registeredControllers.put(niceUrl, webMethod);
         } else {
             throw new RuntimeException("the url " + url + " is already registered.");
