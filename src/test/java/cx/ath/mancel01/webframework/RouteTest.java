@@ -29,15 +29,15 @@ public class RouteTest {
 
     @Test
     public void findPathParam() {
-        String urlRoute = "/person/{id}/info/{type}/important";
-        String url = "/person/1234/info/civic/important";
-        Pattern pattern = Pattern.compile("\\{[a-zA-Z0-9]+\\}");
-        Matcher matcher = pattern.matcher(urlRoute);
-        while (matcher.find()) {
-            Param param = new Param(urlRoute, matcher);
-            System.out.print("key : " + param.name() + ", ");
-            System.out.println("value : " + param.value(url));
-        }
+//        String urlRoute = "/person/{id}/info/{type}/important";
+//        String url = "/person/1234/info/civicé/important";
+//        Pattern pattern = Param.PATH_PARAM_DECLARATION;
+//        Matcher matcher = pattern.matcher(urlRoute);
+//        while (matcher.find()) {
+//            Param param = new Param(urlRoute, matcher);
+//            System.out.print("key : " + param.name() + ", ");
+//            System.out.println("value : " + param.value(url));
+//        }
     }
 
     @Test
