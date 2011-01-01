@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 /**
  *
@@ -58,6 +59,11 @@ public class MyController {
         return new View()
                 .param("message", service.hello("One eyed Jack"))
                 .param("numbers", numbers).param("request", request);
+    }
+
+    @Path("/get/{id}")
+    public void get(@PathParam("id") String id) {
+        Render.text("ok : " + id).go();
     }
 
     public View other() {
