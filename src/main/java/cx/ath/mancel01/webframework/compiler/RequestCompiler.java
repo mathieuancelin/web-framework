@@ -18,6 +18,7 @@ package cx.ath.mancel01.webframework.compiler;
 
 import cx.ath.mancel01.webframework.WebFramework;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.tools.JavaCompiler;
@@ -30,7 +31,6 @@ import javax.tools.ToolProvider;
 public class RequestCompiler {
 
     private static JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
-
     private static Map<File, Long> sourceFiles = new HashMap<File, Long>();
 
     public static Class<?> getCompiledClass(Class<?> clazz) {
@@ -73,10 +73,51 @@ public class RequestCompiler {
             }
         }
         if (ret) {
-            WebFramework.logger.trace("class {} compilation : {} ms."
-                , path.replace("/", "."), System.currentTimeMillis() - start);
+            WebFramework.logger.trace("class {} compilation : {} ms.", path.replace("/", "."), System.currentTimeMillis() - start);
         }
         return ret;
+    }
+
+    public static void compileSources() {
+        try {
+            ArrayList<String> args = new ArrayList<String>();
+            args.add("-encoding");
+            args.add("utf-8");
+            args.add("-source");
+            args.add("1.6");
+            args.add("-target");
+            args.add("1.6");
+            args.add("-d");
+            args.add(WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath());
+            args.add("-classpath");
+            args.add(WebFramework.classpath);
+            findClasses(args, new File(WebFramework.JAVA_SOURCES, "app")); // TODO : remove app ...
+            String[] argsTab = new String[args.size()];
+            argsTab = args.toArray(argsTab);
+            ErrorOutputStream err = new ErrorOutputStream();
+            javac.run(null, null, err, argsTab);
+            if (!err.toString().isEmpty()) {
+                throw new CompilationException(err.toString());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void findClasses(ArrayList<String> builder, File file) {
+        final File[] children = file.listFiles();
+        if (children != null) {
+            for (File f : children) {
+                if (f.isDirectory()) {
+                    findClasses(builder, f);
+                }
+                if (f.isFile()) {
+                    if (f.getName().endsWith(".java")) {
+                        builder.add(f.getAbsolutePath());
+                    }
+                }
+            }
+        }
     }
 
     private static void compile(File source) {
@@ -85,11 +126,12 @@ public class RequestCompiler {
             //p.waitFor();
             ErrorOutputStream err = new ErrorOutputStream();
             javac.run(null, null, err
-                    , "-encoding", "utf-8", "-source", "1.6"
-                    , "-target", "1.6", "-d"
-                    , WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
+                    , "-encoding", "utf-8", "-source"
+                    , "1.6", "-target", "1.6"
+                    , "-d", WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
+                    , "-sourcepath", WebFramework.JAVA_SOURCES.getAbsolutePath()
                     , "-classpath"
-                    , WebFramework.classpath + WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
+                    , WebFramework.classpath
                     , source.getAbsolutePath());
             if (!err.toString().isEmpty()) {
                 throw new CompilationException(err.toString());

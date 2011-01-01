@@ -25,14 +25,13 @@ import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.compiler.CompilationException;
+import cx.ath.mancel01.webframework.compiler.RequestCompiler;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
-import cx.ath.mancel01.webframework.http.StatusCodes;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import cx.ath.mancel01.webframework.view.HtmlPage;
-import cx.ath.mancel01.webframework.view.Page;
 import cx.ath.mancel01.webframework.view.Render;
 import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
@@ -53,7 +52,7 @@ public class FrameworkHandler {
 
     private static final String DEFAUTL_CONTENT_TYPE = "text/html";
     private InjectorImpl injector;
-    private final WebBinder configBinder;
+    private WebBinder configBinder;
     private final TemplateRenderer renderer;
     private final FileGrabber grabber;
     private Map<String, Class> controllers;
@@ -61,9 +60,11 @@ public class FrameworkHandler {
     private boolean started = false;
     private final String contextRoot;
     private final File base;
-    private final Class<? extends Binder> binderClass;
+    private Class<? extends Binder> binderClass;
+    private String binderClassName;
 
-    public FrameworkHandler(Class<? extends Binder> binderClass, String contextRoot, FileGrabber grabber) {
+    public FrameworkHandler(String binderClassName, String contextRoot, FileGrabber grabber) {
+        this.binderClassName = binderClassName;
         controllers = new HashMap<String, Class>();
         renderer = new TemplateRenderer();
         if ("".equals(contextRoot)) {
@@ -71,15 +72,25 @@ public class FrameworkHandler {
         }
         this.contextRoot = contextRoot;
         this.grabber = grabber;
+        WebFramework.init();
         try {
-            this.binderClass = binderClass;
-            this.configBinder = (WebBinder) binderClass.newInstance();
+            if (!WebFramework.dev) {
+                this.binderClass =
+                    (Class<? extends Binder>)
+                        Class.forName(binderClassName);
+            } else {
+                this.binderClass =
+                    (Class<? extends Binder>)
+                        new WebFrameworkClassLoader(getClass().getClassLoader())
+                            .loadClass(binderClassName);
+            }
+            this.configBinder = (WebBinder) this.binderClass.newInstance();
             this.configBinder.setDispatcher(this);
             this.injector = DependencyShot.getInjector(configBinder);
+            configureInjector(this.injector);
         } catch (Exception e) {
             throw new RuntimeException("Error at injector creation", e);
         }
-        configureInjector(this.injector);
         this.base = grabber.getFile("public");
     }
 
@@ -96,7 +107,6 @@ public class FrameworkHandler {
     }
 
     public void start() {
-        WebFramework.init();
         this.started = true;
     }
 
@@ -190,7 +200,7 @@ public class FrameworkHandler {
         InjectorImpl devInjector = null;
         if (WebFramework.dev) {
             try {
-                Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClass.getName());
+                Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClassName);
                 WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
                 devBinder.setDispatcher(this);
                 devInjector = DependencyShot.getInjector(devBinder);
