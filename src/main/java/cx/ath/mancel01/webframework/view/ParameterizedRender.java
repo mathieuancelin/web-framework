@@ -25,6 +25,6 @@ public interface ParameterizedRender {
 
     void go();
 
-    ParameterizedRender with(String name, Object value);
+    ParameterizedRender param(String name, Object value);
 
 }

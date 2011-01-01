@@ -182,18 +182,18 @@ public class Render implements ParameterizedRender {
         };
     }
 
-    public static ParameterizedRender page(String name) {
+    public static ParameterizedRender view(String name) {
         Render render = new Render();
         render.view = new View(name);
         return render;
     }
 
-    public static ParameterizedRender withParam(String name, Object value) {
+    public static ParameterizedRender viewWithParam(String name, Object value) {
         return new Render();
     }
 
     @Override
-    public ParameterizedRender with(String name, Object value) {
+    public ParameterizedRender param(String name, Object value) {
         view.param(name, value);
         return this;
     }

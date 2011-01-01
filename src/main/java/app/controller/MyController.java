@@ -73,9 +73,9 @@ public class MyController {
         numbers.add("seven");
         numbers.add("height");
         numbers.add("nine");
-        Render.page("index.html")
-            .with("message", service.hello("foo"))
-            .with("numbers", numbers).with("request", request)
+        Render.view("index.html")
+            .param("message", service.hello("foo"))
+            .param("numbers", numbers).param("request", request)
             .go();
     }
 
