@@ -17,15 +17,23 @@
 
 package app.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author mathieuancelin
  */
+@Entity
 @XmlRootElement
 public class Person {
 
+    @Id @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+    
     private String name;
     private String surname;
     private String address;
@@ -61,5 +69,13 @@ public class Person {
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
