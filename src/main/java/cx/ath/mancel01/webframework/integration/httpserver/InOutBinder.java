@@ -19,6 +19,7 @@ package cx.ath.mancel01.webframework.integration.httpserver;
 import com.sun.net.httpserver.HttpExchange;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Cookie;
+import cx.ath.mancel01.webframework.http.CopyInputStream;
 import cx.ath.mancel01.webframework.http.Header;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -33,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
  *
@@ -56,7 +56,8 @@ public class InOutBinder {
         if (he.getRequestHeaders().getFirst("X-HTTP-Method-Override") != null) {
             request.method = he.getRequestHeaders().getFirst("X-HTTP-Method-Override").intern();
         }
-        request.body = he.getRequestBody();
+        CopyInputStream cis = new CopyInputStream(he.getRequestBody());
+        request.body = cis.getCopy();
         request.url = uri.toString() + (request.querystring == null ? "" : "?" + request.querystring);
         request.host = he.getRequestHeaders().getFirst("host");
         if (request.host.contains(":")) {

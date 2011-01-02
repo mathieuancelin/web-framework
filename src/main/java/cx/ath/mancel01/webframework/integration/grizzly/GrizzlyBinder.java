@@ -19,6 +19,7 @@ package cx.ath.mancel01.webframework.integration.grizzly;
 import com.sun.grizzly.tcp.http11.GrizzlyRequest;
 import com.sun.grizzly.tcp.http11.GrizzlyResponse;
 import cx.ath.mancel01.webframework.http.Cookie;
+import cx.ath.mancel01.webframework.http.CopyInputStream;
 import cx.ath.mancel01.webframework.http.Header;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -32,7 +33,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
  *
@@ -55,7 +55,8 @@ public class GrizzlyBinder {
         if (req.getHeader("X-HTTP-Method-Override") != null) {
             request.method = req.getHeader("X-HTTP-Method-Override").intern();
         }
-        request.body = req.getStream();
+        CopyInputStream cis = new CopyInputStream(req.getInputStream());
+        request.body = cis.getCopy();
         request.url = uri.toString() + (request.querystring == null ? "" : "?" + request.querystring);
         request.host = req.getHeader("host");
         if (request.host.contains(":")) {
