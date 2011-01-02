@@ -35,7 +35,7 @@ public class Param {
 
     public enum ParamType {
 
-        PATH, QUERY, FORM
+        PATH, QUERY, FORM, BODY
     }
     public static final Pattern PATH_PARAM_DECLARATION = Pattern.compile("\\{[a-zA-Zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0-9]+\\}");
     private final String name;
@@ -74,22 +74,29 @@ public class Param {
     public Object value(Request req) {
         Object ret = null;
         if (this.paramType.equals(ParamType.PATH)) {
+            // TODO : check here simple types only 
             if (matchesRoute(req.getPath(), urlRoute)) {
                 ret = req.getPath().replaceAll(prefix, "").replaceAll(suffix, "");
+                ret = URLDecoder.decode((String) ret);
             } else {
                 throw new RuntimeException("url " + req.getPath() + " doesn't match route url pattern" + urlRoute);
             }
         } else if (this.paramType.equals(ParamType.QUERY)) {
+            // TODO : check here simple types only
             ret = getQueryParam(this.name, "?" + req.querystring);
             ret = URLDecoder.decode((String) ret);
         } else if (this.paramType.equals(ParamType.FORM)) {
+            // TODO : check here simple types only
             ret = getQueryParam(this.name, "?" + req.body());
             ret = URLDecoder.decode((String) ret);
+        } else if (this.paramType.equals(ParamType.BODY)) {
+            ret = null; // Map with type according to kind of value (json, xml, txt, bytes)
         }
         return mapProperlyValue(ret);
     }
 
     private Object mapProperlyValue(Object value) {
+        // TODO : map simple types (string, integer, etc ...) correctly
         return value;
     }
 
