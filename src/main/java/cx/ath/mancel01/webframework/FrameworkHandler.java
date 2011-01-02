@@ -131,7 +131,9 @@ public class FrameworkHandler {
                     return res;
                 }
                 WebMethod webMethod = router.route(request, contextRoot);
-                
+//                RenderThread thread = new RenderThread(this, request, webMethod);
+//                thread.start();
+//                return thread.getResponse();
                 return render(request, webMethod);
             } else {
                 throw new RuntimeException("Framework not started ...");
@@ -145,7 +147,7 @@ public class FrameworkHandler {
         }
     }
 
-    private Response render(Request request, WebMethod webMethod) throws Exception {
+    Response render(Request request, WebMethod webMethod) throws Exception {
         Class controllerClass = webMethod.getClazz();
         String methodName = webMethod.getMethod().getName();
         Binding devControllerBinding = null;
@@ -157,6 +159,7 @@ public class FrameworkHandler {
                 WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
                 devBinder.setDispatcher(this);
                 devInjector = DependencyShot.getInjector(devBinder);
+                configureInjector(devInjector);
                 controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
             } catch (Throwable ex) {
                 return createErrorResponse(ex);
