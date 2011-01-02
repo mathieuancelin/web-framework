@@ -90,6 +90,8 @@ public class ServletDispatcher extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace(); // TODO : print something useless here
         } finally {
+            Request.current.remove();
+            Response.current.remove();
             WebFramework.logger.trace("request processed in {} ms.\n", (System.currentTimeMillis() - start));
             WebFramework.logger.trace("=======================================\n");
         }

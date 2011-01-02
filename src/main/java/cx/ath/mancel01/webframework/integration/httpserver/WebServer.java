@@ -79,6 +79,8 @@ public class WebServer {
                         e.getCause().printStackTrace();
                     } finally {
                         he.close();
+                        Request.current.remove();
+                        Response.current.remove();
                         WebFramework.logger.trace("request processed in {} ms.\n"
                                 , (System.currentTimeMillis() - start));
                         WebFramework.logger.trace("=======================================\n");
