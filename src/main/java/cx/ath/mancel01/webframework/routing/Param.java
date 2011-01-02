@@ -18,6 +18,7 @@ package cx.ath.mancel01.webframework.routing;
 
 import cx.ath.mancel01.webframework.http.Request;
 import java.lang.annotation.Annotation;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -79,7 +80,11 @@ public class Param {
                 throw new RuntimeException("url " + req.getPath() + " doesn't match route url pattern" + urlRoute);
             }
         } else if (this.paramType.equals(ParamType.QUERY)) {
-            ret = getQueryParam(this.name, req);
+            ret = getQueryParam(this.name, "?" + req.querystring);
+            ret = URLDecoder.decode((String) ret);
+        } else if (this.paramType.equals(ParamType.FORM)) {
+            ret = getQueryParam(this.name, "?" + req.body());
+            ret = URLDecoder.decode((String) ret);
         }
         return mapProperlyValue(ret);
     }
@@ -88,8 +93,8 @@ public class Param {
         return value;
     }
 
-    private String getQueryParam(String name, Request req) {
-        List<String> values = Param.getQueryValues(name, "?" + req.querystring);
+    private String getQueryParam(String name, String req) {
+        List<String> values = Param.getQueryValues(name, req);
         if (!values.isEmpty()) {
             return values.iterator().next();
         }

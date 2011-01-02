@@ -16,6 +16,7 @@
  */
 package cx.ath.mancel01.webframework.http;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ public class Request {
     public String password;
     public boolean isLoopback;
     public static ThreadLocal<Request> current = new ThreadLocal<Request>();
+    private String bodyValue;
 
     public String getPath() {
         String tmppath = path;
@@ -58,11 +60,33 @@ public class Request {
         return tmppath;
     }
 
-    public String getControllerName() {
-        return "";
+    public String body() {
+        if (bodyValue == null) {
+            CopyInputStream cis = new CopyInputStream(body);
+            bodyValue = slurpBody(cis.getCopy());
+        }
+        return bodyValue;
     }
 
-    public String getCalledMethod() {
-        return "";
+    public boolean isAjax() {
+        if (!headers.containsKey("x-requested-with")) {
+            return false;
+        }
+        return "XMLHttpRequest".equals(headers.get("x-requested-with").value());
+    }
+
+    private static String slurpBody(InputStream body) {
+        if (body == null)
+            return "null";
+        try {
+            StringBuilder out = new StringBuilder();
+            byte[] b = new byte[4096];
+            for (int n; (n = body.read(b)) != -1;) {
+                out.append(new String(b, 0, n));
+            }
+            return out.toString();
+        } catch (IOException ex) {
+            return "IO/error";
+        }
     }
 }
