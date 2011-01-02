@@ -41,7 +41,6 @@ public class CacheService {
 
     private CacheService() {
         this.cacheManager = CacheManager.create();
-
         Cache webFrameworkCache = new Cache(
              new CacheConfiguration("web-framework", 10000)
                .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU)
