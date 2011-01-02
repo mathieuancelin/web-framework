@@ -11,6 +11,10 @@
       <div>${number}</div>
       <% } %>
       <br/>
+      <form METHOD="POST" ACTION="/post">
+          <input type="text" name="value"/>
+          <input type="submit" value="ok">
+      </form>
       <img src="/public/img/samcrow.png"/>
       <% /**include 'views/mycontroller/img.html'**/ %>
   </body>

@@ -29,11 +29,16 @@ import cx.ath.mancel01.webframework.view.JSON;
 import cx.ath.mancel01.webframework.view.Page;
 import cx.ath.mancel01.webframework.view.Redirect;
 import cx.ath.mancel01.webframework.view.XML;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 /**
  *
@@ -64,6 +69,11 @@ public class MyController {
     @Path("/get/{id}")
     public void get(@PathParam("id") String id) {
         Render.text("ok : " + id).go();
+    }
+
+    @Path("/post")
+    public void postValue(@QueryParam("value") String value) {
+        Render.text("input was : " + value + "\n\n" + request.path).go();
     }
 
     public View other() {
