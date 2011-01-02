@@ -131,6 +131,7 @@ public class FrameworkHandler {
                     return res;
                 }
                 WebMethod webMethod = router.route(request, contextRoot);
+                
                 return render(request, webMethod);
             } else {
                 throw new RuntimeException("Framework not started ...");
@@ -177,9 +178,7 @@ public class FrameworkHandler {
         WebFramework.logger.trace("controller injection : {} ms."
                 , (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
-
         Object ret = webMethod.invoke(request, controller);
-        
         WebFramework.logger.trace("controller method invocation : {} ms."
                 , (System.currentTimeMillis() - start));
         if (ret instanceof Renderable) {

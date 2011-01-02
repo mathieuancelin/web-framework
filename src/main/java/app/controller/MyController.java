@@ -29,16 +29,12 @@ import cx.ath.mancel01.webframework.view.JSON;
 import cx.ath.mancel01.webframework.view.Page;
 import cx.ath.mancel01.webframework.view.Redirect;
 import cx.ath.mancel01.webframework.view.XML;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.inject.Inject;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 /**
  *
@@ -72,8 +68,8 @@ public class MyController {
     }
 
     @Path("/post")
-    public void postValue(@QueryParam("value") String value) {
-        Render.text("input was : " + value + "\n\n" + request.path).go();
+    public void postValue(@FormParam("value") String value, @FormParam("value2") String value2) {
+        Render.text("input was : " + value + " " + value2).go();
     }
 
     public View other() {
