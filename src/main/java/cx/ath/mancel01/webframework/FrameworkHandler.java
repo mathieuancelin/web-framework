@@ -21,6 +21,7 @@ import cx.ath.mancel01.dependencyshot.DependencyShot;
 import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
+import cx.ath.mancel01.webframework.cache.CacheService;
 import cx.ath.mancel01.webframework.compiler.CompilationException;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.http.Request;
@@ -99,6 +100,7 @@ public class FrameworkHandler {
         } catch (Exception e) {
             throw new RuntimeException("Error at injector creation", e);
         }
+        CacheService.getInstance();
         this.started = true;
     }
 

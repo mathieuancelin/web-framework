@@ -22,6 +22,8 @@ import java.io.Serializable;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 
 /**
  *
@@ -39,7 +41,17 @@ public class CacheService {
 
     private CacheService() {
         this.cacheManager = CacheManager.create();
-        this.cacheManager.addCache("web-framework");
+
+        Cache webFrameworkCache = new Cache(
+             new CacheConfiguration("web-framework", 10000)
+               .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU)
+               .overflowToDisk(false)
+               .eternal(false)
+               .timeToLiveSeconds(120)
+               .timeToIdleSeconds(120)
+               .diskPersistent(false)
+               .diskExpiryThreadIntervalSeconds(120));
+        this.cacheManager.addCache(webFrameworkCache);
         this.cache = cacheManager.getCache("web-framework");
         // TODO : if prod, search for terracota distributed cache
         /**Configuration configuration = new Configuration()
