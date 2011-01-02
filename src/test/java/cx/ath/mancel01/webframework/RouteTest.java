@@ -16,6 +16,7 @@
  */
 package cx.ath.mancel01.webframework;
 
+import cx.ath.mancel01.webframework.data.JPASource;
 import cx.ath.mancel01.webframework.routing.Param;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,7 +47,15 @@ public class RouteTest {
         System.out.println("key : id, values : " + Param.getQueryValues("id", url));
         System.out.println("key : type, values : " + Param.getQueryValues("type", url));
     }
-    
+
+    @Test
+    public void testDB() throws Exception {
+        JPASource source = new JPASource();
+        source.launchTestServer();
+        source.launchJPA();
+        source.stopTestServer();
+    }
+
     private static void showParams(String url) {
         String[] urlParts = url.split("\\?");
         if (urlParts.length > 1) {
