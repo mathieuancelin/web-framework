@@ -69,7 +69,7 @@ public class MyController {
 
     @Path("/person/all")
     public void findall() {
-        List<Person> persons = em.createQuery("select p from Person p").getResultList();
+        List<Person> persons = Person.jpa.all().getResultList();
         Render.view("findall.html").param("persons", persons).go();
     }
 
