@@ -49,9 +49,9 @@ public class RouteTest {
     @Test
     public void testDB() throws Exception {
         JPAService source = JPAService.getInstance();
-        source.launchTestServer();
+        source.launchDevelopementServer();
         source.launchJPA();
-        source.stopTestServer();
+        source.stopDevelopementServer();
     }
 
     private static void showParams(String url) {
