@@ -50,6 +50,9 @@ public class WebFrameworkClassLoader extends ClassLoader {
                 return super.loadClass(name);
             }
         }
+        if (name.startsWith("app.model")) {
+            return super.loadClass(name);
+        }
         //System.out.println("ask for class " + name);
         if (name.startsWith("app.")) {
             return findClass(name);
