@@ -21,6 +21,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
+import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -37,19 +38,33 @@ public class WebFramework {
 
     public static final Logger logger = LoggerFactory.getLogger(WebFramework.class);
     public static final Properties config = new Properties();
-    public static final File WEB_SOURCES = new File("src/main/webapp");
-    public static final File JAVA_SOURCES = new File("src/main/java");
-    public static final File RESOURCES = new File("src/main/resources");
-    public static final File TARGET = new File("target");
-    public static final File MVN_COMPILED_CLASSES_PATH = new File("target/classes");
-    public static final File FWK_COMPILED_CLASSES_PATH = new File("target/compclasses");
+
+    public static File ROOT;
+    public static File SOURCES;
+    public static File TARGET;
+
+    public static File WEB_SOURCES;
+    public static File VIEWS;
+    public static File CONF;
+    public static File PUBLIC_RESOURCES;
+    public static File JAVA_SOURCES;
+    public static File RESOURCES;
+    
+    public static File MVN_COMPILED_CLASSES_PATH;
+    public static File FWK_COMPILED_CLASSES_PATH;
+    public static File DB;
+    public static File LOGS;
+
     public static boolean dev = false;
     public static boolean keepDefaultRoutes = true;
     public static boolean proxyInjectionForCompilation = false;
     public static boolean recompileServices = true;
     public static String classpath = "";
 
-    public static void init() {
+    public static FileGrabber grabber;
+
+    public static void init(File rootDir) {
+        initFiles(rootDir);
         initClasspath();
         initConfig();
         initLogger();
@@ -58,6 +73,40 @@ public class WebFramework {
                 FWK_COMPILED_CLASSES_PATH.mkdir();
             }
         }
+    }
+
+    private static void initFiles(File rootDir) {
+        ROOT = rootDir;
+        SOURCES = new File(rootDir, "src");
+        TARGET = new File(rootDir, "target");
+        WEB_SOURCES = new File(SOURCES, "main/webapp");
+        VIEWS = new File(WEB_SOURCES, "views");
+        CONF = new File(WEB_SOURCES, "conf");
+        PUBLIC_RESOURCES = new File(WEB_SOURCES, "public");
+        JAVA_SOURCES = new File(SOURCES, "main/java");
+        RESOURCES = new File(SOURCES, "main/resources");
+        MVN_COMPILED_CLASSES_PATH = new File(TARGET, "classes");
+        FWK_COMPILED_CLASSES_PATH = new File(TARGET, "compclasses");
+        DB = new File(TARGET, "db");
+        LOGS = new File(TARGET, "logs");
+        createDir(TARGET);
+        createDir(DB);
+        createDir(MVN_COMPILED_CLASSES_PATH);
+        createDir(FWK_COMPILED_CLASSES_PATH);
+        createDir(LOGS);
+        grabber = new FileGrabber() {
+            @Override
+            public File getFile(String file) {
+                return new File(ROOT, file);
+            }
+        };
+    }
+
+    private static boolean createDir(File dir) {
+        if (!dir.exists()) {
+            return dir.mkdirs();
+        }
+        return false;
     }
     
     private static void initClasspath() {

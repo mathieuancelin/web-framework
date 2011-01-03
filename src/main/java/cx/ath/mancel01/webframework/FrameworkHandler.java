@@ -24,19 +24,17 @@ import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.cache.CacheService;
 import cx.ath.mancel01.webframework.compiler.CompilationException;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
+import cx.ath.mancel01.webframework.data.JPAService;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.routing.Router;
 import cx.ath.mancel01.webframework.routing.WebMethod;
-import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import cx.ath.mancel01.webframework.view.HtmlPage;
 import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -46,25 +44,22 @@ public class FrameworkHandler {
 
     private InjectorImpl injector;
     private WebBinder configBinder;
-    private final FileGrabber grabber;
-    private Map<String, Class> controllers;
+    private final File rootDir;
     private Class rootController;
     private boolean started = false;
     private final String contextRoot;
-    private final File base;
+    private File publicResources;
     private Class<? extends Binder> binderClass;
     private String binderClassName;
     private Router router;
 
-    public FrameworkHandler(String binderClassName, String contextRoot, FileGrabber grabber) {
-        this.binderClassName = binderClassName;
-        controllers = new HashMap<String, Class>();
+    public FrameworkHandler(String binderClassName, String contextRoot, File rootDir) {
         if ("".equals(contextRoot)) {
             throw new RuntimeException("Can't have an empty context root");
         }
-        this.contextRoot = contextRoot;
-        this.grabber = grabber;
-        this.base = grabber.getFile("public");
+        this.binderClassName = binderClassName;
+        this.rootDir = rootDir;
+        this.contextRoot = contextRoot;        
         this.router = new Router();
     }
 
@@ -81,7 +76,8 @@ public class FrameworkHandler {
     }
 
     public void start() {
-        WebFramework.init();
+        WebFramework.init(rootDir);
+        publicResources = WebFramework.PUBLIC_RESOURCES;
         try {
             if (!WebFramework.dev) {
                 this.binderClass =
@@ -100,7 +96,8 @@ public class FrameworkHandler {
         } catch (Exception e) {
             throw new RuntimeException("Error at injector creation", e);
         }
-        CacheService.getInstance();
+        CacheService.start();
+        JPAService.start();
         this.started = true;
     }
 
@@ -127,7 +124,7 @@ public class FrameworkHandler {
                     path = "/public/img/favicon.ico";
                 }
                 if (path.startsWith("/public/")) {
-                    File asked = new File(base, path.replace("/public/", ""));
+                    File asked = new File(publicResources, path.replace("/public/", ""));
                     res.direct = asked;
                     res.out = new ByteArrayOutputStream();
                     return res;
@@ -189,7 +186,7 @@ public class FrameworkHandler {
         if (ret instanceof Renderable) {
             Renderable renderable = (Renderable) ret;
             if (renderable instanceof View) { // ok that's not really OO but what the hell !
-                return ((View) renderable).render(methodName, controllerClass, grabber);
+                return ((View) renderable).render(methodName, controllerClass, WebFramework.grabber);
             }
             return renderable.render();
         } else {

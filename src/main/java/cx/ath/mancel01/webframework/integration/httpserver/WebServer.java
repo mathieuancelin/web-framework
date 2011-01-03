@@ -20,7 +20,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import cx.ath.mancel01.webframework.FrameworkHandler;
-import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
@@ -46,16 +45,16 @@ public class WebServer {
     private final String rootContext;
     private FrameworkHandler dispatcher;
     private final String binder;
-    private final File viewDirectory;
+    private final File rootDir;
 
     public WebServer(String host,
             int port, String rootContext,
-            String binder, File viewDirectory) {
+            String binder, File rootDir) {
         this.host = host;
         this.port = port;
         this.rootContext = rootContext;
         this.binder = binder;
-        this.viewDirectory = viewDirectory;
+        this.rootDir = rootDir;
     }
 
     public void start() {
@@ -87,12 +86,7 @@ public class WebServer {
                     }
                 }
             });
-            dispatcher = new FrameworkHandler(binder, rootContext, new FileGrabber() {
-                @Override
-                public File getFile(String file) {
-                    return new File(viewDirectory, file);
-                }
-            });
+            dispatcher = new FrameworkHandler(binder, rootContext, rootDir);
             Runtime.getRuntime().addShutdownHook(new Shutdown(dispatcher));
             server.start();
             dispatcher.start();

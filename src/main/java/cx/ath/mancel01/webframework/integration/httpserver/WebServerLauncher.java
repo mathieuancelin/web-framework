@@ -19,6 +19,7 @@ package cx.ath.mancel01.webframework.integration.httpserver;
 
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -29,9 +30,12 @@ public class WebServerLauncher {
 
     public static void main(String... args) {
         try {
+            if (args.length < 1) {
+                throw new RuntimeException("Can't work without the path of the app.");
+            }
             WebServer dispatcher
                     = new WebServer("localhost", 8080,
-                    "/", WebBinder.BINDER_DEFAULT_NAME, WebFramework.WEB_SOURCES);
+                    "/", WebBinder.BINDER_DEFAULT_NAME, new File(args[0]));
             dispatcher.start();
             WebFramework.logger.info("running the application in dev mode");
             WebFramework.logger.info("listening for HTTP on port 8080");
