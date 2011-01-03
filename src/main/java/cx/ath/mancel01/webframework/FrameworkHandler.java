@@ -116,6 +116,7 @@ public class FrameworkHandler {
         try {
             if (started) {
                 WebFramework.logger.trace("asked resource => {}", request.path);
+                long start = System.currentTimeMillis();
                 Response res = new Response();
                 request.contextRoot = contextRoot;
                 String path = request.path;
@@ -132,9 +133,9 @@ public class FrameworkHandler {
                     return res;
                 }
                 WebMethod webMethod = router.route(request, contextRoot);
-//                RenderThread thread = new RenderThread(this, request, webMethod);
-//                thread.start();
-//                return thread.getResponse();
+                WebFramework.logger.trace("routing : {} ms."
+                    , (System.currentTimeMillis() - start));
+                start = System.currentTimeMillis();
                 return render(request, webMethod);
             } else {
                 throw new RuntimeException("Framework not started ...");
@@ -153,6 +154,7 @@ public class FrameworkHandler {
         String methodName = webMethod.getMethod().getName();
         Binding devControllerBinding = null;
         InjectorImpl devInjector = null;
+        long start = System.currentTimeMillis();
         JPAService.getInstance().startTx();
         if (WebFramework.dev) {
             try {
@@ -167,8 +169,10 @@ public class FrameworkHandler {
                 return createErrorResponse(ex);
             }
             devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
+            WebFramework.logger.trace("configuration bootstrap : {} ms."
+                    , (System.currentTimeMillis() - start));
         }
-        long start = System.currentTimeMillis();
+        start = System.currentTimeMillis();
         Object controller = null;
         if (WebFramework.dev) {
             try {
