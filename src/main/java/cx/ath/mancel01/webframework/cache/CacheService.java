@@ -40,7 +40,19 @@ public class CacheService {
     private Cache cache;
 
     private CacheService() {
-        this.cacheManager = CacheManager.create();
+        
+    }
+
+    public static synchronized CacheService getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new CacheService();
+        }
+        return INSTANCE;
+    }
+
+    public static synchronized void start() {
+        CacheService service = getInstance();
+        service.cacheManager = CacheManager.create();
         Cache webFrameworkCache = new Cache(
              new CacheConfiguration("web-framework", 10000)
                .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU)
@@ -50,8 +62,8 @@ public class CacheService {
                .timeToIdleSeconds(120)
                .diskPersistent(false)
                .diskExpiryThreadIntervalSeconds(120));
-        this.cacheManager.addCache(webFrameworkCache);
-        this.cache = cacheManager.getCache("web-framework");
+        service.cacheManager.addCache(webFrameworkCache);
+        service.cache = service.cacheManager.getCache("web-framework");
         // TODO : if prod, search for terracota distributed cache
         /**Configuration configuration = new Configuration()
             .terracotta(new GlobalTerracottaConfiguration().url("localhost:9510"))
@@ -61,13 +73,6 @@ public class CacheService {
             .timeToLiveSeconds(120)
             .terracotta(new TerracottaConfiguration()));
         this.cacheManager = new CacheManager(configuration);**/
-    }
-
-    public static CacheService getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new CacheService();
-        }
-        return INSTANCE;
     }
 
     public void clear() {
