@@ -21,6 +21,7 @@ import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Header;
 import cx.ath.mancel01.webframework.http.Response;
 import java.io.ByteArrayOutputStream;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -32,7 +33,7 @@ public class Redirect extends Renderable {
 
     public Redirect(String url) {
         this.url = url;
-        this.contentType = "text/html";
+        this.contentType = MediaType.TEXT_HTML;
     }
 
     public Header getHeader() {

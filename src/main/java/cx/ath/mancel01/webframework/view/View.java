@@ -22,6 +22,7 @@ import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -30,7 +31,7 @@ import java.util.Map;
 public class View extends Renderable {
 
     private static final TemplateRenderer renderer = new TemplateRenderer();
-    private static final String TYPE = "text/html";
+    private static final String TYPE = MediaType.TEXT_HTML;
     private final String viewName;
     private final Map<String, Object> context;
     private String methodName;

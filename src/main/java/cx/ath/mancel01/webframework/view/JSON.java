@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Response;
 import java.io.ByteArrayOutputStream;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -31,7 +32,7 @@ public class JSON extends Renderable {
 
     public JSON(Object jsonObject) {
         this.jsonObject = jsonObject;
-        this.contentType = "application/json";
+        this.contentType = MediaType.APPLICATION_JSON;
     }
 
     public Object getJsonObject() {

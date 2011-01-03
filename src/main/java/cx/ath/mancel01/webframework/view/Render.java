@@ -20,6 +20,7 @@ package cx.ath.mancel01.webframework.view;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.webframework.http.StatusCodes;
 import java.io.File;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -45,7 +46,7 @@ public class Render implements ParameterizedRender {
 
             @Override
             public String getContentType() {
-                return "text/plain";
+                return MediaType.TEXT_PLAIN;
             }
 
             @Override
@@ -82,7 +83,7 @@ public class Render implements ParameterizedRender {
 
             @Override
             public String getContentType() {
-                return "text/html";
+                return MediaType.TEXT_HTML;
             }
 
             @Override
@@ -104,7 +105,7 @@ public class Render implements ParameterizedRender {
 
             @Override
             public String getContentType() {
-                return "text/html";
+                return MediaType.TEXT_HTML;
             }
 
             @Override
@@ -126,7 +127,7 @@ public class Render implements ParameterizedRender {
 
             @Override
             public String getContentType() {
-                return "text/html";
+                return MediaType.TEXT_HTML;
             }
 
             @Override
@@ -148,7 +149,7 @@ public class Render implements ParameterizedRender {
 
             @Override
             public String getContentType() {
-                return "text/html";
+                return MediaType.TEXT_HTML;
             }
 
             @Override
@@ -170,7 +171,7 @@ public class Render implements ParameterizedRender {
 
             @Override
             public String getContentType() {
-                return "text/html";
+                return MediaType.TEXT_HTML;
             }
 
             @Override

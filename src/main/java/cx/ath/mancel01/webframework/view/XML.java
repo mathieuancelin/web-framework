@@ -20,8 +20,7 @@ package cx.ath.mancel01.webframework.view;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Response;
 import java.io.ByteArrayOutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -36,7 +35,7 @@ public class XML extends Renderable {
 
     public XML(Object xmlObject) {
         this.xmlObject = xmlObject;
-        this.contentType = "application/xml";
+        this.contentType = MediaType.APPLICATION_XML;
     }
 
     public Object getXmlObject() {

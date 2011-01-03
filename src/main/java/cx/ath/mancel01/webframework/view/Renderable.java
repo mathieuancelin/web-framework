@@ -20,6 +20,7 @@ package cx.ath.mancel01.webframework.view;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.http.StatusCodes;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -28,7 +29,7 @@ import cx.ath.mancel01.webframework.http.StatusCodes;
 public abstract class Renderable {
 
     protected int statusCode = StatusCodes.OK;
-    protected String contentType = "application/octet-stream";
+    protected String contentType = MediaType.APPLICATION_OCTET_STREAM;
 
     public int getStatusCode() {
         return statusCode;
