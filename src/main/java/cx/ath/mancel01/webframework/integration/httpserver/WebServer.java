@@ -59,7 +59,6 @@ public class WebServer {
 
     public void start() {
         try {
-//            WebFramework.logger.info("starting http server ... ");
             server = HttpServer.create(new InetSocketAddress(host, port), 0);
             server.setExecutor(exec);
             server.createContext(rootContext, new HttpHandler() {
