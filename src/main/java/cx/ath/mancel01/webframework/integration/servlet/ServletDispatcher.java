@@ -45,15 +45,6 @@ public class ServletDispatcher extends HttpServlet {
         if (configClassName == null) {
             throw new RuntimeException("No binder registered ...");
         }
-//        Class<?> binder = null;
-//        try {
-//            binder = getClass().getClassLoader().loadClass(configClassName);
-//            if (!Binder.class.isAssignableFrom(binder)) {
-//                throw new RuntimeException("Your config class is not a binder");
-//            }
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException("Your config class is not a good one ...", e);
-//        }
         final ServletContext context = this.getServletContext();
         dispatcher = new FrameworkHandler(configClassName,
             getServletContext().getContextPath(),
