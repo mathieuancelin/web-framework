@@ -75,6 +75,11 @@ public class CacheService {
         this.cacheManager = new CacheManager(configuration);**/
     }
 
+    public static synchronized void stop() {
+        CacheService service = getInstance();
+        service.cacheManager.shutdown();
+    }
+
     public void clear() {
         cache.removeAll();
     }
