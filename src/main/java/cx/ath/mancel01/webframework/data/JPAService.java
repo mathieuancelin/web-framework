@@ -18,10 +18,15 @@ package cx.ath.mancel01.webframework.data;
 
 import app.model.Person;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import cx.ath.mancel01.webframework.WebFramework;
 import java.io.File;
+import java.util.ArrayList;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
+import javax.sql.DataSource;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hsqldb.Server;
 
@@ -35,6 +40,21 @@ public class JPAService {
 
     private Server hsqlServer = null;
 
+    private boolean started = false;
+
+    private DataSource dataSource;
+
+    private EntityManagerFactory emf;
+
+    public static ThreadLocal<EntityManager> currentEm =
+            new ThreadLocal<EntityManager>() {
+
+        @Override
+        protected EntityManager initialValue() {
+            return null;
+        }
+    };
+
     private JPAService() {}
 
     public static synchronized JPAService getInstance() {
@@ -46,10 +66,60 @@ public class JPAService {
 
     public static synchronized void start() {
         JPAService service = getInstance();
-
+        //if (WebFramework.dev) {
+            String db =  WebFramework.config.getProperty("db.dev");
+            if (db != null) {
+                if (db.equals("true")) {
+                    service.launchDevelopementServer();
+                    service.started = true;
+                }
+            }
+        //}
+        try {
+            service.launchJPA();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        service.started = true;
     }
 
-    public void launchTestServer() {
+    public static synchronized void stop() {
+        JPAService service = getInstance();
+        service.stopDevelopementServer();
+        if (service.emf != null)
+            service.emf.close();
+        if (service.dataSource instanceof ComboPooledDataSource) {
+            try {
+            ((ComboPooledDataSource) service.dataSource).close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        service.started = false;
+    }
+
+    public void startTx() {
+        EntityManager manager = emf.createEntityManager();
+        manager.setFlushMode(FlushModeType.COMMIT);
+        manager.getTransaction().begin();
+        JPAService.currentEm.set(manager);
+    }
+
+    public void stopTx(boolean rollback) {
+        EntityManager manager = JPAService.currentEm.get();
+        try {
+            if (rollback) {
+                manager.getTransaction().rollback();
+            } else {
+                manager.getTransaction().commit();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JPAService.currentEm.remove();
+    }
+
+    public void launchDevelopementServer() {
         try {
 
             hsqlServer = new Server();
@@ -63,7 +133,7 @@ public class JPAService {
         }
     }
 
-    public void stopTestServer() {
+    public void stopDevelopementServer() {
         if (hsqlServer != null) {
             hsqlServer.shutdown();
             hsqlServer.stop();
@@ -74,35 +144,94 @@ public class JPAService {
         System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
         System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
         Ejb3Configuration cfg = new Ejb3Configuration();
-        cfg.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        if (WebFramework.config.getProperty("db.dataSource") == null) {
+            ComboPooledDataSource intDataSource = new ComboPooledDataSource();
+            if (hsqlServer != null) {
+                intDataSource.setDriverClass("org.hsqldb.jdbcDriver");
+                intDataSource.setJdbcUrl("jdbc:hsqldb:hsql://localhost/webframeworkdb");
+                intDataSource.setUser("sa");
+                intDataSource.setPassword("");
+                cfg.setProperty("hibernate.hbm2ddl.auto", "create-drop");          
+                cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+            } else {
+                intDataSource.setDriverClass(
+                        WebFramework.config.getProperty("db.url"));
+                intDataSource.setJdbcUrl(
+                        WebFramework.config.getProperty("db.driver"));
+                intDataSource.setUser(
+                        WebFramework.config.getProperty("db.user"));
+                intDataSource.setPassword(
+                        WebFramework.config.getProperty("db.pass"));
+                cfg.setProperty("hibernate.hbm2ddl.auto", WebFramework.config.getProperty("jpa.dialect"));
+                cfg.setProperty("hibernate.dialect", WebFramework.config.getProperty("jpa.ddl"));
+            }
+            intDataSource.setAcquireRetryAttempts(10);
+            intDataSource.setCheckoutTimeout(5000);
+            intDataSource.setBreakAfterAcquireFailure(false);
+            intDataSource.setMaxPoolSize(30);
+            intDataSource.setMinPoolSize(1);
+            intDataSource.setIdleConnectionTestPeriod(10);
+            intDataSource.setTestConnectionOnCheckin(true);
+            dataSource = intDataSource;
+        } else {
+            Context ctx = new InitialContext();
+            dataSource = (DataSource) ctx.lookup(WebFramework.config.getProperty("db.dataSource"));
+        }
         cfg.setProperty("javax.persistence.transactionType", "RESOURCE_LOCAL");
-        cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         cfg.addAnnotatedClass(Person.class);
-        ComboPooledDataSource source = new ComboPooledDataSource();
-        source.setDriverClass("org.hsqldb.jdbcDriver");
-        source.setJdbcUrl("jdbc:hsqldb:hsql://localhost/webframeworkdb");
-        source.setUser("sa");
-        source.setPassword("");
-        source.setAcquireRetryAttempts(10);
-        source.setCheckoutTimeout(5000);
-        source.setBreakAfterAcquireFailure(false);
-        source.setMaxPoolSize(30);
-        source.setMinPoolSize(1);
-        source.setIdleConnectionTestPeriod(10);
-        source.setTestConnectionOnCheckin(true);
-        cfg.setDataSource(source);
-        EntityManagerFactory programmaticEmf = cfg.buildEntityManagerFactory();
-        EntityManager manager = programmaticEmf.createEntityManager();
-        Person person = new Person("john", "doe", "null");
-        EntityTransaction tx = manager.getTransaction();
-        tx.begin();
-        manager.persist(person);
-        manager.flush();
-        tx.commit();
-        manager.close();
-        programmaticEmf.close();
-        source.close();
+        cfg.setDataSource(dataSource);
+        this.emf = cfg.buildEntityManagerFactory();
     }
+
+    private static void findEntities(ArrayList<String> builder, File file) {
+        final File[] children = file.listFiles();
+        if (children != null) {
+            for (File f : children) {
+                if (f.isDirectory()) {
+                    findEntities(builder, f);
+                }
+                if (f.isFile()) {
+                    if (f.getName().endsWith(".java")) {
+                        builder.add(f.getAbsolutePath());
+                    }
+                }
+            }
+        }
+    }
+
+//    public void launchJPA() throws Exception {
+//        System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
+//        System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
+//        Ejb3Configuration cfg = new Ejb3Configuration();
+//        cfg.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+//        cfg.setProperty("javax.persistence.transactionType", "RESOURCE_LOCAL");
+//        cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+//        cfg.addAnnotatedClass(Person.class);
+//        ComboPooledDataSource source = new ComboPooledDataSource();
+//        source.setDriverClass("org.hsqldb.jdbcDriver");
+//        source.setJdbcUrl("jdbc:hsqldb:hsql://localhost/webframeworkdb");
+//        source.setUser("sa");
+//        source.setPassword("");
+//        source.setAcquireRetryAttempts(10);
+//        source.setCheckoutTimeout(5000);
+//        source.setBreakAfterAcquireFailure(false);
+//        source.setMaxPoolSize(30);
+//        source.setMinPoolSize(1);
+//        source.setIdleConnectionTestPeriod(10);
+//        source.setTestConnectionOnCheckin(true);
+//        cfg.setDataSource(source);
+//        EntityManagerFactory programmaticEmf = cfg.buildEntityManagerFactory();
+//        EntityManager manager = programmaticEmf.createEntityManager();
+//        Person person = new Person("john", "doe", "null");
+//        EntityTransaction tx = manager.getTransaction();
+//        tx.begin();
+//        manager.persist(person);
+//        manager.flush();
+//        tx.commit();
+//        manager.close();
+//        programmaticEmf.close();
+//        source.close();
+//    }
 
 //    public void testConnection() {
 //        Connection connection = null;
