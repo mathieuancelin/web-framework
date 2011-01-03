@@ -32,6 +32,7 @@ import cx.ath.mancel01.webframework.view.XML;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -51,15 +52,25 @@ public class MyController {
     @Inject
     private Request request;
 
+    @Inject
+    private EntityManager em;
+
     @Path("/")
     public View index() {
         List<String> numbers = new ArrayList<String>();
         numbers.add("one");
         numbers.add("two");
         numbers.add("three");
+        em.persist(new Person("john", "doe", "null"));
         return new View()
                 .param("message", service.hello("One eyed Jack"))
                 .param("numbers", numbers).param("request", request);
+    }
+
+    @Path("/person/all")
+    public void findall() {
+        List<Person> persons = em.createQuery("select p from Person p").getResultList();
+        Render.view("findall.html").param("persons", persons).go();
     }
 
     @Path("/get/{id}")
