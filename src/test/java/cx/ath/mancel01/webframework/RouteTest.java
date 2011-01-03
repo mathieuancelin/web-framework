@@ -16,10 +16,8 @@
  */
 package cx.ath.mancel01.webframework;
 
-import cx.ath.mancel01.webframework.data.JPASource;
+import cx.ath.mancel01.webframework.data.JPAService;
 import cx.ath.mancel01.webframework.routing.Param;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
@@ -50,7 +48,7 @@ public class RouteTest {
 
     @Test
     public void testDB() throws Exception {
-        JPASource source = new JPASource();
+        JPAService source = JPAService.getInstance();
         source.launchTestServer();
         source.launchJPA();
         source.stopTestServer();
