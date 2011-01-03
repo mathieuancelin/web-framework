@@ -97,7 +97,8 @@ public class RequestCompiler {
             ErrorOutputStream err = new ErrorOutputStream();
             javac.run(null, null, err, argsTab);
             if (!err.toString().isEmpty()) {
-                throw new CompilationException(err.toString());
+                if (!err.toString().contains("Note: Recompile with -Xlint")) // TODO : real analysis
+                    throw new CompilationException(err.toString());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -134,7 +135,8 @@ public class RequestCompiler {
                     , WebFramework.classpath
                     , source.getAbsolutePath());
             if (!err.toString().isEmpty()) {
-                throw new CompilationException(err.toString());
+                if (!err.toString().contains("Note: Recompile with -Xlint")) // TODO : real analysis
+                    throw new CompilationException(err.toString());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
