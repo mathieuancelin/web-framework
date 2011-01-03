@@ -35,14 +35,16 @@ public abstract class Model<T> {
 
     public Model() {
         if (helper == null) {
-            Throwable t = new Throwable();
-            String name = t.getStackTrace()[1].getClassName();
-            try {
-                clazz = Class.forName(name);
-                helper = DataHelper.forType(clazz);
-            } catch (ClassNotFoundException ex) {
-                ex.printStackTrace();
-            }
+            clazz = getClass();
+            helper = DataHelper.forType(clazz);
+//            Throwable t = new Throwable();
+//            String name = t.getStackTrace()[1].getClassName();
+//            try {
+//                clazz = Class.forName(name);
+//                helper = DataHelper.forType(clazz);
+//            } catch (ClassNotFoundException ex) {
+//                ex.printStackTrace();
+//            }
         }
     }
 

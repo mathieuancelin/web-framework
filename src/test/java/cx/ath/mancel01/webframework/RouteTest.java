@@ -48,10 +48,11 @@ public class RouteTest {
 
     @Test
     public void testDB() throws Exception {
-        JPAService source = JPAService.getInstance();
-        source.launchDevelopementServer();
-        source.launchJPA();
-        source.stopDevelopementServer();
+//        JPAService source = JPAService.getInstance();
+//        source.launchDevelopementServer();
+//        source.launchJPA();
+//        source.stopDevelopementServer();
+        Truc t = new Truc();
     }
 
     private static void showParams(String url) {
