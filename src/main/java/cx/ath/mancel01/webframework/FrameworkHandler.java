@@ -102,6 +102,8 @@ public class FrameworkHandler {
     }
 
     public void stop() {
+        CacheService.stop();
+        JPAService.stop();
         this.started = false;
         this.injector.triggerLifecycleDestroyCallbacks();
     }
@@ -151,6 +153,7 @@ public class FrameworkHandler {
         String methodName = webMethod.getMethod().getName();
         Binding devControllerBinding = null;
         InjectorImpl devInjector = null;
+        JPAService.getInstance().startTx();
         if (WebFramework.dev) {
             try {
                 router.reset();
@@ -183,6 +186,7 @@ public class FrameworkHandler {
         Object ret = webMethod.invoke(request, controller);
         WebFramework.logger.trace("controller method invocation : {} ms."
                 , (System.currentTimeMillis() - start));
+        JPAService.getInstance().stopTx(false);
         if (ret instanceof Renderable) {
             Renderable renderable = (Renderable) ret;
             if (renderable instanceof View) { // ok that's not really OO but what the hell !
