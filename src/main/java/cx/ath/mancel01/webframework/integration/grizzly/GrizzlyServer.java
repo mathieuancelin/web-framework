@@ -21,11 +21,9 @@ import com.sun.grizzly.tcp.http11.GrizzlyAdapter;
 import com.sun.grizzly.tcp.http11.GrizzlyRequest;
 import com.sun.grizzly.tcp.http11.GrizzlyResponse;
 import cx.ath.mancel01.webframework.FrameworkHandler;
-import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
-import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.File;
 import java.io.IOException;
 
@@ -43,7 +41,7 @@ public class GrizzlyServer {
     private GrizzlyWebServer server;
     private final int port;
     private final String rootContext;
-    private FrameworkHandler dispatcher;
+    private FrameworkHandler handler;
     private final String binder;
     private final File rootDir;
 
@@ -67,7 +65,7 @@ public class GrizzlyServer {
                     try {
                         Request req = GrizzlyBinder.extractRequest(request);
                         Request.current.set(req);
-                        Response res = dispatcher.process(req);
+                        Response res = handler.process(req);
                         Response.current.set(res);
                         GrizzlyBinder.flushResponse(req, res, response);
                     } catch (Exception e) {
@@ -84,10 +82,10 @@ public class GrizzlyServer {
             };
             server.setMaxThreads(NTHREADS);
             server.addGrizzlyAdapter(adapter, new String[]{rootContext});
-            dispatcher = new FrameworkHandler(binder, rootContext, rootDir);
-            Runtime.getRuntime().addShutdownHook(new Shutdown(dispatcher));
+            handler = new FrameworkHandler(binder, rootContext, rootDir);
+            Runtime.getRuntime().addShutdownHook(new Shutdown(handler));
             server.start();
-            dispatcher.start();
+            handler.start();
             WebFramework.logger.info("starting http server ... done !");
         } catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -96,7 +94,7 @@ public class GrizzlyServer {
 
     public void stop() {
         server.stop();
-        dispatcher.stop();
+        handler.stop();
         WebFramework.logger.info("stopping http server ... done !");
     }
 

@@ -33,16 +33,16 @@ public class GrizzlyServerLauncher {
             if (args.length < 1) {
                 throw new RuntimeException("Can't work without the path of the app.");
             }
-            GrizzlyServer dispatcher
+            GrizzlyServer server
                     = new GrizzlyServer(8080,
                     "/", WebBinder.BINDER_DEFAULT_NAME, new File(args[0]));
-            dispatcher.start();
+            server.start();
             WebFramework.logger.info("running the application in dev mode");
             WebFramework.logger.info("listening for HTTP on port 8080");
             WebFramework.logger.info("press return key or Ctrl-C to stop the http server ...\n\n");
             char c = '\0';
             while ((c = (char) System.in.read()) !='\n') {}
-            dispatcher.stop();
+            server.stop();
             System.exit(0);
         } catch (IOException ex) {
             ex.printStackTrace();
