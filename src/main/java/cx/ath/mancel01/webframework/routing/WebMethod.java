@@ -17,6 +17,7 @@
 
 package cx.ath.mancel01.webframework.routing;
 
+import cx.ath.mancel01.webframework.data.JPAService;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.webframework.http.Request;
 import java.lang.reflect.Method;
@@ -97,6 +98,7 @@ public class WebMethod {
                 BreakFlowException br = (BreakFlowException) ex.getCause();
                 ret = br.getRenderable();
             } else {
+                JPAService.getInstance().stopTx(true);
                 throw new RuntimeException(ex);
             }
         }
