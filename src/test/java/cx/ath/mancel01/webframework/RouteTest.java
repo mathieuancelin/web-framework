@@ -16,7 +16,7 @@
  */
 package cx.ath.mancel01.webframework;
 
-import cx.ath.mancel01.webframework.data.JPAService;
+import cx.ath.mancel01.webframework.compiler.AlphaClassloader;
 import cx.ath.mancel01.webframework.routing.Param;
 import org.junit.Test;
 
@@ -53,6 +53,13 @@ public class RouteTest {
 //        source.launchJPA();
 //        source.stopDevelopementServer();
         Truc t = new Truc();
+    }
+
+    @Test
+    public void testClassLoader() throws Exception {
+//        AlphaClassloader loader = new AlphaClassloader();
+//        Class<?> clazz = loader.loadClass("app.controller.MyController");
+//        System.out.println(clazz.getName());
     }
 
     private static void showParams(String url) {
