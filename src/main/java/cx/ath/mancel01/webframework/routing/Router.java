@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import javax.ws.rs.Path;
 
@@ -152,5 +153,9 @@ public class Router {
         } else {
             throw new RuntimeException("the url " + url + " is already registered.");
         }
+    }
+
+    public Set<String> getRoutes() {
+        return registeredControllers.keySet();
     }
 }

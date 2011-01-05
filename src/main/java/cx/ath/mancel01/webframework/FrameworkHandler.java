@@ -31,6 +31,7 @@ import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotInt
 import cx.ath.mancel01.webframework.routing.Router;
 import cx.ath.mancel01.webframework.routing.WebMethod;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
+import cx.ath.mancel01.webframework.view.FrameworkPage;
 import cx.ath.mancel01.webframework.view.HtmlPage;
 import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
@@ -136,11 +137,27 @@ public class FrameworkHandler {
                 }
                 if (path.startsWith("/public/")) {
                     File asked = new File(publicResources, path.replace("/public/", ""));
-                    res.direct = asked;
+                    if (asked.exists()) {
+                        res.direct = asked;
+                    } else {
+                        WebFramework.logger.warn("file not found : {}", path);
+                    }
                     res.out = new ByteArrayOutputStream();
                     return res;
                 }
-                WebMethod webMethod = router.route(request, contextRoot);
+                WebMethod webMethod = null;
+                try {
+                    webMethod = router.route(request, contextRoot);
+                } catch (Throwable t) {
+                    StringBuilder routes = new StringBuilder();
+                    for (String route : router.getRoutes()) {
+                        routes.append(route);
+                        routes.append("<br/>");
+                    }
+                    return new FrameworkPage("Can't find route for " + path,
+                            "<b>registered routes are</b> :<br/><br/>"
+                            + routes.toString()).render();
+                }
                 WebFramework.logger.trace("routing : {} ms."
                     , (System.currentTimeMillis() - start));
                 start = System.currentTimeMillis();
@@ -151,9 +168,9 @@ public class FrameworkHandler {
         } catch (Throwable t) {
             final Throwable ex = t;
             t.printStackTrace();
-            return new HtmlPage("Error"
-                    , "<h1>Ooops, an error occured : "
-                    + ex.getMessage() + "</h1>").render();
+            return new FrameworkPage("Error"
+                    , "Ooops, an error occured : <br/><br/>"
+                    + ex.getMessage()).render();
         }
     }
 
@@ -202,7 +219,7 @@ public class FrameworkHandler {
                 , (System.currentTimeMillis() - start));
         JPAService.getInstance().stopTx(false);
         if (ret == null) {
-            return new HtmlPage("Error", "<h1>Ooops</h1> it seems that your controller method doesn't return"
+            return new FrameworkPage("Nothing returned", "<h1>Ooops</h1> it seems that your controller method doesn't return"
                     + " anything.<br/><br/>If you use the Render api, don't forget to call the go() method.").render();
         }
         if (ret instanceof Renderable) {
@@ -213,8 +230,8 @@ public class FrameworkHandler {
             }
             return renderable.render();
         } else {
-            return new HtmlPage("Can't render", "<h1>Ooops, can't render an object of type : "
-                    + ret.getClass().getName() + "</h1>").render();
+            return new FrameworkPage("Oooops, can't render", "can't render an object of type : <br/><br/>"
+                    + ret.getClass().getName()).render();
         }
     }
 
@@ -231,12 +248,10 @@ public class FrameworkHandler {
             }
         }
         if (cause == null) { // TODO : error page with stacktrace
-            return new HtmlPage("Error"
-                , "<h1>Error :</h1><br/>"
-                + original.getMessage().replace("\n", "<br/>")).render();
+            return new FrameworkPage("Error",
+                original.getMessage().replace("\n", "<br/>")).render();
         }
-        return new HtmlPage("Compilation error"
-                , "<h1>Compilation error :</h1><br/>"
-                + cause.getMessage().replace("\n", "<br/>")).render();
+        return new FrameworkPage("Compilation error"
+                , cause.getMessage().replace("\n", "<br/>")).render();
     }
 }
