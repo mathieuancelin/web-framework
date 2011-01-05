@@ -201,6 +201,10 @@ public class FrameworkHandler {
         WebFramework.logger.trace("controller method invocation : {} ms."
                 , (System.currentTimeMillis() - start));
         JPAService.getInstance().stopTx(false);
+        if (ret == null) {
+            return new HtmlPage("Error", "<h1>Ooops</h1> it seems that your controller method doesn't return"
+                    + " anything.<br/><br/>If you use the Render api, don't forget to call the go() method.").render();
+        }
         if (ret instanceof Renderable) {
             Renderable renderable = (Renderable) ret;
             if (renderable instanceof View) { // ok that's not really OO but what the hell !
