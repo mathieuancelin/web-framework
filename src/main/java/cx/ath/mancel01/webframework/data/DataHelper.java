@@ -17,7 +17,6 @@
 
 package cx.ath.mancel01.webframework.data;
 
-import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
