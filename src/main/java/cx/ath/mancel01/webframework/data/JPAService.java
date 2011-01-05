@@ -20,6 +20,8 @@ import app.model.Person;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import cx.ath.mancel01.webframework.WebFramework;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -46,6 +48,8 @@ public class JPAService {
 
     private EntityManagerFactory emf;
 
+    private TxManager txManager;
+
     public static ThreadLocal<EntityManager> currentEm =
             new ThreadLocal<EntityManager>() {
 
@@ -55,7 +59,18 @@ public class JPAService {
         }
     };
 
-    private JPAService() {}
+    private static final ThreadLocal<Boolean> rollbackFlag =
+            new ThreadLocal<Boolean>() {
+
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
+
+    private JPAService() {
+        this.txManager = new TxManager();
+    }
 
     public static synchronized JPAService getInstance() {
         if (INSTANCE == null) {
@@ -103,6 +118,7 @@ public class JPAService {
         manager.setFlushMode(FlushModeType.COMMIT);
         manager.getTransaction().begin();
         JPAService.currentEm.set(manager);
+        JPAService.rollbackFlag.set(false);
     }
 
     public void stopTx(boolean rollback) {
@@ -111,11 +127,16 @@ public class JPAService {
             if (rollback) {
                 manager.getTransaction().rollback();
             } else {
-                manager.getTransaction().commit();
+                if (JPAService.rollbackFlag.get()) {
+                    manager.getTransaction().rollback();
+                } else {
+                    manager.getTransaction().commit();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        JPAService.rollbackFlag.remove();
         JPAService.currentEm.remove();
     }
 
@@ -181,6 +202,28 @@ public class JPAService {
         cfg.addAnnotatedClass(Person.class);
         cfg.setDataSource(dataSource);
         this.emf = cfg.buildEntityManagerFactory();
+    }
+
+    public TxManager getTxManager() {
+        return txManager;
+    }
+
+    public class TxManager {
+        public void rollboackCurrentTx() {
+            JPAService.rollbackFlag.set(true);
+        }
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public Connection getConnection() {
+        try {
+            return dataSource.getConnection();
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private static void findEntities(ArrayList<String> builder, File file) {

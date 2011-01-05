@@ -23,10 +23,13 @@ import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.cache.CacheService;
 import cx.ath.mancel01.webframework.data.JPAService;
+import cx.ath.mancel01.webframework.data.JPAService.TxManager;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import java.sql.Connection;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 
 /**
@@ -77,11 +80,35 @@ public class DependencyShotIntegrator {
                     return JPAService.currentEm.get();
                 }
             }).build();
+        Binding datasourceBinding =
+            BindingBuilder.prepareBindingThat().bind(DataSource.class).providedBy(new Provider<DataSource>() {
+                @Override
+                public DataSource get() {
+                    return JPAService.getInstance().getDataSource();
+                }
+            }).build();
+        Binding connectionBinding =
+            BindingBuilder.prepareBindingThat().bind(Connection.class).providedBy(new Provider<Connection>() {
+                @Override
+                public Connection get() {
+                    return JPAService.getInstance().getConnection();
+                }
+            }).build();
+        Binding txManagerBinding =
+            BindingBuilder.prepareBindingThat().bind(TxManager.class).providedBy(new Provider<TxManager>() {
+                @Override
+                public TxManager get() {
+                    return JPAService.getInstance().getTxManager();
+                }
+            }).build();
         injector.bindings().put(cacheBinding, cacheBinding);
         injector.bindings().put(responseBinding, responseBinding);
         injector.bindings().put(requestBinding, requestBinding);
         injector.bindings().put(loggerBinding, loggerBinding);
         injector.bindings().put(emBinding, emBinding);
+        injector.bindings().put(datasourceBinding, datasourceBinding);
+        injector.bindings().put(connectionBinding, connectionBinding);
+        injector.bindings().put(txManagerBinding, txManagerBinding);
     }
 
 }
