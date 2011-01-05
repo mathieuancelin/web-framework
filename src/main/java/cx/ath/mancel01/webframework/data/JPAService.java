@@ -40,7 +40,7 @@ public class JPAService {
 
     private static JPAService INSTANCE;
 
-    private Server hsqlServer = null;
+//    private Server hsqlServer = null;
 
     private boolean started = false;
 
@@ -81,15 +81,15 @@ public class JPAService {
 
     public static synchronized void start() {
         JPAService service = getInstance();
-        //if (WebFramework.dev) {
-            String db =  WebFramework.config.getProperty("db.dev");
-            if (db != null) {
-                if (db.equals("true")) {
-                    service.launchDevelopementServer();
-                    service.started = true;
-                }
-            }
-        //}
+//        //if (WebFramework.dev) {
+//            String db =  WebFramework.config.getProperty("db.dev");
+//            if (db != null) {
+//                if (db.equals("true")) {
+//                    //service.launchDevelopementServer();
+//                    service.started = true;
+//                }
+//            }
+//        //}
         try {
             service.launchJPA();
         } catch (Exception ex) {
@@ -100,7 +100,7 @@ public class JPAService {
 
     public static synchronized void stop() {
         JPAService service = getInstance();
-        service.stopDevelopementServer();
+//        service.stopDevelopementServer();
         if (service.emf != null)
             service.emf.close();
         if (service.dataSource instanceof ComboPooledDataSource) {
@@ -140,26 +140,25 @@ public class JPAService {
         JPAService.currentEm.remove();
     }
 
-    public void launchDevelopementServer() {
-        try {
-
-            hsqlServer = new Server();
-            hsqlServer.setLogWriter(null);
-            hsqlServer.setSilent(true);
-            hsqlServer.setDatabaseName(0, "webframeworkdb");
-            hsqlServer.setDatabasePath(0, "file:target/db/webframeworkdb");
-            hsqlServer.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void stopDevelopementServer() {
-        if (hsqlServer != null) {
-            hsqlServer.shutdown();
-            hsqlServer.stop();
-        }
-    }
+//    public void launchDevelopementServer() {
+//        try {
+//            hsqlServer = new Server();
+//            hsqlServer.setLogWriter(null);
+//            hsqlServer.setSilent(true);
+//            hsqlServer.setDatabaseName(0, "webframeworkdb");
+//            hsqlServer.setDatabasePath(0, "file:target/db/webframeworkdb");
+//            hsqlServer.start();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    public void stopDevelopementServer() {
+//        if (hsqlServer != null) {
+//            hsqlServer.shutdown();
+//            hsqlServer.stop();
+//        }
+//    }
 
     public void launchJPA() throws Exception {
         System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
@@ -167,9 +166,11 @@ public class JPAService {
         Ejb3Configuration cfg = new Ejb3Configuration();
         if (WebFramework.config.getProperty("db.dataSource") == null) {
             ComboPooledDataSource intDataSource = new ComboPooledDataSource();
-            if (hsqlServer != null) {
+            if ("true".equals(WebFramework.config.getProperty("db.dev", "true"))) {
+            //if (hsqlServer != null) {
                 intDataSource.setDriverClass("org.hsqldb.jdbcDriver");
-                intDataSource.setJdbcUrl("jdbc:hsqldb:hsql://localhost/webframeworkdb");
+                //intDataSource.setJdbcUrl("jdbc:hsqldb:hsql://localhost/webframeworkdb");
+                intDataSource.setJdbcUrl("jdbc:hsqldb:file:" + (new File(WebFramework.DB, "webframeworkdb").getAbsolutePath()));
                 intDataSource.setUser("sa");
                 intDataSource.setPassword("");
                 cfg.setProperty("hibernate.hbm2ddl.auto", "create-drop");          
