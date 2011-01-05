@@ -98,7 +98,8 @@ public class View extends Renderable {
                 name = methodName + ".html";
             }
             // TODO : change for servlet based
-            name = "src/main/webapp/views/" + controllerClass.getSimpleName().toLowerCase() + "/" + name;
+            //name = "src/main/webapp/views/" + controllerClass.getSimpleName().toLowerCase() + "/" + name;
+            name = controllerClass.getSimpleName().toLowerCase() + "/" + name;
             renderer.render(grabber.getFile(name), this.getContext(), res.out);
             WebFramework.logger.trace("template view rendering : {} ms.", System.currentTimeMillis() - start);
             return res;

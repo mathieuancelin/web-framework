@@ -30,6 +30,7 @@ import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.routing.Router;
 import cx.ath.mancel01.webframework.routing.WebMethod;
+import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import cx.ath.mancel01.webframework.view.HtmlPage;
 import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
@@ -52,8 +53,11 @@ public class FrameworkHandler {
     private Class<? extends Binder> binderClass;
     private String binderClassName;
     private Router router;
+    private FileGrabber viewGrabber;
+    //private AlphaClassloader loader;
 
-    public FrameworkHandler(String binderClassName, String contextRoot, File rootDir) {
+    public FrameworkHandler(String binderClassName, String contextRoot, 
+            File rootDir, FileGrabber viewGrabber) {
         if ("".equals(contextRoot)) {
             throw new RuntimeException("Can't have an empty context root");
         }
@@ -61,6 +65,7 @@ public class FrameworkHandler {
         this.rootDir = rootDir;
         this.contextRoot = contextRoot;        
         this.router = new Router();
+        this.viewGrabber = viewGrabber;
     }
 
     private void configureInjector(InjectorImpl inj) {
@@ -77,6 +82,7 @@ public class FrameworkHandler {
 
     public void start() {
         WebFramework.init(rootDir);
+        //this.loader = new AlphaClassloader();
         publicResources = WebFramework.PUBLIC_RESOURCES;
         try {
             if (!WebFramework.dev) {
@@ -86,6 +92,7 @@ public class FrameworkHandler {
             } else {
                 this.binderClass =
                     (Class<? extends Binder>)
+//                    (Class<? extends Binder>) loader.loadClass(binderClassName);
                         new WebFrameworkClassLoader(getClass().getClassLoader())
                             .loadClass(binderClassName);
             }
@@ -115,6 +122,7 @@ public class FrameworkHandler {
     public Response process(Request request) {
         try {
             if (started) {
+                //Thread.currentThread().setContextClassLoader(loader);
                 WebFramework.logger.trace("asked resource => {}", request.path);
                 long start = System.currentTimeMillis();
                 Response res = new Response();
@@ -160,10 +168,12 @@ public class FrameworkHandler {
             try {
                 router.reset();
                 Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClassName);
+//                Class devBinderClass = loader.loadClass(binderClassName);
                 WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
                 devBinder.setDispatcher(this);
                 devInjector = DependencyShot.getInjector(devBinder);
                 configureInjector(devInjector);
+//                controllerClass = loader.loadClass(controllerClass.getName());
                 controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
             } catch (Throwable ex) {
                 return createErrorResponse(ex);
@@ -194,7 +204,8 @@ public class FrameworkHandler {
         if (ret instanceof Renderable) {
             Renderable renderable = (Renderable) ret;
             if (renderable instanceof View) { // ok that's not really OO but what the hell !
-                return ((View) renderable).render(methodName, controllerClass, WebFramework.grabber);
+//                return ((View) renderable).render(methodName, controllerClass, WebFramework.grabber);
+                return ((View) renderable).render(methodName, controllerClass, viewGrabber);
             }
             return renderable.render();
         } else {

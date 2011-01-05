@@ -47,7 +47,15 @@ public class ServletDispatcher extends HttpServlet {
         }
         final ServletContext context = this.getServletContext();
         dispatcher = new FrameworkHandler(configClassName,
-            getServletContext().getContextPath(), new File(getServletContext().getRealPath("")));
+            getServletContext().getContextPath()
+            , new File(getServletContext().getRealPath("")), new FileGrabber() {
+
+                @Override
+                public File getFile(String file) {
+                    return new File(getServletContext().getRealPath("views/" + file));
+                }
+
+            });
         dispatcher.start();
     }
 

@@ -53,8 +53,6 @@ public class FileUtils {
     }
 
     public interface FileGrabber {
-
         File getFile(String file);
-
     }
 }

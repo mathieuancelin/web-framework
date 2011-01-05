@@ -24,6 +24,7 @@ import cx.ath.mancel01.webframework.FrameworkHandler;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.File;
 import java.io.IOException;
 
@@ -82,7 +83,14 @@ public class GrizzlyServer {
             };
             server.setMaxThreads(NTHREADS);
             server.addGrizzlyAdapter(adapter, new String[]{rootContext});
-            handler = new FrameworkHandler(binder, rootContext, rootDir);
+            handler = new FrameworkHandler(binder, rootContext, rootDir, new FileGrabber() {
+
+                @Override
+                public File getFile(String file) {
+                    return new File(rootDir, "src/main/webapp/views/" + file);
+                }
+
+            });
             Runtime.getRuntime().addShutdownHook(new Shutdown(handler));
             server.start();
             handler.start();

@@ -85,7 +85,14 @@ public class WebServer {
                     }
                 }
             });
-            dispatcher = new FrameworkHandler(binder, rootContext, rootDir);
+            dispatcher = new FrameworkHandler(binder, rootContext, rootDir, new FileGrabber() {
+
+                @Override
+                public File getFile(String file) {
+                    return new File(rootDir, "src/main/webapp/views/" + file);
+                }
+
+            });
             Runtime.getRuntime().addShutdownHook(new Shutdown(dispatcher));
             server.start();
             dispatcher.start();
