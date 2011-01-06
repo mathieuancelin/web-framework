@@ -17,6 +17,7 @@
 package cx.ath.mancel01.webframework.routing;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.http.Request;
@@ -27,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -146,13 +148,15 @@ public class Router {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
                     public Object map(String value) {
-                        Gson gson = new Gson();
+                        System.out.println(value);
+                        Gson gson = new GsonBuilder()
+                            .excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT, Modifier.VOLATILE)
+                            .create();
                         return gson.fromJson(value, paramTypes[0]);
                     }
                 });
                 webMethod.getParams().put(param.name(), param);
-            }
-            if (MediaType.APPLICATION_OCTET_STREAM.equals(type)) {
+            } else if (MediaType.APPLICATION_OCTET_STREAM.equals(type)) {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
                     public Object map(String value) {

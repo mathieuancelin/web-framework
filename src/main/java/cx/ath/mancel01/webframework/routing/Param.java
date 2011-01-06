@@ -100,6 +100,7 @@ public class Param {
             ret = URLDecoder.decode((String) ret);
         } else if (this.paramType.equals(ParamType.BODY)) {
             ret = mapper.map(req.body()); // Map with type according to kind of value (json, xml, txt, bytes)
+            return ret;
             // not with mappropertyvalue
         }
         return mapProperlyValue((String) ret, this.type);

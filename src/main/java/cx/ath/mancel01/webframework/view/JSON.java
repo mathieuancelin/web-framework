@@ -17,9 +17,11 @@
 package cx.ath.mancel01.webframework.view;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Response;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Modifier;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -45,7 +47,10 @@ public class JSON extends Renderable {
         Response res = new Response();
         res.out = new ByteArrayOutputStream();
         res.contentType = this.getContentType();
-        Gson gson = new Gson();
+        //Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT, Modifier.VOLATILE)
+            .create();
         String jsonRepresentation = gson.toJson(this.getJsonObject());
         res.out.write(jsonRepresentation.getBytes(), 0, jsonRepresentation.length());
         WebFramework.logger.trace("JSON object rendering : {} ms.", (System.currentTimeMillis() - start));
