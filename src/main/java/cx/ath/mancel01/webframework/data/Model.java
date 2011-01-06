@@ -28,10 +28,10 @@ import javax.persistence.Transient;
 public abstract class Model<T> {
     
     @Transient
-    private DataHelper helper;
+    private transient DataHelper helper;
 
     @Transient
-    private Class clazz;
+    private transient Class clazz;
 
     public Model() {
         if (helper == null) {

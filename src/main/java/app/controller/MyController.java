@@ -64,7 +64,6 @@ public class MyController {
         numbers.add("one");
         numbers.add("two");
         numbers.add("three");
-        em.persist(new Person("john", "doe", "null"));
         return new View()
                 .param("message", service.hello("One eyed Jack"))
                 .param("numbers", numbers).param("request", request);
@@ -73,7 +72,7 @@ public class MyController {
     @Path("/person/all")
     public void findall() {
         List<Person> persons = Person.jpa.all().getResultList();
-        Render.view("findall.html").param("persons", persons).go();
+        Render.view("findall.html").param("persons", persons).param("request", request).go();
     }
 
     @Path("/get/{id}")
@@ -88,9 +87,9 @@ public class MyController {
 
     @Path("/put")
     @PUT
-    @Consumes({MediaType.TEXT_PLAIN})
-    public void putValue(String value) {
-        System.out.println("send : " + value);
+    @Consumes({MediaType.APPLICATION_JSON})
+    public void putValue(Person value) {
+        em.persist(value);
         Render.text("ok").go();
     }
 

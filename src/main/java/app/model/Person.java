@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Person extends Model {
 
     @Transient
-    public static DataHelper jpa = DataHelper.forType(Person.class);
+    public transient static DataHelper jpa = DataHelper.forType(Person.class);
 
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
