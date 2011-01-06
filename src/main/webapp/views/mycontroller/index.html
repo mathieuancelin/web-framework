@@ -23,7 +23,8 @@
                             <div class="post">
                                 <h2 class="title"><a href="#">${message}</a></h2>
                                 <div class="entry">
-                                    <p>${request.path}</p> <br/>
+                                    <p>${request?.path}</p>
+                                    <p>${request?.method}</p>
                                     <p>
                                         <% numbers.each { number -> %>
                                     <div>${number}</div>
