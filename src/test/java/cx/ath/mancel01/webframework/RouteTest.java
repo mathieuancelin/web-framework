@@ -57,14 +57,20 @@ public class RouteTest {
 
     @Test
     public void testClassLoader() throws Exception {
-//        AlphaClassloader loader = new AlphaClassloader();
-//        Class<?> clazz = loader.loadClass("app.controller.MyController");
-//        System.out.println(clazz.getName());
-        String methods = "()";
-        System.out.println("GET".matches(methods));
-        System.out.println("POST".matches(methods));
-        System.out.println("PUT".matches(methods));
-        System.out.println("DELETE".matches(methods));
+        String templateSet = "#{set title:'machin' /}";
+        String templateGet = "#{get title /}";
+        String templateScript = "%{ print 'troulala' }%";
+        String templateJQuery = "$.show(); $('#truc').show();";
+        String templateList = "#{list items:products, as:'product'}<br/>#{/list}";
+
+
+        templateScript = templateScript.replace("%{", "<%").replace("}%", "%>");
+        templateJQuery = templateJQuery.replace("$.", "\\$.").replace("$(", "\\$(");
+        templateList = templateList.replace("#{/list}", "<% } %>").replace("#{list items:", "<% ")
+                .replace(", as:'", ".each { ").replace("'}", " -> %>");
+        System.out.println(templateScript);
+        System.out.println(templateJQuery);
+        System.out.println(templateList);
     }
 
     private static void showParams(String url) {

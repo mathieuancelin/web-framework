@@ -82,6 +82,9 @@ public class View extends Renderable {
         this.methodName = methodName;
         this.controllerClass = controllerClass;
         this.grabber = grabber;
+        if (renderer.grabber == null) {
+            renderer.grabber = grabber;
+        }
         return render();
     }
 
