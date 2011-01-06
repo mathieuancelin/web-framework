@@ -33,9 +33,12 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
@@ -81,6 +84,14 @@ public class MyController {
     @Path("/post")
     public void postValue(@FormParam("value") String value, @FormParam("value2") String value2) {
         Render.text("input was : " + value + " " + value2).go();
+    }
+
+    @Path("/put")
+    @PUT
+    @Consumes({MediaType.TEXT_PLAIN})
+    public void putValue(String value) {
+        System.out.println("send : " + value);
+        Render.text("ok").go();
     }
 
     public View other() {

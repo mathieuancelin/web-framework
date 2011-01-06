@@ -44,6 +44,7 @@ public class Param {
     private final String urlRoute;
     private final ParamType paramType;
     private final Class<?> type;
+    private TypeMapper mapper;
 
     public Param(Annotation annotation, String urlRoute, Class<?> type) {
         if (annotation instanceof PathParam) {
@@ -61,6 +62,14 @@ public class Param {
         }
         this.urlRoute = urlRoute;
         this.type = type;
+    }
+
+    public Param(Class<?> type, String urlRoute, TypeMapper mapper) {
+        this.name = "param";
+        this.urlRoute = urlRoute;
+        this.paramType = ParamType.BODY;
+        this.type = type;
+        this.mapper = mapper;
     }
 
     public void setPathParamName(Matcher matcher) {
@@ -90,7 +99,7 @@ public class Param {
             ret = getQueryParam(this.name, "?" + req.body());
             ret = URLDecoder.decode((String) ret);
         } else if (this.paramType.equals(ParamType.BODY)) {
-            ret = null; // Map with type according to kind of value (json, xml, txt, bytes)
+            ret = mapper.map(req.body()); // Map with type according to kind of value (json, xml, txt, bytes)
             // not with mappropertyvalue
         }
         return mapProperlyValue((String) ret, this.type);
@@ -203,5 +212,9 @@ public class Param {
 
     public static String replaceParamsWithWildcard(String value) {
         return value.replaceAll("\\{[a-zA-Zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0-9]+\\}", "[a-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿA-Z0-9]+");
+    }
+
+    public interface TypeMapper {
+        Object map(String value);
     }
 }

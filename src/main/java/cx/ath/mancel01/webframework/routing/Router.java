@@ -16,9 +16,15 @@
  */
 package cx.ath.mancel01.webframework.routing;
 
+import com.google.gson.Gson;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.http.Request;
+import cx.ath.mancel01.webframework.routing.Param.TypeMapper;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,7 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 /**
  *
@@ -75,7 +86,7 @@ public class Router {
             } else {
                 prefix = "/" + clazz.getSimpleName().toLowerCase();
             }
-            
+
             for (Method method : clazz.getMethods()) {
                 if (!uselessMethods.contains(method.getName())) {
                     if (method.isAnnotationPresent(Path.class)) {
@@ -120,24 +131,112 @@ public class Router {
         } else {
             webMethod.setComparisonUrl("/" + Param.replaceParamsWithWildcard(url));
         }
-        Annotation[][] annotations = method.getParameterAnnotations();
-        Class<?>[] types = method.getParameterTypes();
-        if (annotations != null) {
-            for (int i = 0; i < annotations.length; i++) {
-                for (int j = 0; j < annotations[i].length; j++) {
-                    Annotation annotation = annotations[i][j];
-                    Param param = new Param(annotation, url, types[i]);
-                    webMethod.getParams().put(param.name(), param);
-                }
+        if (method.isAnnotationPresent(Consumes.class)) {
+            final Class<?>[] paramTypes = method.getParameterTypes();
+            if (paramTypes.length > 1) {
+                throw new RuntimeException("can't register an @Consumes method with more than one parameter");
             }
-            Matcher matcher = Param.PATH_PARAM_DECLARATION.matcher(url);
-            while (matcher.find()) {
-                String name = matcher.group().replaceAll("\\{|\\}", "");
-                if (webMethod.getParams().containsKey(name)) {
-                    webMethod.getParams().get(name).setPathParamName(matcher);
-                } else {
-                    throw new RuntimeException("the @Path on method " + method.getName()
-                        + " is missing path param : " + name);
+            Consumes consumes = method.getAnnotation(Consumes.class);
+            String[] types = consumes.value();
+            if (types.length > 1) {
+                throw new RuntimeException("can't register an @Consumes method with more than consume type");
+            }
+            String type = types[0];
+            if (MediaType.APPLICATION_JSON.equals(type)) {
+                Param param = new Param(paramTypes[0], url, new TypeMapper() {
+                    @Override
+                    public Object map(String value) {
+                        Gson gson = new Gson();
+                        return gson.fromJson(value, paramTypes[0]);
+                    }
+                });
+                webMethod.getParams().put(param.name(), param);
+            }
+            if (MediaType.APPLICATION_OCTET_STREAM.equals(type)) {
+                Param param = new Param(paramTypes[0], url, new TypeMapper() {
+                    @Override
+                    public Object map(String value) {
+                        FileOutputStream out = null;
+                        try {
+                            String path = WebFramework.TARGET.getAbsolutePath()
+                                    + "/file" + System.currentTimeMillis();
+                            out = new FileOutputStream(path);
+                            out.write(value.getBytes());
+                            out.close();
+                            return new File(path);
+                        } catch (Exception ex) {
+                            try {
+                                out.close();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                });
+                webMethod.getParams().put(param.name(), param);
+            } else if (MediaType.APPLICATION_XML.equals(type)) {
+                Param param = new Param(paramTypes[0], url, new TypeMapper() {
+                    @Override
+                    public Object map(String value) {
+                        try {
+                            JAXBContext jc = JAXBContext.newInstance(paramTypes[0]);
+                            Unmarshaller unmarshaller = jc.createUnmarshaller();
+                            ByteArrayInputStream input = new ByteArrayInputStream(value.getBytes());
+                            return unmarshaller.unmarshal(input);
+                        } catch (JAXBException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                });
+                webMethod.getParams().put(param.name(), param);
+            } else if (MediaType.TEXT_HTML.equals(type)) {
+                Param param = new Param(paramTypes[0], url, new TypeMapper() {
+                    @Override
+                    public Object map(String value) {
+                        return value;
+                    }
+                });
+                webMethod.getParams().put(param.name(), param);
+            } else if (MediaType.TEXT_PLAIN.equals(type)) {
+                Param param = new Param(paramTypes[0], url, new TypeMapper() {
+                    @Override
+                    public Object map(String value) {
+                        return value;
+                    }
+                });
+                webMethod.getParams().put(param.name(), param);
+            } else if (MediaType.TEXT_XML.equals(type)) {
+                Param param = new Param(paramTypes[0], url, new TypeMapper() {
+                    @Override
+                    public Object map(String value) {
+                        return value;
+                    }
+                });
+                webMethod.getParams().put(param.name(), param);
+            } else {
+                throw new RuntimeException("unsupported @Consumes type");
+            }
+        } else {
+            Annotation[][] annotations = method.getParameterAnnotations();
+            Class<?>[] types = method.getParameterTypes();
+            if (annotations != null) {
+                for (int i = 0; i < annotations.length; i++) {
+                    for (int j = 0; j < annotations[i].length; j++) {
+                        Annotation annotation = annotations[i][j];
+                        Param param = new Param(annotation, url, types[i]);
+                        webMethod.getParams().put(param.name(), param);
+                    }
+                }
+                Matcher matcher = Param.PATH_PARAM_DECLARATION.matcher(url);
+                while (matcher.find()) {
+                    String name = matcher.group().replaceAll("\\{|\\}", "");
+                    if (webMethod.getParams().containsKey(name)) {
+                        webMethod.getParams().get(name).setPathParamName(matcher);
+                    } else {
+                        throw new RuntimeException("the @Path on method " + method.getName()
+                                + " is missing path param : " + name);
+                    }
                 }
             }
         }
