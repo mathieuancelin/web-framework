@@ -60,6 +60,11 @@ public class RouteTest {
 //        AlphaClassloader loader = new AlphaClassloader();
 //        Class<?> clazz = loader.loadClass("app.controller.MyController");
 //        System.out.println(clazz.getName());
+        String methods = "()";
+        System.out.println("GET".matches(methods));
+        System.out.println("POST".matches(methods));
+        System.out.println("PUT".matches(methods));
+        System.out.println("DELETE".matches(methods));
     }
 
     private static void showParams(String url) {
