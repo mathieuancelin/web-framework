@@ -74,7 +74,7 @@ public class MyController {
     }
 
     @Path("/get/{id}")
-    public void get(@PathParam("id") String id) {
+    public void get(@PathParam("id") int id) {
         Render.text("ok : " + id).go();
     }
 
