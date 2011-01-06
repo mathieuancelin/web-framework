@@ -91,12 +91,83 @@ public class Param {
             ret = URLDecoder.decode((String) ret);
         } else if (this.paramType.equals(ParamType.BODY)) {
             ret = null; // Map with type according to kind of value (json, xml, txt, bytes)
+            // not with mappropertyvalue
         }
-        return mapProperlyValue(ret);
+        return mapProperlyValue((String) ret, this.type);
     }
 
-    private Object mapProperlyValue(Object value) {
+    private Object mapProperlyValue(String value, Class<?> type) {
         // TODO : map simple types (string, integer, etc ...) correctly
+        if (type.equals(Byte.TYPE)) {
+            if (value != null) {
+                return Byte.valueOf(value);
+            } else {
+                return Byte.MIN_VALUE;
+            }
+        }
+        if (type.equals(Short.TYPE)) {
+            if (value != null) {
+                return Short.valueOf(value);
+            } else {
+                return Short.MIN_VALUE;
+            }
+        }
+        if (type.equals(Integer.TYPE)) {
+            if (value != null) {
+                return Integer.valueOf(value);
+            } else {
+                return Integer.MIN_VALUE;
+            }
+        }
+        if (type.equals(Long.TYPE)) {
+            if (value != null) {
+                return Long.valueOf(value);
+            } else {
+                return Long.MIN_VALUE;
+            }
+        }
+        if (type.equals(Float.TYPE)) {
+            if (value != null) {
+                return Float.valueOf(value);
+            } else {
+                return Float.MIN_VALUE;
+            }
+        }
+        if (type.equals(Double.TYPE)) {
+            if (value != null) {
+                return Double.valueOf(value);
+            } else {
+                return Double.MIN_VALUE;
+            }
+        }
+        if (type.equals(Boolean.TYPE)) {
+            if (value != null) {
+                return Boolean.valueOf(value);
+            } else {
+                return false;
+            }
+        }
+        if (type.equals(Byte.class)) {
+            return Byte.valueOf(value);
+        }
+        if (type.equals(Short.class)) {
+            return Short.valueOf(value);
+        }
+        if (type.equals(Integer.class)) {
+            return Integer.valueOf(value);
+        }
+        if (type.equals(Long.class)) {
+            return Long.valueOf(value);
+        }
+        if (type.equals(Float.class)) {
+            return Float.valueOf(value);
+        }
+        if (type.equals(Double.class)) {
+            return Double.valueOf(value);
+        }
+        if (type.equals(Boolean.class)) {
+            return Boolean.valueOf(value);
+        }
         return value;
     }
 
