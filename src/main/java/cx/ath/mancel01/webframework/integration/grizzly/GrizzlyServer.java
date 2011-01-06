@@ -81,6 +81,7 @@ public class GrizzlyServer {
                     }
                 }
             };
+            server.useAsynchronousWrite(true);
             server.setMaxThreads(NTHREADS);
             server.addGrizzlyAdapter(adapter, new String[]{rootContext});
             handler = new FrameworkHandler(binder, rootContext, rootDir, new FileGrabber() {
@@ -91,7 +92,7 @@ public class GrizzlyServer {
                 }
 
             });
-            Runtime.getRuntime().addShutdownHook(new Shutdown(handler));
+            Runtime.getRuntime().addShutdownHook(new Shutdown(handler, server));
             server.start();
             handler.start();
             WebFramework.logger.info("starting http server ... done !");
@@ -108,15 +109,19 @@ public class GrizzlyServer {
 
     private class Shutdown extends Thread {
 
-        private final FrameworkHandler dispatcher;
+        private final FrameworkHandler handler;
+        private final GrizzlyWebServer server;
 
-        public Shutdown(FrameworkHandler dispatcher) {
-            this.dispatcher = dispatcher;
+        public Shutdown(FrameworkHandler dispatcher, GrizzlyWebServer server) {
+            this.handler = dispatcher;
+            this.server = server;
         }
 
         @Override
         public void run() {
-            dispatcher.stop();
+            handler.stop();
+            server.stop();
+            WebFramework.logger.info("stopping http server ... done !");
         }
     }
 }
