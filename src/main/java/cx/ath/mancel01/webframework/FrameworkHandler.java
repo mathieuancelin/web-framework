@@ -32,7 +32,7 @@ import cx.ath.mancel01.webframework.routing.Router;
 import cx.ath.mancel01.webframework.routing.WebMethod;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import cx.ath.mancel01.webframework.view.FrameworkPage;
-import cx.ath.mancel01.webframework.view.HtmlPage;
+import cx.ath.mancel01.webframework.view.Render;
 import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
@@ -141,6 +141,7 @@ public class FrameworkHandler {
                         res.direct = asked;
                     } else {
                         WebFramework.logger.warn("file not found : {}", path);
+                        return Render.notFound().render();
                     }
                     res.out = new ByteArrayOutputStream();
                     return res;
