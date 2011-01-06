@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 
 /**
  *
@@ -92,7 +96,32 @@ public class WebMethod {
             args = objects.toArray(args);
             argsTypes = types.toArray(argsTypes);
             Method m = controller.getClass().getMethod(method.getName(), argsTypes);
-            ret = m.invoke(controller, args);
+            String pattern = "(";
+            if (m.isAnnotationPresent(GET.class)) {
+                pattern += "GET|";
+            }
+            if (m.isAnnotationPresent(POST.class)) {
+                pattern += "POST|";
+            }
+            if (m.isAnnotationPresent(PUT.class)) {
+                pattern += "PUT|";
+            }
+            if (m.isAnnotationPresent(DELETE.class)) {
+                pattern += "DELETE";
+            }
+            pattern += ")";
+            if (!pattern.equals("()")) {
+                if (req.method.matches(pattern)) {
+                    ret = m.invoke(controller, args);
+                } else {
+                    throw new RuntimeException("can't invoke "
+                            + controller.getClass().getSimpleName()
+                            + "." + m.getName() + " with a "
+                            + req.method + " http method.");
+                }
+            } else {
+                ret = m.invoke(controller, args);
+            }
         } catch (Exception ex) {
             if (ex.getCause() instanceof BreakFlowException) {
                 BreakFlowException br = (BreakFlowException) ex.getCause();
