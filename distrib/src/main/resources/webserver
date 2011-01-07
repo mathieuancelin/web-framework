@@ -26,8 +26,11 @@ function compute_classpath()
 	LIBS_CLASSPATH=`find $LIBS -type f -name \*.jar` 
 	LIBS_CLASSPATH=`echo $LIBS_CLASSPATH | tr ' ' ':'`
 	
+	SOURCES=$APP_PATH/src/main/java
 	RESOURCES=$APP_PATH/src/main/resources
 	CONF=$APP_PATH/src/main/webapp/conf
+	
+	FILES=`find $SOURCES -type f -name \*.java` 
 	
 	## end of computing with ununderstandable bash commands
 	return
@@ -50,10 +53,16 @@ function launch()
 	
 	compute_classpath
 	
-	if (test -e $APP_PATH/target)
+	if ( ! test -e $APP_PATH/target)
 	then
+		mkdir $APP_PATH/target
+	fi
+	if ( ! test -e $APP_PATH/target/classes)
+	then
+		mkdir $APP_PATH/target/classes
+		javac -encoding utf-8 -source 1.6 -target 1.6 -d $APP_PATH/target/classes -classpath $RESOURCES:$CONF:$LIBS_CLASSPATH $FILES
+	fi	
 		echo " "
-		
 		rm -rf $APP_PATH/target/compclasses
 		mkdir $APP_PATH/target/compclasses
 		
@@ -67,11 +76,6 @@ function launch()
 		
 		#cx.ath.mancel01.webframework.integration.httpserver.WebServerLauncher
 		
-	else
-		echo "target not exists. run 'mvn clean install' to prepare application."
-		echo " "
-		exit 0
-	fi
 	return
 }
 
