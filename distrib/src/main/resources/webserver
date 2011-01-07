@@ -17,14 +17,17 @@ function compute_classpath()
 	
 	#WAR_NAME=`find $APP_PATH/target -type f -name \*.war`
 	#WAR_NAME=${WAR_NAME#$APP_PATH/target/} 
-	
 	#APP_NAME=${WAR_NAME%.war}
-	
 	#WEBAPP_PATH=$APP_PATH/target/$APP_NAME
 	#LIBS=$WEBAPP_PATH/WEB-INF/lib
+	
 	LIBS=$WEBFWK_HOME/lib
 	LIBS_CLASSPATH=`find $LIBS -type f -name \*.jar` 
 	LIBS_CLASSPATH=`echo $LIBS_CLASSPATH | tr ' ' ':'`
+	
+	USER_LIBS=$APP_PATH/lib
+	USER_LIBS_CLASSPATH=`find $USER_LIBS -type f -name \*.jar` 
+	USER_LIBS_CLASSPATH=`echo $USER_LIBS_CLASSPATH | tr ' ' ':'`
 	
 	SOURCES=$APP_PATH/src/main/java
 	RESOURCES=$APP_PATH/src/main/resources
@@ -51,6 +54,11 @@ function launch()
 	esac	
 	echo "the application is located @" $APP_PATH
 	
+	if ( ! test -e $APP_PATH/lib)
+	then
+		mkdir $APP_PATH/lib
+	fi
+	
 	compute_classpath
 	
 	if ( ! test -e $APP_PATH/target)
@@ -60,7 +68,8 @@ function launch()
 	if ( ! test -e $APP_PATH/target/classes)
 	then
 		mkdir $APP_PATH/target/classes
-		javac -encoding utf-8 -source 1.6 -target 1.6 -d $APP_PATH/target/classes -classpath $RESOURCES:$CONF:$LIBS_CLASSPATH $FILES
+		javac -encoding utf-8 -source 1.6 -target 1.6 -d $APP_PATH/target/classes \
+		-classpath $RESOURCES:$CONF:$LIBS_CLASSPATH:$USER_LIBS_CLASSPATH $FILES
 	fi	
 		echo " "
 		rm -rf $APP_PATH/target/compclasses
@@ -69,7 +78,7 @@ function launch()
 		## starting the Grizzly server
 		
 		java -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n \
-		-classpath $APP_PATH/target/classes:$APP_PATH/target/compclasses:$RESOURCES:$CONF:$LIBS_CLASSPATH \
+		-classpath $APP_PATH/target/classes:$APP_PATH/target/compclasses:$RESOURCES:$CONF:$LIBS_CLASSPATH:$USER_LIBS_CLASSPATH \
 		cx.ath.mancel01.webframework.integration.grizzly.GrizzlyServerLauncher $APP_PATH
 		
 		## for starting the sun webserver
