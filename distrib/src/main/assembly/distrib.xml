@@ -58,6 +58,7 @@
         <file>
             <source>src/main/resources/webserver</source>
             <outputDirectory></outputDirectory>
+            <fileMode>0777</fileMode>
         </file>
     </files>
 </assembly>

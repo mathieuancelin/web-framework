@@ -1,0 +1,5 @@
+h1. How to use web-framework
+
+* set the WEBFWK_HOME environment variable to your distribution folder
+* add $WEBFWK_HOME/lib to your PATH
+* run : webserver run /path/to/your/app
