@@ -178,7 +178,7 @@ public class WebFramework {
             pl.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
             pl.setContext(lc);
             pl.start();
-            fileAppender.setFile(TARGET.getAbsolutePath());
+            fileAppender.setFile(TARGET.getAbsolutePath() + "/webframework.log");
             fileAppender.setLayout(pl);
             fileAppender.start();
             backLogger.addAppender(fileAppender);
