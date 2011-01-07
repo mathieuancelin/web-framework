@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+    <id>all</id>
+    <formats>
+        <format>dir</format>
+        <format>zip</format>
+    </formats>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>antlr:antlr</include>
+                <include>aopalliance:aopalliance</include>
+                <include>asm:asm</include>
+                <include>c3p0:c3p0</include>
+                <include>cglib:cglib</include>
+                <include>commons-collections:commons-collections</include>
+                <include>cx.ath.mancel01:dependency-shot-aop</include>
+                <include>cx.ath.mancel01:dependency-shot-api</include>
+                <include>cx.ath.mancel01:dependency-shot-core</include>
+                <include>cx.ath.mancel01:dependency-shot-lifecycle</include>
+                <include>cx.ath.mancel01:dependency-shot-utils</include>
+                <include>cx.ath.mancel01:webframework-core</include>
+                <include>dom4j:dom4j</include>
+                <include>net.sf.ehcache:ehcache-core</include>
+                <include>net.sf.ehcache:ehcache-terracotta</include>
+                <include>com.sun.grizzly:grizzly-comet</include>
+                <include>com.sun.grizzly:grizzly-cometd</include>
+                <include>com.sun.grizzly:grizzly-framework</include>
+                <include>com.sun.grizzly:grizzly-http</include>
+                <include>com.sun.grizzly:grizzly-http-servlet</include>
+                <include>com.sun.grizzly:grizzly-portunif</include>
+                <include>com.sun.grizzly:grizzly-rcm</include>
+                <include>com.sun.grizzly:grizzly-utils</include>
+                <include>com.sun.grizzly:grizzly-webserver</include>
+                <include>org.codehaus.groovy:groovy-all</include>
+                <include>com.google.code.gson:gson</include>
+                <include>org.hibernate:hibernate-commons-annotations</include>
+                <include>org.hibernate:hibernate-core</include>
+                <include>org.hibernate:hibernate-entitymanager</include>
+                <include>org.hibernate.javax.persistence:hibernate-jpa-2.0-api</include>
+                <include>org.hibernate:hibernate-validator</include>
+                <include>hsqldb:hsqldb</include>
+                <include>javassist:javassist</include>
+                <include>javax.inject:javax.inject</include>
+                <include>javax.ws.rs:jsr311-api</include>
+                <include>javax.servlet:servlet-api</include>
+                <include>javax.transaction:jta</include>
+                <include>ch.qos.logback:logback-classic</include>
+                <include>ch.qos.logback:logback-core</include>
+                <include>org.slf4j:slf4j-api</include>
+                <include>javax.validation:validation-api</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+    <files>
+        <file>
+            <source>src/main/resources/webserver</source>
+            <outputDirectory></outputDirectory>
+        </file>
+    </files>
+</assembly>
+
+
