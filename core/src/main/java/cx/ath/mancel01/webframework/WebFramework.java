@@ -23,6 +23,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -134,7 +135,7 @@ public class WebFramework {
 
     static void initConfig() {
         try {
-            config.load(WebFramework.class.getClassLoader().getResourceAsStream("config.properties"));
+            config.load(new FileInputStream(new File(CONF, "config.properties")));
             String mode = config.getProperty("framework.mode", "dev");
             if (mode.equals("dev")) {
                 dev = true;
