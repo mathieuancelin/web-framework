@@ -51,6 +51,7 @@
                 <include>ch.qos.logback:logback-core</include>
                 <include>org.slf4j:slf4j-api</include>
                 <include>javax.validation:validation-api</include>
+                <include>junit:junit</include>
             </includes>
         </dependencySet>
     </dependencySets>
