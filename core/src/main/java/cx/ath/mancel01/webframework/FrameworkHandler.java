@@ -130,7 +130,10 @@ public class FrameworkHandler {
                 request.contextRoot = contextRoot;
                 String path = request.path;
                 if (!"/".equals(contextRoot)) {
-                    path = path.replace(contextRoot, "/");
+                    path = path.replace(contextRoot, "");
+                    if (!path.startsWith("/")) {
+                        path = "/" + path;
+                    }
                 }
                 if (path.endsWith("favicon.ico")) {
                     path = "/public/img/favicon.ico";
