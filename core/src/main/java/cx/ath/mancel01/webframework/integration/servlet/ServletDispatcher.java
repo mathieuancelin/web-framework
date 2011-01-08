@@ -52,7 +52,7 @@ public class ServletDispatcher extends HttpServlet {
 
                 @Override
                 public File getFile(String file) {
-                    return new File(getServletContext().getRealPath("views/" + file));
+                    return new File(getServletContext().getRealPath("src/main/webapp/views/" + file));
                 }
 
             });
