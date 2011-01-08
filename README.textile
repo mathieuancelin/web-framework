@@ -1,7 +1,14 @@
 h1. How to use web-framework
 
-* set the WEBFWK_HOME environment variable to your distribution folder
-* add $WEBFWK_HOME/lib to your PATH
-* run : webserver run /path/to/your/app
+* Installation
+** download the web-framework distribution (link below)
+** set the WEBFWK_HOME environment variable to your distribution path
+** add $WEBFWK_HOME/lib to your PATH
+
+* Use web-framework
+** create a new project with command 
+*** webfwk new myapp
+** run your brand new app with command 
+*** webfwk run myapp
 
 You can download a zip distribution file "here":http://dl.dropbox.com/u/3121809/web-framework-all.zip
