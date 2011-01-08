@@ -2,7 +2,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-	<groupId>com.foo.bar</groupId>
+    <groupId>com.foo.bar</groupId>
     <version>1.0-SNAPSHOT</version>
     <artifactId>myapp</artifactId>
     <name>My App</name>
@@ -22,20 +22,47 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>src/main</directory>
+                            <targetPath>src/main</targetPath>
+                            <excludes>
+                                <exclude>**/test</exclude>
+                                <exclude>**/WEB-INF</exclude>
+                            </excludes>
+                        </resource>
+                    </webResources>
+                    <resources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <excludes>
+                                <exclude>conf</exclude>
+                                <exclude>public</exclude>
+                                <exclude>views</exclude>
+                            </excludes>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
         </plugins>
         <finalName>myapp</finalName>
     </build>
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>cx.ath.mancel01</groupId>
             <artifactId>webframework-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>junit</groupId>
-		    <artifactId>junit</artifactId>
+            <artifactId>junit</artifactId>
             <version>4.4</version>
-			<scope>test</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
