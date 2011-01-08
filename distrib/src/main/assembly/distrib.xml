@@ -61,7 +61,24 @@
             <outputDirectory></outputDirectory>
             <fileMode>0777</fileMode>
         </file>
+        <file>
+            <source>src/main/resources/scripts/pom.xml</source>
+            <outputDirectory>scripts</outputDirectory>
+        </file>
+        <file>
+            <source>src/main/resources/scripts/build.xml</source>
+            <outputDirectory>scripts</outputDirectory>
+        </file>
     </files>
+    <fileSets>
+        <fileSet>
+            <outputDirectory>new-project/src</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <directory>../empty/src</directory>
+        </fileSet>
+    </fileSets>
 </assembly>
 
 

@@ -95,9 +95,33 @@ function classpath()
 	return
 }
 
+function new() 
+{	
+	case $1 in
+	 "")
+	  APP_PATH=`pwd`
+	  ;;
+	 ".")
+	  APP_PATH=`pwd`
+	  ;;
+	 *)
+	  if ( ! test -e $1)
+	  then
+		  mkdir $1
+	  fi
+	  APP_PATH=$1
+	  ;;
+	esac	
+	echo "the application is created @" $APP_PATH
+	cp $WEBFWK_HOME/scripts/pom.xml $APP_PATH
+	cp $WEBFWK_HOME/scripts/build.xml $APP_PATH
+	cp -r $WEBFWK_HOME/new-project/src $APP_PATH
+	return
+}
+
 case $1 in
  new)
-  echo "not yet implemented"
+  new $2
   ;;
  run)
   launch $2
