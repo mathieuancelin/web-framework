@@ -57,7 +57,7 @@
     </dependencySets>
     <files>
         <file>
-            <source>src/main/resources/webserver</source>
+            <source>src/main/resources/webfwk</source>
             <outputDirectory></outputDirectory>
             <fileMode>0777</fileMode>
         </file>
