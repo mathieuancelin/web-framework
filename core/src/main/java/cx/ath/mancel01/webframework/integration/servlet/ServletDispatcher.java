@@ -16,7 +16,6 @@
  */
 package cx.ath.mancel01.webframework.integration.servlet;
 
-import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.webframework.FrameworkHandler;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Request;
@@ -57,6 +56,7 @@ public class ServletDispatcher extends HttpServlet {
 
             });
         dispatcher.start();
+        // TODO : check for base dev and dev mode, should not be allowed
     }
 
     @Override
