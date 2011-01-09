@@ -37,7 +37,7 @@ public class Param {
 
         PATH, QUERY, FORM, BODY
     }
-    public static final Pattern PATH_PARAM_DECLARATION = Pattern.compile("\\{[a-zA-Zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0-9]+\\}");
+    public static final Pattern PATH_PARAM_DECLARATION = Pattern.compile("\\{[^/]+\\}");
     private final String name;
     private String prefix;
     private String suffix;
@@ -212,7 +212,7 @@ public class Param {
     }
 
     public static String replaceParamsWithWildcard(String value) {
-        return value.replaceAll("\\{[a-zA-Zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ0-9]+\\}", "[a-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿA-Z0-9]+");
+        return value.replaceAll("\\{[^/]+\\}", "[^/]+");
     }
 
     public interface TypeMapper {

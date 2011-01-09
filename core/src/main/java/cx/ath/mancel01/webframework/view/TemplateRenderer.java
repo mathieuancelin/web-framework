@@ -38,10 +38,10 @@ import java.util.regex.Pattern;
  */
 public class TemplateRenderer {
 
-    private static final Pattern listPattern = Pattern.compile("\\#\\{list items:[a-zA-Z0-9]+, as:'[a-zA-Z0-9]+'\\}");
-    private static final Pattern extendsPatter = Pattern.compile("\\#\\{extends '[a-zA-Z./0-9]+' /\\}");
-    private static final Pattern setPattern = Pattern.compile("\\#\\{set [a-zA-Z0-9]+:'[a-zA-Z 0-9]+' /\\}");
-    private static final Pattern getPattern = Pattern.compile("\\#\\{get [a-zA-Z0-9]+ /\\}");
+    private static final Pattern listPattern = Pattern.compile("\\#\\{list items:[^/]+, as:'[a-zA-Z0-9]+'\\}");
+    private static final Pattern extendsPatter = Pattern.compile("\\#\\{extends '[^!]+' /\\}");
+    private static final Pattern setPattern = Pattern.compile("\\#\\{set [^/]+:'[^§]+' /\\}");
+    private static final Pattern getPattern = Pattern.compile("\\#\\{get [^/]+ /\\}");
     private final SimpleTemplateEngine engine;
     private final ConcurrentHashMap<String, groovy.text.Template> templates =
             new ConcurrentHashMap<String, groovy.text.Template>();
@@ -99,9 +99,9 @@ public class TemplateRenderer {
         while(setMatcher.find()) {
             String group = setMatcher.group();
             String name = group;
-            name = name.replace("#{set ", "").replaceAll(":'[a-zA-Z 0-9]+' /\\}", "");
+            name = name.replace("#{set ", "").replaceAll(":'[^§]+' /\\}", "");
             String value = group;
-            value = group.replaceAll("\\#\\{set [a-zA-Z0-9]+:'", "").replace("' /}", "");
+            value = group.replaceAll("\\#\\{set [^/]+:'", "").replace("' /}", "");
             //custom = custom.replace(group, "<% " + name + " = '" + value + "' %>");
             custom = custom.replace(group, "");
             before.add("<% " + name + " = '" + value + "' %>\n");
@@ -114,7 +114,7 @@ public class TemplateRenderer {
             custom = custom.replace(group, "${" + name + "}");
         }
         Matcher extendsMatcher = extendsPatter.matcher(custom);
-        custom = custom.replaceAll("\\#\\{extends '[a-zA-Z./0-9]+' /\\}", "");
+        custom = custom.replaceAll("\\#\\{extends '[^!]+' /\\}", "");
         while(extendsMatcher.find()) {
             String group = extendsMatcher.group();
             String fileName = group;
