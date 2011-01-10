@@ -117,6 +117,27 @@ public class Render implements ParameterizedRender {
         };
     }
 
+    public static Page ok() {
+        return new Page() {
+
+            @Override
+            public int getStatusCode() {
+                return StatusCodes.OK;
+            }
+
+            @Override
+            public String getContentType() {
+                return MediaType.TEXT_PLAIN;
+            }
+
+            @Override
+            public String getMessage() {
+                return "";
+            }
+
+        };
+    }
+
     public static Page error() {
         return new Page() {
 
