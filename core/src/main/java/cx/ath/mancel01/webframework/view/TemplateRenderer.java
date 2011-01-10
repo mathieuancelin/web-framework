@@ -62,7 +62,8 @@ public class TemplateRenderer {
 
     private Writer renderWithGroovy(String source, Map<String, Object> context, OutputStream os) throws Exception {
          OutputStreamWriter osw = new OutputStreamWriter(os);
-         return engine.createTemplate(enhanceCode(source, grabber)).make(context).writeTo(osw);
+         String enhanced = enhanceCode(source, grabber);
+         return engine.createTemplate(enhanced).make(context).writeTo(osw);
     }
 
     private Writer renderWithGroovy(File file, Map<String, Object> context, OutputStream os) throws Exception {
