@@ -177,15 +177,15 @@ public class JPAService {
                 cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
             } else {
                 intDataSource.setDriverClass(
-                        WebFramework.config.getProperty("db.url"));
-                intDataSource.setJdbcUrl(
                         WebFramework.config.getProperty("db.driver"));
+                intDataSource.setJdbcUrl(
+                        WebFramework.config.getProperty("db.url"));
                 intDataSource.setUser(
                         WebFramework.config.getProperty("db.user"));
                 intDataSource.setPassword(
                         WebFramework.config.getProperty("db.pass"));
-                cfg.setProperty("hibernate.hbm2ddl.auto", WebFramework.config.getProperty("jpa.dialect"));
-                cfg.setProperty("hibernate.dialect", WebFramework.config.getProperty("jpa.ddl"));
+                cfg.setProperty("hibernate.hbm2ddl.auto", WebFramework.config.getProperty("jpa.ddl"));
+                cfg.setProperty("hibernate.dialect", WebFramework.config.getProperty("jpa.dialect"));
             }
             intDataSource.setAcquireRetryAttempts(10);
             intDataSource.setCheckoutTimeout(5000);
