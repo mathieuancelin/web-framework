@@ -5,23 +5,23 @@
 <div class="entry">
     <p>${request?.method} on ${request?.path}</p>
     <p>
+        <div id="results" style="width: 100px; background: #66FF88; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
+            <p> Person added</p>
+        </div>
+        <div id="fail" style="width: 120px; background: #FF4411; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
+            <p> Person not added</p>
+        </div>
         <div id="form">
-            name : <input type="text" name="name" id="name"/><br/>
-            surname : <input type="text" name="surname" id="surname"/><br/>
-            address : <input type="text" name="address" id="address"/><br/>
+            <table>
+                <tr><td>name : </td><td><input type="text" name="name" id="name"/></td></tr>
+                <tr><td>surname : </td><td><input type="text" name="surname" id="surname"/></td></tr>
+                <tr><td>address : </td><td><input type="text" name="address" id="address"/></td></tr>
+            </table>
             <input type="submit" value="ok" onclick="add();">
         </div>
         <div id="wait"><img src="/public/img/bar.gif"/></div>
-        <div id="results">
-            <p>Person added</p>
-            <input type="submit" value="add" onclick="show();">
-        </div>
-        <div id="fail">
-            <p>Person not added</p>
-            <input type="submit" value="add" onclick="show();">
-        </div>
         <br/>
-        <a href="/person/all">all persons</a><br/>
+        <a href="/person/all">all persons</a> - <a href="#" onclick="show();">add</a><br/>
     <br/>
     <img src="/public/img/samcrow.png"/>
     <script type="text/javascript">
@@ -29,9 +29,11 @@
            function add() {
                $('#form').hide();
                $('#wait').show();
+               $('#results').hide();
+               $('#fail').hide();
                var xmlDocument = "<person><address>" + $('#address').val() + "</address><name>" + $('#name').val() + "</name><surname>"+ $('#surname').val() +"</surname></person>";
                var jsonDocument = "{name:'" + $('#name').val() + "', surname:'" + $('#surname').val() + "', address:'" + $('#address').val() + "'}";
-                $.ajax({
+               $.ajax({
                    url: "/put",
                    type: "PUT",
                    contentType: "application/json",
@@ -40,9 +42,14 @@
                        $('#wait').hide();
                        if (html.match("ok")) {
                            $('#results').show();
+                           $('#form').show();
                        } else {
                             $('#fail').show();
+                            $('#form').show();
                        }
+                       $('#address').val("");
+                       $('#name').val("");
+                       $('#surname').val("");
                    }
                 });
             }
