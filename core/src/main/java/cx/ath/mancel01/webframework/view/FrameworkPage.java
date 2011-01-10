@@ -20,7 +20,10 @@ package cx.ath.mancel01.webframework.view;
 import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.http.StatusCodes;
+import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.HashMap;
 
 /**
  *
@@ -28,24 +31,36 @@ import java.io.ByteArrayOutputStream;
  */
 public class FrameworkPage extends Page {
 
+    private static final TemplateRenderer renderer = new TemplateRenderer();
     private final String html;
     private final String title;
 
     public FrameworkPage(String title, String html) {
         this.html = html;
         this.title = title;
+        renderer.grabber = new FileGrabber() {
+            @Override
+            public File getFile(String file) {
+                return new File(WebFramework.VIEWS, file);
+            }
+        };
     }
 
     @Override
     public Response render() {
-        long start = System.currentTimeMillis();
-        Response res = new Response();
-        res.out = new ByteArrayOutputStream();
-        res.contentType = this.getContentType();
-        String message = this.getMessage();
-        res.out.write(message.getBytes(), 0, message.length());
-        WebFramework.logger.trace("html page rendering : {} ms.", (System.currentTimeMillis() - start));
-        return res;
+        try {
+            long start = System.currentTimeMillis();
+            Response res = new Response();
+            res.out = new ByteArrayOutputStream();
+            res.contentType = this.getContentType();
+            String message = this.getMessage();
+            //res.out.write(message.getBytes(), 0, message.length());
+            renderer.render(message, new HashMap<String, Object>(), res.out);
+            WebFramework.logger.trace("html page rendering : {} ms.", (System.currentTimeMillis() - start));
+            return res;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
@@ -60,42 +75,12 @@ public class FrameworkPage extends Page {
 
     @Override
     public String getMessage() {
-        return "<html>" +
-        "    <head>" +
-        "        <title>" + title + "</title>" +
-        "        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">" +
-        "        <link href=\"/public/css/style.css\" rel=\"stylesheet\" type=\"text/css\" media=\"screen\" />" +
-        "    </head>" +
-        "    <body>" +
-        "        <div id=\"wrapper\">" +
-        "            <div id=\"header-wrapper\">" +
-        "                <div id=\"header\">" +
-        "                    <div id=\"logo\">" +
-        "                        <h1>web-framework</h1>" +
-        "                        <p>the useless web framework</p>" +
-        "                    </div>" +
-        "                </div>" +
-        "            </div>" +
-        "            <div id=\"page\">" +
-        "                <div id=\"page-bgtop\">" +
-        "                    <div id=\"page-bgbtm\">" +
-        "                        <div id=\"content\">" +
-        "                            <div class=\"post\">" +
-        "                                <h2 class=vtitle\">" + title + "</h2>" +
-        "                                <div class=\"entry\">" +
-        "                                    <p>" + html +
-        "                                    </p>" +
-        "                                </div>" +
-        "                                <div class=\"byline\" />" +
-        "                            </div>" +
-        "                            <div style=\"clear: both;\">&nbsp;</div>" +
-        "                        </div>" +
-        "                        <div style=\"clear: both;\">&nbsp;</div>" +
-        "                    </div>" +
-        "                </div>" +
-        "            </div>" +
-        "        </div>" +
-        "    </body>" +
-        "</html>";
+        return  "#{extends 'main.html' /}" +
+                "#{set title:'" + title + "' /}" +
+                "<h2 class=\"title\">" + title + "</h2>" +
+                "<div class=\"entry\">" +
+                "   <p>" + html + "</p>" +
+                "</div>" +
+                "<div class=\"byline\" />";
     }
 }
