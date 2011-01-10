@@ -82,7 +82,7 @@ public class FrameworkHandler {
     }
 
     public void start() {
-        WebFramework.init(rootDir);
+        WebFramework.init(rootDir, contextRoot);
         //this.loader = new AlphaClassloader();
         publicResources = WebFramework.PUBLIC_RESOURCES;
         try {

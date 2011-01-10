@@ -8,7 +8,7 @@ Released for free under a Creative Commons Attribution 2.5 License
 body {
 	margin: 0;
 	padding: 0;
-	background: #2D2722 url(/public/img/img01.jpg) repeat-x left top;
+	background: #2D2722 url(../img/img01.jpg) repeat-x left top;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	color: #3C3D3F;
@@ -53,7 +53,7 @@ a:hover {
 #wrapper {
 	margin: 0 auto;
 	padding: 0;
-	background: url(/public/img/img04.jpg) no-repeat left 400px;
+	background: url(../img/img04.jpg) no-repeat left 400px;
 }
 
 /* Header */
@@ -287,7 +287,7 @@ a:hover {
 #sidebar li li {
 	line-height: 35px;
 	border-bottom: 1px solid #342C29;
-	background: url(/public/img/img02.gif) no-repeat left 15px;
+	background: url(../img/img02.gif) no-repeat left 15px;
 	margin: 0px 20px 0px 20px;
 	border-left: none;
 	text-align: left;
@@ -309,7 +309,7 @@ a:hover {
 	height: 31px;
 	margin: 0px 0px 20px 0px;
 	padding: 10px 0px 0px 20px;
-	background: url(/public/img/img03.jpg) no-repeat left top;
+	background: url(../img/img03.jpg) no-repeat left top;
 	text-shadow: #203060 -1px 1px 2px;
 	text-align: left;
 	text-transform: uppercase;

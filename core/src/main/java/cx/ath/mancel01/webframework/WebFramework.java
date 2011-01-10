@@ -72,7 +72,10 @@ public class WebFramework {
     private static Map<String, Class<?>> applicationClasses
             = new HashMap<String, Class<?>>();
 
-    public static void init(File rootDir) {
+    public static String contextRoot;
+
+    public static void init(File rootDir, String context) {
+        contextRoot = context;
         initFiles(rootDir);
         findApplicationClasses();
         initClasspath();
