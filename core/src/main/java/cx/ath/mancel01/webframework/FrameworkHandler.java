@@ -56,15 +56,17 @@ public class FrameworkHandler {
     private Router router;
     private FileGrabber viewGrabber;
     //private AlphaClassloader loader;
+    private Binding devControllerBinding;
+    private InjectorImpl devInjector;
 
-    public FrameworkHandler(String binderClassName, String contextRoot, 
+    public FrameworkHandler(String binderClassName, String contextRoot,
             File rootDir, FileGrabber viewGrabber) {
         if ("".equals(contextRoot)) {
             throw new RuntimeException("Can't have an empty context root");
         }
         this.binderClassName = binderClassName;
         this.rootDir = rootDir;
-        this.contextRoot = contextRoot;        
+        this.contextRoot = contextRoot;
         this.router = new Router();
         this.viewGrabber = viewGrabber;
     }
@@ -78,7 +80,7 @@ public class FrameworkHandler {
     public void validate() {
         if (rootController == null) {
             throw new RuntimeException("You need to register a root controler");
-        } 
+        }
     }
 
     public void start() {
@@ -88,14 +90,11 @@ public class FrameworkHandler {
         try {
             if (!WebFramework.dev) {
                 this.binderClass =
-                    (Class<? extends Binder>)
-                        Class.forName(binderClassName);
+                        (Class<? extends Binder>) Class.forName(binderClassName);
             } else {
                 this.binderClass =
-                    (Class<? extends Binder>)
-//                    (Class<? extends Binder>) loader.loadClass(binderClassName);
-                        new WebFrameworkClassLoader(getClass().getClassLoader())
-                            .loadClass(binderClassName);
+                        (Class<? extends Binder>) //                    (Class<? extends Binder>) loader.loadClass(binderClassName);
+                        new WebFrameworkClassLoader(getClass().getClassLoader()).loadClass(binderClassName);
             }
             this.configBinder = (WebBinder) this.binderClass.newInstance();
             this.configBinder.setDispatcher(this);
@@ -150,6 +149,24 @@ public class FrameworkHandler {
                     return res;
                 }
                 WebMethod webMethod = null;
+                if (WebFramework.dev) {
+                    try {
+                        devControllerBinding = null;
+                        devInjector = null;
+                        router.reset();
+                        Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClassName);
+                        //Class devBinderClass = loader.loadClass(binderClassName);
+                        WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
+                        devBinder.setDispatcher(this);
+                        devInjector = DependencyShot.getInjector(devBinder);
+                        configureInjector(devInjector);
+                        //controllerClass = loader.loadClass(controllerClass.getName());
+                    } catch (Throwable ex) {
+                        return createErrorResponse(ex);
+                    }
+                    WebFramework.logger.trace("configuration bootstrap : {} ms.", (System.currentTimeMillis() - start));
+                    start = System.currentTimeMillis();
+                }
                 try {
                     webMethod = router.route(request, contextRoot);
                 } catch (Throwable t) {
@@ -162,8 +179,7 @@ public class FrameworkHandler {
                             "<b>registered routes are</b> :<br/><br/>"
                             + routes.toString()).render();
                 }
-                WebFramework.logger.trace("routing : {} ms."
-                    , (System.currentTimeMillis() - start));
+                WebFramework.logger.trace("routing : {} ms.", (System.currentTimeMillis() - start));
                 start = System.currentTimeMillis();
                 return render(request, webMethod);
             } else {
@@ -172,8 +188,7 @@ public class FrameworkHandler {
         } catch (Throwable t) {
             final Throwable ex = t;
             t.printStackTrace();
-            return new FrameworkPage("Error"
-                    , "Ooops, an error occured : <br/><br/>"
+            return new FrameworkPage("Error", "Ooops, an error occured : <br/><br/>"
                     + ex.getMessage()).render();
         }
     }
@@ -181,32 +196,14 @@ public class FrameworkHandler {
     Response render(Request request, WebMethod webMethod) throws Exception {
         Class controllerClass = webMethod.getClazz();
         String methodName = webMethod.getMethod().getName();
-        Binding devControllerBinding = null;
-        InjectorImpl devInjector = null;
         long start = System.currentTimeMillis();
         JPAService.getInstance().startTx();
-        if (WebFramework.dev) {
-            try {
-                router.reset();
-                Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClassName);
-//                Class devBinderClass = loader.loadClass(binderClassName);
-                WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
-                devBinder.setDispatcher(this);
-                devInjector = DependencyShot.getInjector(devBinder);
-                configureInjector(devInjector);
-//                controllerClass = loader.loadClass(controllerClass.getName());
-                controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
-            } catch (Throwable ex) {
-                return createErrorResponse(ex);
-            }
-            devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
-            WebFramework.logger.trace("configuration bootstrap : {} ms."
-                    , (System.currentTimeMillis() - start));
-        }
         start = System.currentTimeMillis();
         Object controller = null;
         if (WebFramework.dev) {
             try {
+                controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
+                devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
                 controller = devControllerBinding.getInstance(devInjector, null);
                 //controller = controllerBinding.getInstance(injector, null);
             } catch (Throwable ex) {
@@ -215,12 +212,10 @@ public class FrameworkHandler {
         } else {
             controller = injector.getInstance(controllerClass);
         }
-        WebFramework.logger.trace("controller injection : {} ms."
-                , (System.currentTimeMillis() - start));
+        WebFramework.logger.trace("controller injection : {} ms.", (System.currentTimeMillis() - start));
         start = System.currentTimeMillis();
         Object ret = webMethod.invoke(request, controller);
-        WebFramework.logger.trace("controller method invocation : {} ms."
-                , (System.currentTimeMillis() - start));
+        WebFramework.logger.trace("controller method invocation : {} ms.", (System.currentTimeMillis() - start));
         JPAService.getInstance().stopTx(false);
         if (ret == null) {
             return new FrameworkPage("Nothing returned", "<h1>Ooops</h1> it seems that your controller method doesn't return"
@@ -253,9 +248,8 @@ public class FrameworkHandler {
         }
         if (cause == null) { // TODO : error page with stacktrace
             return new FrameworkPage("Error",
-                original.getMessage().replace("\n", "<br/>")).render();
+                    original.getMessage().replace("\n", "<br/>")).render();
         }
-        return new FrameworkPage("Compilation error"
-                , cause.getMessage().replace("\n", "<br/>")).render();
+        return new FrameworkPage("Compilation error", cause.getMessage().replace("\n", "<br/>")).render();
     }
 }
