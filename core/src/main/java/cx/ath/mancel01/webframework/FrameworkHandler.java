@@ -158,7 +158,7 @@ public class FrameworkHandler {
                         routes.append(route);
                         routes.append("<br/>");
                     }
-                    return new FrameworkPage("Can't find route for " + path,
+                    return new FrameworkPage("No route found for " + path,
                             "<b>registered routes are</b> :<br/><br/>"
                             + routes.toString()).render();
                 }
