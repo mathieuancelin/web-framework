@@ -149,7 +149,6 @@ public class Router {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
                     public Object map(String value) {
-                        System.out.println(value);
                         Gson gson = new GsonBuilder()
                             .excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT, Modifier.VOLATILE)
                             .create();
