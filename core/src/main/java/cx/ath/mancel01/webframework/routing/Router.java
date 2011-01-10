@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import javax.ws.rs.Consumes;
@@ -261,4 +262,44 @@ public class Router {
     public Set<String> getRoutes() {
         return registeredControllers.keySet();
     }
+
+    public String getHtmlRoutesTable() {
+        StringBuilder routes = new StringBuilder();
+        routes.append("<table>");
+        int row = 0;
+        for (Entry<String, WebMethod> route : this.registeredControllers.entrySet()) {
+            row++;
+            if (row % 2 == 0) {
+                routes.append("<tr>");
+            } else {
+                routes.append("<tr bgcolor=\"EEEEEE\">");
+            }
+            routes.append("<td>");
+            routes.append(route.getKey());
+            routes.append("</td><td width=\"100px\" align=\"center\">");
+            routes.append("  =>  ");
+            routes.append("</td><td>");
+            routes.append(route.getValue().getClazz().getSimpleName());
+            routes.append(".");
+            routes.append(route.getValue().getMethod().getName());
+            routes.append("(");
+            Set<String> params = route.getValue().getParams().keySet();
+            int nbrParam = params.size();
+            int i = 0;
+            for (String param : params) {
+                i++;
+                routes.append(param);
+                if (nbrParam > 1) {
+                    if (i != nbrParam)
+                        routes.append(", ");
+                }
+            }
+            routes.append(")");
+            routes.append("</td>");
+            routes.append("</tr>");
+        }
+        routes.append("</table>");
+        return routes.toString();
+    }
+    
 }

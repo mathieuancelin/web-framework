@@ -37,6 +37,8 @@ import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  *
@@ -170,14 +172,9 @@ public class FrameworkHandler {
                 try {
                     webMethod = router.route(request, contextRoot);
                 } catch (Throwable t) {
-                    StringBuilder routes = new StringBuilder();
-                    for (String route : router.getRoutes()) {
-                        routes.append(route);
-                        routes.append("<br/>");
-                    }
                     return new FrameworkPage("No route found for " + path,
                             "<b>registered routes are</b> :<br/><br/>"
-                            + routes.toString()).render();
+                            + router.getHtmlRoutesTable()).render();
                 }
                 WebFramework.logger.trace("routing : {} ms.", (System.currentTimeMillis() - start));
                 start = System.currentTimeMillis();
