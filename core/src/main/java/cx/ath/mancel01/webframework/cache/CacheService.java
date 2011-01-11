@@ -54,7 +54,7 @@ public class CacheService {
         CacheService service = getInstance();
         service.cacheManager = CacheManager.create();
         Cache webFrameworkCache = new Cache(
-             new CacheConfiguration("web-framework", 10000)
+             new CacheConfiguration("web-framework", 1000000)
                .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU)
                .overflowToDisk(false)
                .eternal(false)
@@ -82,6 +82,10 @@ public class CacheService {
 
     public void clear() {
         cache.removeAll();
+    }
+
+    public int size() {
+        return cache.getSize();
     }
 
     public Object get(String key) {
@@ -112,7 +116,6 @@ public class CacheService {
     }
 
     public boolean add(String key, Object value, int expiration) {
-        checkSerializable(value);
         try {
             checkSerializable(value);
             if (cache.get(key) != null) {
@@ -120,6 +123,20 @@ public class CacheService {
             }
             Element element = new Element(key, value);
             element.setTimeToLive(expiration);
+            cache.put(element);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean add(String key, Object value) {
+        try {
+            checkSerializable(value);
+            if (cache.get(key) != null) {
+                return false;
+            }
+            Element element = new Element(key, value);
             cache.put(element);
             return true;
         } catch (Exception e) {
@@ -138,7 +155,6 @@ public class CacheService {
     }
 
     public boolean replace(String key, Object value, int expiration) {
-        checkSerializable(value);
         try {
             checkSerializable(value);
             if (cache.get(key) == null) {
@@ -155,10 +171,22 @@ public class CacheService {
     }
 
     public boolean set(String key, Object value, int expiration) {
-        checkSerializable(value);
         try {
+            checkSerializable(value);
             Element element = new Element(key, value);
             element.setTimeToLive(expiration);
+            cache.put(element);
+            return true;
+        } catch (Exception e) {
+            WebFramework.logger.error(e.toString());
+            return false;
+        }
+    }
+
+    public boolean set(String key, Object value) {
+        try {
+            checkSerializable(value);
+            Element element = new Element(key, value);
             cache.put(element);
             return true;
         } catch (Exception e) {
