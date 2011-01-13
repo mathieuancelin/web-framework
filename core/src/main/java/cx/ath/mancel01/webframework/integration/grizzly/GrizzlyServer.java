@@ -66,8 +66,8 @@ public class GrizzlyServer {
                     try {
                         Request req = GrizzlyBinder.extractRequest(request);
                         Request.current.set(req);
+                        Response.current.set(new Response());
                         Response res = handler.process(req);
-                        Response.current.set(res);
                         GrizzlyBinder.flushResponse(req, res, response);
                     } catch (Exception e) {
                         e.printStackTrace(); // TODO : print something useless here

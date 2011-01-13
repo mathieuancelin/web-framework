@@ -44,7 +44,7 @@ public class JSON extends Renderable {
     @Override
     public Response render() {
         long start = System.currentTimeMillis();
-        Response res = new Response();
+        Response res = Response.current.get();
         res.out = new ByteArrayOutputStream();
         res.contentType = this.getContentType();
         //Gson gson = new Gson();

@@ -73,8 +73,8 @@ public class ServletDispatcher extends HttpServlet {
             // process in a thread ?
             Request req = ServletBinder.extractRequest(request);
             Request.current.set(req);
+            Response.current.set(new Response());
             Response res = dispatcher.process(req);
-            Response.current.set(res);
             ServletBinder.flushResponse(req, res, request, response);
         } catch (Exception e) {
             e.printStackTrace(); // TODO : print something useless here

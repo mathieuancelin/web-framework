@@ -127,7 +127,7 @@ public class FrameworkHandler {
                 //Thread.currentThread().setContextClassLoader(loader);
                 WebFramework.logger.trace("asked resource => {}", request.path);
                 long start = System.currentTimeMillis();
-                Response res = new Response();
+                Response res = Response.current.get();
                 request.contextRoot = contextRoot;
                 String path = request.path;
                 if (!"/".equals(contextRoot)) {

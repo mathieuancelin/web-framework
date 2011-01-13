@@ -92,7 +92,7 @@ public class View extends Renderable {
     public Response render() {
         try {
             long start = System.currentTimeMillis();
-            Response res = new Response();
+            Response res = Response.current.get();
             res.out = new ByteArrayOutputStream();
             res.contentType = this.getContentType();
             String name = viewName;
