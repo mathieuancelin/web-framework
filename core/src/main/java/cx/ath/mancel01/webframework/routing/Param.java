@@ -96,7 +96,10 @@ public class Param {
             ret = URLDecoder.decode((String) ret);
         } else if (this.paramType.equals(ParamType.FORM)) {
             // TODO : check here simple types only
+            System.out.println("for param " + name);
+            System.out.println(req.body());
             ret = getQueryParam(this.name, "?" + req.body());
+            System.out.println("value : " + ret);
             ret = URLDecoder.decode((String) ret);
         } else if (this.paramType.equals(ParamType.BODY)) {
             ret = mapper.map(req.body()); // Map with type according to kind of value (json, xml, txt, bytes)

@@ -229,7 +229,8 @@ public class Router {
                     for (int j = 0; j < annotations[i].length; j++) {
                         Annotation annotation = annotations[i][j];
                         Param param = new Param(annotation, url, types[i]);
-                        webMethod.getParams().put(param.name(), param);
+                        //webMethod.getParams().put(param.name(), param);
+                        webMethod.addParam(param);
                     }
                 }
                 Matcher matcher = Param.PATH_PARAM_DECLARATION.matcher(url);

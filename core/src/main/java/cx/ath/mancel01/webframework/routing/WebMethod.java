@@ -41,6 +41,7 @@ public class WebMethod {
     private String fullUrl;
     private String comparisonUrl;
     private Map<String, Param> params = new HashMap<String, Param>();
+    private List<String> paramNames = new ArrayList<String>();
 
     public Class<?> getClazz() {
         return clazz;
@@ -82,14 +83,27 @@ public class WebMethod {
         this.params = params;
     }
 
+    public void addParam(Param param) {
+        this.params.put(param.name(), param);
+        this.paramNames.add(param.name());
+    }
+
+    public List<String> getParamNames() {
+        return paramNames;
+    }
+
     public Object invoke(Request req, Object controller) {
         Object ret = null;
         try {
             List<Class<?>> types = new ArrayList<Class<?>>();
             List<Object> objects = new ArrayList<Object>();
-            for(Param p : params.values()) {
-                types.add(p.type());
-                objects.add(p.value(req));
+//            for(Param p : params.values()) {
+//                types.add(p.type());
+//                objects.add(p.value(req));
+//            }
+            for(String name : paramNames) {
+                types.add(params.get(name).type());
+                objects.add(params.get(name).value(req));
             }
             Object[] args = new Object[objects.size()];
             Class<?>[] argsTypes = new Class<?>[types.size()];
