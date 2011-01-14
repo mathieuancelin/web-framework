@@ -155,7 +155,8 @@ public class Router {
                         return gson.fromJson(value, paramTypes[0]);
                     }
                 });
-                webMethod.getParams().put(param.name(), param);
+//                webMethod.getParams().put(param.name(), param);
+                webMethod.addParam(param);
             } else if (MediaType.APPLICATION_OCTET_STREAM.equals(type)) {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
@@ -178,7 +179,8 @@ public class Router {
                         }
                     }
                 });
-                webMethod.getParams().put(param.name(), param);
+//                webMethod.getParams().put(param.name(), param);
+                webMethod.addParam(param);
             } else if (MediaType.APPLICATION_XML.equals(type)) {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
@@ -193,7 +195,8 @@ public class Router {
                         }
                     }
                 });
-                webMethod.getParams().put(param.name(), param);
+//                webMethod.getParams().put(param.name(), param);
+                webMethod.addParam(param);
             } else if (MediaType.TEXT_HTML.equals(type)) {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
@@ -201,7 +204,8 @@ public class Router {
                         return value;
                     }
                 });
-                webMethod.getParams().put(param.name(), param);
+//                webMethod.getParams().put(param.name(), param);
+                webMethod.addParam(param);
             } else if (MediaType.TEXT_PLAIN.equals(type)) {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
@@ -209,7 +213,8 @@ public class Router {
                         return value;
                     }
                 });
-                webMethod.getParams().put(param.name(), param);
+//                webMethod.getParams().put(param.name(), param);
+                webMethod.addParam(param);
             } else if (MediaType.TEXT_XML.equals(type)) {
                 Param param = new Param(paramTypes[0], url, new TypeMapper() {
                     @Override
@@ -217,7 +222,8 @@ public class Router {
                         return value;
                     }
                 });
-                webMethod.getParams().put(param.name(), param);
+//                webMethod.getParams().put(param.name(), param);
+                webMethod.addParam(param);
             } else {
                 throw new RuntimeException("unsupported @Consumes type");
             }
