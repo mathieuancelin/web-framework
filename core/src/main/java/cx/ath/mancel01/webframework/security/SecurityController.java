@@ -42,7 +42,12 @@ public class SecurityController {
     @Path("/security/loginpage")
     @GET
     public void loginPage() {
-        //Render.viewWithParam("url", this)
+        String callback =  Session.current.get().get("callbackUrl");
+        if (callback == null) {
+            callback = loginModule.defaultCallbackURL();
+        }
+        Session.current.get().remove("callbackUrl");
+        Render.view("login.html").param("callbackUrl", callback).go();
     }
 
     @Path("/security/login")
