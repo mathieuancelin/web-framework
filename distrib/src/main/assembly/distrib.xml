@@ -69,6 +69,10 @@
             <source>src/main/resources/scripts/build.xml</source>
             <outputDirectory>scripts</outputDirectory>
         </file>
+        <file>
+            <source>../core/pom.xml</source>
+            <outputDirectory>web-framework</outputDirectory>
+        </file>
     </files>
     <fileSets>
         <fileSet>
@@ -77,6 +81,13 @@
                 <include>**/*</include>
             </includes>
             <directory>../empty/src</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>web-framework/src</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <directory>../core/src</directory>
         </fileSet>
     </fileSets>
 </assembly>
