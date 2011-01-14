@@ -17,12 +17,13 @@
 
 package cx.ath.mancel01.webframework.security;
 
+import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.annotation.Controller;
 import cx.ath.mancel01.webframework.http.Cookie;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.http.Session;
+import cx.ath.mancel01.webframework.util.SecurityUtils;
 import cx.ath.mancel01.webframework.view.Render;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -32,21 +33,32 @@ import javax.ws.rs.Path;
 @Controller
 public class SecurityController {
 
-    static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
     @Inject
     private Response response;
 
     @Inject
-    private Authenticator authenticator;
+    private LoginModule loginModule;
+
+    @Path("/security/loginpage")
+    @GET
+    public void loginPage() {
+        //Render.viewWithParam("url", this)
+    }
 
     @Path("/security/login")
     @POST
-    public void login(@FormParam("user") String user,
+    public void login(
+            @FormParam("user") String user,
             @FormParam("password") String password,
-            @FormParam("url") String url, @FormParam("rememberme") String rememberme) {
-        if (!authenticator.authenticate(user, password)) {
-            Render.redirect("http://www.google.com").go();
+            @FormParam("url") String url, 
+            @FormParam("rememberme") String rememberme) {
+        
+        if (!loginModule.authenticate(user, password)) {
+            if (!"/".equals(WebFramework.contextRoot)) {
+                Render.redirect(WebFramework.contextRoot
+                        + loginModule.authenticationFailURL()).go();
+            }
+            Render.redirect(loginModule.authenticationFailURL()).go();
         }
         Cookie cookie = new Cookie();
         cookie.name = "username";
@@ -55,7 +67,7 @@ public class SecurityController {
         if(rememberme.equals("on")) {
             cookie = new Cookie();
             cookie.name = "rememberme";
-            cookie.value = user + "-" + sign(user);
+            cookie.value = user + "-" + SecurityUtils.sign(user);
             cookie.maxAge = 2592000; // 30 days
             response.cookies.put("rememberme", cookie);
         }
@@ -67,6 +79,7 @@ public class SecurityController {
     public void logout() {
         Cookie username = new Cookie();
         Cookie rememberme = new Cookie();
+        Cookie sessionId = new Cookie();
         username.name = "username";
         username.domain = null;
         username.value = "";
@@ -79,30 +92,16 @@ public class SecurityController {
         rememberme.path = "/";
         rememberme.maxAge = 0;
         response.cookies.put("rememberme", rememberme);
-        Render.redirect("/").go(); // TODO: fix that
-    }
-
-    public static String sign(String message) {
-        byte[] key = "oiuytredcvbhjnkjhgfdghjkjhgfghjkjhgfghjkjhgf".getBytes();
-        if (key.length == 0) {
-            return message;
+        sessionId.name = "webfwk-session-id";
+        sessionId.domain = null;
+        sessionId.value = "";
+        sessionId.path = "/";
+        sessionId.maxAge = 0;
+        response.cookies.put("webfwk-session-id", sessionId);
+        Session.current.get().clear();
+        if (!"/".equals(WebFramework.contextRoot)) {
+            Render.redirect(WebFramework.contextRoot + loginModule.logoutURL()).go();
         }
-        try {
-            Mac mac = Mac.getInstance("HmacSHA1");
-            SecretKeySpec signingKey = new SecretKeySpec(key, "HmacSHA1");
-            mac.init(signingKey);
-            byte[] messageBytes = message.getBytes("utf-8");
-            byte[] result = mac.doFinal(messageBytes);
-            int len = result.length;
-            char[] hexChars = new char[len * 2];
-            for (int charIndex = 0, startIndex = 0; charIndex < hexChars.length;) {
-                int bite = result[startIndex++] & 0xff;
-                hexChars[charIndex++] = HEX_CHARS[bite >> 4];
-                hexChars[charIndex++] = HEX_CHARS[bite & 0xf];
-            }
-            return new String(hexChars);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+        Render.redirect(loginModule.logoutURL()).go();
     }
 }

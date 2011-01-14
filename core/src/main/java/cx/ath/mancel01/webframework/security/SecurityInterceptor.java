@@ -20,6 +20,7 @@ package cx.ath.mancel01.webframework.security;
 import cx.ath.mancel01.webframework.http.Cookie;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.util.SecurityUtils;
 import cx.ath.mancel01.webframework.view.FrameworkPage;
 import javax.inject.Singleton;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -52,7 +53,7 @@ public class SecurityInterceptor implements MethodInterceptor {
             String cookieValue = req.cookies.get("rememberme").value;
             String username = cookieValue.split("-")[0];
             String sign = cookieValue.split("-")[1];
-            if (SecurityController.sign(username).equals(sign)) {
+            if (SecurityUtils.sign(username).equals(sign)) {
                 Cookie cookie = new Cookie();
                 cookie.name = "username";
                 cookie.value = username;
