@@ -57,7 +57,7 @@ public class FrameworkHandler {
     private Router router;
     private FileGrabber viewGrabber;
     //private AlphaClassloader loader;
-    private Binding devControllerBinding;
+//    private Binding devControllerBinding;
     private InjectorImpl devInjector;
 
     public FrameworkHandler(String binderClassName, String contextRoot,
@@ -153,7 +153,7 @@ public class FrameworkHandler {
                 WebMethod webMethod = null;
                 if (WebFramework.dev) {
                     try {
-                        devControllerBinding = null;
+//                        devControllerBinding = null;
                         devInjector = null;
                         router.reset();
                         Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClassName);
@@ -202,8 +202,9 @@ public class FrameworkHandler {
         if (WebFramework.dev) {
             try {
                 controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
-                devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
-                controller = devControllerBinding.getInstance(devInjector, null);
+                //devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
+                controller = devInjector.getInstance(controllerClass);
+                //controller = devControllerBinding.getInstance(devInjector, null);
                 //controller = controllerBinding.getInstance(injector, null);
             } catch (Throwable ex) {
                 return createErrorResponse(ex);
