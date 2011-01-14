@@ -17,6 +17,11 @@
 
 package cx.ath.mancel01.webframework.integration.dependencyshot;
 
+import cx.ath.mancel01.webframework.http.Cookie;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import javax.inject.Qualifier;
 import cx.ath.mancel01.dependencyshot.graph.Binding;
 import cx.ath.mancel01.dependencyshot.graph.BindingBuilder;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
@@ -26,17 +31,33 @@ import cx.ath.mancel01.webframework.data.JPAService;
 import cx.ath.mancel01.webframework.data.JPAService.TxManager;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.http.Session;
 import java.sql.Connection;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  *
  * @author mathieuancelin
  */
 public class DependencyShotIntegrator {
+
+    @Target({PARAMETER, FIELD })
+    @Retention(RUNTIME)
+    @Documented
+    @Qualifier
+    public @interface LoggedUsername {}
+
+    @Target({PARAMETER, FIELD })
+    @Retention(RUNTIME)
+    @Documented
+    @Qualifier
+    public @interface SessionId {}
 
     private final InjectorImpl injector;
 
@@ -101,6 +122,35 @@ public class DependencyShotIntegrator {
                     return JPAService.getInstance().getTxManager();
                 }
             }).build();
+        Binding sessionBinding =
+            BindingBuilder.prepareBindingThat().bind(Session.class).providedBy(new Provider<Session>() {
+                @Override
+                public Session get() {
+                    return Session.current.get();
+                }
+            }).build();
+        Binding loggedUsernameBinding =
+            BindingBuilder.prepareBindingThat().bind(String.class).annotatedWith(LoggedUsername.class).providedBy(new Provider<String>() {
+                @Override
+                public String get() {
+                    Cookie cookie = Request.current.get().cookies.get("username");
+                    if (cookie != null) {
+                        return cookie.value;
+                    }
+                    return "anonymous";
+                }
+            }).build();
+        Binding sessionIdBinding =
+            BindingBuilder.prepareBindingThat().bind(String.class).annotatedWith(SessionId.class).providedBy(new Provider<String>() {
+                @Override
+                public String get() {
+                    Cookie cookie = Request.current.get().cookies.get("webfwk-session-id");
+                    if (cookie != null) {
+                        return cookie.value;
+                    }
+                    return "none";
+                }
+            }).build();
         injector.bindings().put(cacheBinding, cacheBinding);
         injector.bindings().put(responseBinding, responseBinding);
         injector.bindings().put(requestBinding, requestBinding);
@@ -109,6 +159,9 @@ public class DependencyShotIntegrator {
         injector.bindings().put(datasourceBinding, datasourceBinding);
         injector.bindings().put(connectionBinding, connectionBinding);
         injector.bindings().put(txManagerBinding, txManagerBinding);
+        injector.bindings().put(sessionBinding, sessionBinding);
+        injector.bindings().put(loggedUsernameBinding, loggedUsernameBinding);
+        injector.bindings().put(sessionIdBinding, sessionIdBinding);
     }
 
 }
