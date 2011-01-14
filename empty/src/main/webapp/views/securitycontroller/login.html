@@ -1,0 +1,36 @@
+#{extends 'main.html' /}
+#{set title:'Login' /}
+
+<h2 class="title"><a href="#">Login</a></h2>
+<div class="entry">
+    <form method="POST" action="@{'/security/login'}" >
+        <table>
+            <tr>
+                <td>Username </td>
+                <td>
+                    <input type="text" name="user">
+                </td>
+            </tr>
+            <tr>
+                <td>Password </td>
+                <td>
+                    <input type="password" name="password">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="hidden" name="url" value="${callbackUrl}"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="submit" value="Login" align="center">
+                </td>
+                <td>
+                    remember me <input type="checkbox" name="rememberme"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div class="byline"/>
