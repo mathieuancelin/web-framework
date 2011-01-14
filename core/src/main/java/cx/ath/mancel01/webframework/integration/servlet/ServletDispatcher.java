@@ -22,7 +22,12 @@ import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,6 +45,26 @@ public class ServletDispatcher extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
+        Properties config = new Properties();
+        try {
+            File confFile = new File(getServletContext().getRealPath("src/main/webapp/conf/config.properties"));           
+            config.load(new FileInputStream(confFile)); 
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        String mode = config.getProperty("framework.mode");
+        if ("dev".equals(mode)) {
+            throw new RuntimeException("You can't run web-framework in dev mode inside a servlet container.");
+        } else if ("prod".equals(mode)) {
+            String db = config.getProperty("db.mode");
+            if ("dev".equals(db)) {
+                System.out.println("You shouldn't run dev database inside servlet container."
+                        + " It's better to launch it from elsewhere. If you encounter issues"
+                        + " while trying to connect to the dev database, try to restart your servlet container.");
+            }
+        } else {
+            throw new RuntimeException("You have to specify a framework mode in config.properties.");
+        }
         String configClassName = getServletContext().getInitParameter("config");
         if (configClassName == null) {
             throw new RuntimeException("No binder registered ...");
