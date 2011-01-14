@@ -40,8 +40,6 @@ public class JPAService {
 
     private static JPAService INSTANCE;
 
-//    private Server hsqlServer = null;
-
     private boolean started = false;
 
     private DataSource dataSource;
@@ -81,63 +79,58 @@ public class JPAService {
 
     public static synchronized void start() {
         JPAService service = getInstance();
-//        //if (WebFramework.dev) {
-//            String db =  WebFramework.config.getProperty("db.dev");
-//            if (db != null) {
-//                if (db.equals("true")) {
-//                    //service.launchDevelopementServer();
-//                    service.started = true;
-//                }
-//            }
-//        //}
         try {
             service.launchJPA();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        service.started = true;
     }
 
     public static synchronized void stop() {
         JPAService service = getInstance();
-//        service.stopDevelopementServer();
-        if (service.emf != null)
-            service.emf.close();
-        if (service.dataSource instanceof ComboPooledDataSource) {
-            try {
-            ((ComboPooledDataSource) service.dataSource).close();
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (service.started) {
+            if (service.emf != null)
+                service.emf.close();
+            if (service.dataSource instanceof ComboPooledDataSource) {
+                try {
+                ((ComboPooledDataSource) service.dataSource).close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+            service.started = false;
         }
-        service.started = false;
     }
 
     public void startTx() {
-        EntityManager manager = emf.createEntityManager();
-        manager.setFlushMode(FlushModeType.COMMIT);
-        manager.getTransaction().begin();
-        JPAService.currentEm.set(manager);
-        JPAService.rollbackFlag.set(false);
+        if (started) {
+            EntityManager manager = emf.createEntityManager();
+            manager.setFlushMode(FlushModeType.COMMIT);
+            manager.getTransaction().begin();
+            JPAService.currentEm.set(manager);
+            JPAService.rollbackFlag.set(false);
+        }
     }
 
     public void stopTx(boolean rollback) {
-        EntityManager manager = JPAService.currentEm.get();
-        try {
-            if (rollback) {
-                manager.getTransaction().rollback();
-            } else {
-                if (JPAService.rollbackFlag.get()) {
+        if (started) {
+            EntityManager manager = JPAService.currentEm.get();
+            try {
+                if (rollback) {
                     manager.getTransaction().rollback();
                 } else {
-                    manager.getTransaction().commit();
+                    if (JPAService.rollbackFlag.get()) {
+                        manager.getTransaction().rollback();
+                    } else {
+                        manager.getTransaction().commit();
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            JPAService.rollbackFlag.remove();
+            JPAService.currentEm.remove();
         }
-        JPAService.rollbackFlag.remove();
-        JPAService.currentEm.remove();
     }
 
 //    public void launchDevelopementServer() {
@@ -161,12 +154,15 @@ public class JPAService {
 //    }
 
     public void launchJPA() throws Exception {
+        if (!WebFramework.config.containsKey("db.mode")) {
+            return;
+        }
         System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
         System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
         Ejb3Configuration cfg = new Ejb3Configuration();
         if (WebFramework.config.getProperty("db.dataSource") == null) {
             ComboPooledDataSource intDataSource = new ComboPooledDataSource();
-            if ("true".equals(WebFramework.config.getProperty("db.dev", "true"))) {
+            if ("dev".equals(WebFramework.config.getProperty("db.mode", "dev"))) {
             //if (hsqlServer != null) {
                 intDataSource.setDriverClass("org.hsqldb.jdbcDriver");
                 //intDataSource.setJdbcUrl("jdbc:hsqldb:hsql://localhost/webframeworkdb");
@@ -208,6 +204,7 @@ public class JPAService {
         }
         cfg.setDataSource(dataSource);
         this.emf = cfg.buildEntityManagerFactory();
+        started = true;
     }
 
     public TxManager getTxManager() {
