@@ -61,15 +61,15 @@ public class SecurityController {
             Render.redirect(loginModule.authenticationFailURL()).go();
         }
         Cookie cookie = new Cookie();
-        cookie.name = "username";
+        cookie.name = Session.USERNAME;
         cookie.value = user;
-        response.cookies.put("username", cookie);
+        response.cookies.put(Session.USERNAME, cookie);
         if(rememberme.equals("on")) {
             cookie = new Cookie();
-            cookie.name = "rememberme";
+            cookie.name = Session.REMEMBERME;
             cookie.value = user + "-" + SecurityUtils.sign(user);
             cookie.maxAge = 2592000; // 30 days
-            response.cookies.put("rememberme", cookie);
+            response.cookies.put(Session.REMEMBERME, cookie);
         }
         Render.redirect(url).go();
     }
@@ -80,24 +80,24 @@ public class SecurityController {
         Cookie username = new Cookie();
         Cookie rememberme = new Cookie();
         Cookie sessionId = new Cookie();
-        username.name = "username";
+        username.name = Session.USERNAME;
         username.domain = null;
         username.value = "";
         username.path = "/";
         username.maxAge = 0;
-        response.cookies.put("username", username);
-        rememberme.name = "rememberme";
+        response.cookies.put(Session.USERNAME, username);
+        rememberme.name = Session.REMEMBERME;
         rememberme.domain = null;
         rememberme.value = "";
         rememberme.path = "/";
         rememberme.maxAge = 0;
-        response.cookies.put("rememberme", rememberme);
-        sessionId.name = "webfwk-session-id";
+        response.cookies.put(Session.REMEMBERME, rememberme);
+        sessionId.name = Session.SESSION_ID;
         sessionId.domain = null;
         sessionId.value = "";
         sessionId.path = "/";
         sessionId.maxAge = 0;
-        response.cookies.put("webfwk-session-id", sessionId);
+        response.cookies.put(Session.SESSION_ID, sessionId);
         Session.current.get().clear();
         if (!"/".equals(WebFramework.contextRoot)) {
             Render.redirect(WebFramework.contextRoot + loginModule.logoutURL()).go();

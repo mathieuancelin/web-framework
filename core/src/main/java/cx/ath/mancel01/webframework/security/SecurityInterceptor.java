@@ -20,6 +20,7 @@ package cx.ath.mancel01.webframework.security;
 import cx.ath.mancel01.webframework.http.Cookie;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.http.Session;
 import cx.ath.mancel01.webframework.util.SecurityUtils;
 import cx.ath.mancel01.webframework.view.FrameworkPage;
 import javax.inject.Singleton;
@@ -47,17 +48,17 @@ public class SecurityInterceptor implements MethodInterceptor {
                     + "</td><td>Remember me <input type=\"checkbox\" name=\"rememberme\"/>"
                     + "</td></tr></table>"
                     + "</form>";
-        if (req.cookies.containsKey("username")) {
+        if (req.cookies.containsKey(Session.USERNAME)) {
             return mi.proceed();
-        } else if (req.cookies.containsKey("rememberme")) {
-            String cookieValue = req.cookies.get("rememberme").value;
+        } else if (req.cookies.containsKey(Session.REMEMBERME)) {
+            String cookieValue = req.cookies.get(Session.REMEMBERME).value;
             String username = cookieValue.split("-")[0];
             String sign = cookieValue.split("-")[1];
             if (SecurityUtils.sign(username).equals(sign)) {
                 Cookie cookie = new Cookie();
-                cookie.name = "username";
+                cookie.name = Session.USERNAME;
                 cookie.value = username;
-                Response.current.get().cookies.put("username", cookie);
+                Response.current.get().cookies.put(Session.USERNAME, cookie);
                 return mi.proceed();
             } else {
                 new FrameworkPage("Connection", form).go();

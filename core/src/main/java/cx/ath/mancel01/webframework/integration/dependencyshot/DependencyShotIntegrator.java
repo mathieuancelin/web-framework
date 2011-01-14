@@ -133,7 +133,7 @@ public class DependencyShotIntegrator {
             BindingBuilder.prepareBindingThat().bind(String.class).annotatedWith(LoggedUsername.class).providedBy(new Provider<String>() {
                 @Override
                 public String get() {
-                    Cookie cookie = Request.current.get().cookies.get("username");
+                    Cookie cookie = Request.current.get().cookies.get(Session.USERNAME);
                     if (cookie != null) {
                         return cookie.value;
                     }
@@ -144,7 +144,7 @@ public class DependencyShotIntegrator {
             BindingBuilder.prepareBindingThat().bind(String.class).annotatedWith(SessionId.class).providedBy(new Provider<String>() {
                 @Override
                 public String get() {
-                    Cookie cookie = Request.current.get().cookies.get("webfwk-session-id");
+                    Cookie cookie = Request.current.get().cookies.get(Session.SESSION_ID);
                     if (cookie != null) {
                         return cookie.value;
                     }

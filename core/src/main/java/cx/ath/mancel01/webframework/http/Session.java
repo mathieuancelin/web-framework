@@ -31,6 +31,11 @@ import java.util.regex.Pattern;
  */
 public class Session {
 
+    public static final String SESSION_ID = "webfwk-session-id";
+    public static final String SESSION = "webfwk-session";
+    public static final String REMEMBERME = "webfwk-rememberme";
+    public static final String USERNAME = "webfwk-username";
+
     private static final Pattern sessionParser
             = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
     public static ThreadLocal<Session> current 
@@ -43,7 +48,7 @@ public class Session {
         Response res = Response.current.get();
         Session session = new Session();
         try {
-            Cookie cookie = req.cookies.get("webfwk-session");
+            Cookie cookie = req.cookies.get(SESSION);
             if (cookie != null) {
                 String value = cookie.value;
                 String sign = value.substring(0, value.indexOf("-"));
@@ -59,14 +64,14 @@ public class Session {
         } catch (Exception e) {
             throw new RuntimeException("Corrupted HTTP session from " + Request.current.get().remoteAddress, e);
         }
-        if (!req.cookies.containsKey("webfwk-session-id")) {
+        if (!req.cookies.containsKey(SESSION_ID)) {
             session.sessionId = UUID.randomUUID().toString();
             Cookie cookie = new Cookie();
-            cookie.name = "webfwk-session-id";
+            cookie.name = SESSION_ID;
             cookie.value = session.sessionId;
-            res.cookies.put("webfwk-session-id", cookie);
+            res.cookies.put(SESSION_ID, cookie);
         } else {
-            session.sessionId = req.cookies.get("webfwk-session-id").value;
+            session.sessionId = req.cookies.get(SESSION_ID).value;
         }
         return session;
     }
@@ -84,7 +89,7 @@ public class Session {
             String sessionData = URLEncoder.encode(session.toString(), "utf-8");
             String sign = SecurityUtils.sign(sessionData);
             Cookie cookie = new Cookie();
-            cookie.name = "webfwk-session";
+            cookie.name = SESSION;
             cookie.value = sign + "-" + sessionData;
             Response.current.get().cookies.put(cookie.name, cookie);
         } catch (Exception e) {
