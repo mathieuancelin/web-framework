@@ -27,6 +27,7 @@ import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.data.JPAService;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
+import cx.ath.mancel01.webframework.http.Session;
 import cx.ath.mancel01.webframework.integration.dependencyshot.DependencyShotIntegrator;
 import cx.ath.mancel01.webframework.routing.Router;
 import cx.ath.mancel01.webframework.routing.WebMethod;
@@ -37,8 +38,6 @@ import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  *
@@ -150,6 +149,7 @@ public class FrameworkHandler {
                     res.out = new ByteArrayOutputStream();
                     return res;
                 }
+                Session.current.set(Session.restore());
                 WebMethod webMethod = null;
                 if (WebFramework.dev) {
                     try {
@@ -187,6 +187,8 @@ public class FrameworkHandler {
             t.printStackTrace();
             return new FrameworkPage("Error", "Ooops, an error occured : <br/><br/>"
                     + ex.getMessage()).render();
+        } finally {
+            Session.current.remove();
         }
     }
 
@@ -218,6 +220,7 @@ public class FrameworkHandler {
             return new FrameworkPage("Nothing returned", "<h1>Ooops</h1> it seems that your controller method doesn't return"
                     + " anything.<br/><br/>If you use the Render api, don't forget to call the go() method.").render();
         }
+        Session.current.get().save();
         if (ret instanceof Renderable) {
             Renderable renderable = (Renderable) ret;
             if (renderable instanceof View) { // ok that's not really OO but what the hell !
