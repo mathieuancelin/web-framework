@@ -17,12 +17,13 @@
 
 package cx.ath.mancel01.webframework.security;
 
+import cx.ath.mancel01.webframework.WebFramework;
 import cx.ath.mancel01.webframework.http.Cookie;
 import cx.ath.mancel01.webframework.http.Request;
 import cx.ath.mancel01.webframework.http.Response;
 import cx.ath.mancel01.webframework.http.Session;
 import cx.ath.mancel01.webframework.util.SecurityUtils;
-import cx.ath.mancel01.webframework.view.FrameworkPage;
+import cx.ath.mancel01.webframework.view.Render;
 import javax.inject.Singleton;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -37,17 +38,6 @@ public class SecurityInterceptor implements MethodInterceptor {
     @Override
     public final Object invoke(MethodInvocation mi) throws Throwable {
         Request req = Request.current.get();
-        String form = "<form method=\"POST\" action=\"@{'/security/login'}\" >"
-                    + "<table><tr><td>"
-                    + "Username </td><td>"
-                    + "<input type=\"text\" name=\"user\"></td></tr><tr><td>"
-                    + "Password </td><td><input type=\"password\" name=\"password\">"
-                    + "<input type=\"hidden\" name=\"url\" value=\"" + req.path + "\">"
-                    + "</td></tr><tr><td></td></td></tr><tr><td>"
-                    + "<input type=\"submit\" value=\"Login\" align=\"center\">"
-                    + "</td><td>Remember me <input type=\"checkbox\" name=\"rememberme\"/>"
-                    + "</td></tr></table>"
-                    + "</form>";
         if (req.cookies.containsKey(Session.USERNAME)) {
             return mi.proceed();
         } else if (req.cookies.containsKey(Session.REMEMBERME)) {
@@ -61,10 +51,20 @@ public class SecurityInterceptor implements MethodInterceptor {
                 Response.current.get().cookies.put(Session.USERNAME, cookie);
                 return mi.proceed();
             } else {
-                new FrameworkPage("Connection", form).go();
+                Session.current.get().put("callbackUrl", req.path);
+                if (!"/".equals(WebFramework.contextRoot)) {
+                    Render.redirect(WebFramework.contextRoot
+                            + "/security/loginpage").go();
+                }
+                Render.redirect("/security/loginpage").go();
             }
         } else {
-            new FrameworkPage("Connection", form).go();
+            Session.current.get().put("callbackUrl", req.path);
+            if (!"/".equals(WebFramework.contextRoot)) {
+                Render.redirect(WebFramework.contextRoot
+                        + "/security/loginpage").go();
+            }
+            Render.redirect("/security/loginpage").go();
         }
         // should never append
         return null;
