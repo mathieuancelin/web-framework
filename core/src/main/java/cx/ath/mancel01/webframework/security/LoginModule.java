@@ -17,6 +17,8 @@
 
 package cx.ath.mancel01.webframework.security;
 
-public interface Authenticator {
+public interface LoginModule {
     boolean authenticate(String username, String password);
+    String authenticationFailURL();
+    String logoutURL();
 }
