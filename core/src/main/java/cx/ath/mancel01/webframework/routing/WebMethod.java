@@ -17,6 +17,7 @@
 
 package cx.ath.mancel01.webframework.routing;
 
+import cx.ath.mancel01.webframework.SuspendException;
 import cx.ath.mancel01.webframework.data.JPAService;
 import cx.ath.mancel01.webframework.exception.BreakFlowException;
 import cx.ath.mancel01.webframework.http.Request;
@@ -137,6 +138,14 @@ public class WebMethod {
                 ret = m.invoke(controller, args);
             }
         } catch (Exception ex) {
+            Throwable t = ex;
+            while(t != null) {
+                if (t instanceof SuspendException) {
+                    SuspendException s = (SuspendException) t;
+                    throw s;
+                }
+                t = t.getCause();
+            }
             if (ex.getCause() instanceof BreakFlowException) {
                 BreakFlowException br = (BreakFlowException) ex.getCause();
                 ret = br.getRenderable();

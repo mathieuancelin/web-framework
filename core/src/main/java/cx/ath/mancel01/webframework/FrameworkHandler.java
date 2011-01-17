@@ -192,45 +192,51 @@ public class FrameworkHandler {
     }
 
     Response render(Request request, WebMethod webMethod) throws Exception {
-        Class controllerClass = webMethod.getClazz();
-        String methodName = webMethod.getMethod().getName();
-        long start = System.currentTimeMillis();
-        JPAService.getInstance().startTx();
-        start = System.currentTimeMillis();
-        Object controller = null;
-        if (WebFramework.dev) {
-            try {
-                controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
-                //devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
-                controller = devInjector.getInstance(controllerClass);
-                //controller = devControllerBinding.getInstance(devInjector, null);
-                //controller = controllerBinding.getInstance(injector, null);
-            } catch (Throwable ex) {
-                return createErrorResponse(ex);
+        try {
+            Class controllerClass = webMethod.getClazz();
+            String methodName = webMethod.getMethod().getName();
+            long start = System.currentTimeMillis();
+            JPAService.getInstance().startTx();
+            start = System.currentTimeMillis();
+            Object controller = null;
+            if (WebFramework.dev) {
+                try {
+                    controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
+                    //devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
+                    controller = devInjector.getInstance(controllerClass);
+                    //controller = devControllerBinding.getInstance(devInjector, null);
+                    //controller = controllerBinding.getInstance(injector, null);
+                } catch (Throwable ex) {
+                    return createErrorResponse(ex);
+                }
+            } else {
+                controller = injector.getInstance(controllerClass);
             }
-        } else {
-            controller = injector.getInstance(controllerClass);
-        }
-        WebFramework.logger.trace("controller injection : {} ms.", (System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
-        Object ret = webMethod.invoke(request, controller);
-        WebFramework.logger.trace("controller method invocation : {} ms.", (System.currentTimeMillis() - start));
-        JPAService.getInstance().stopTx(false);
-        if (ret == null) {
-            return new FrameworkPage("Nothing returned", "<h1>Ooops</h1> it seems that your controller method doesn't return"
-                    + " anything.<br/><br/>If you use the Render api, don't forget to call the go() method.").render();
-        }
-        Session.current.get().save();
-        if (ret instanceof Renderable) {
-            Renderable renderable = (Renderable) ret;
-            if (renderable instanceof View) { // ok that's not really OO but what the hell !
+            WebFramework.logger.trace("controller injection : {} ms.", (System.currentTimeMillis() - start));
+            start = System.currentTimeMillis();
+            Object ret = webMethod.invoke(request, controller);
+            WebFramework.logger.trace("controller method invocation : {} ms.", (System.currentTimeMillis() - start));
+            JPAService.getInstance().stopTx(false);
+            AsyncJob.current.remove();
+            if (ret == null) {
+                return new FrameworkPage("Nothing returned", "<h1>Ooops</h1> it seems that your controller method doesn't return"
+                        + " anything.<br/><br/>If you use the Render api, don't forget to call the go() method.").render();
+            }
+            Session.current.get().save();
+            if (ret instanceof Renderable) {
+                Renderable renderable = (Renderable) ret;
+                if (renderable instanceof View) { // ok that's not really OO but what the hell !
 //                return ((View) renderable).render(methodName, controllerClass, WebFramework.grabber);
-                return ((View) renderable).render(methodName, controllerClass, viewGrabber);
+                    return ((View) renderable).render(methodName, controllerClass, viewGrabber);
+                }
+                return renderable.render();
+            } else {
+                return new FrameworkPage("Oooops, can't render", "can't render an object of type : <br/><br/>"
+                        + ret.getClass().getName()).render();
             }
-            return renderable.render();
-        } else {
-            return new FrameworkPage("Oooops, can't render", "can't render an object of type : <br/><br/>"
-                    + ret.getClass().getName()).render();
+        } catch (SuspendException s) {
+            s.waitFor();
+            return process(s.getReq());
         }
     }
 
