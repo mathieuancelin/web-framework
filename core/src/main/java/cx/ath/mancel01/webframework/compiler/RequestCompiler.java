@@ -20,6 +20,7 @@ import cx.ath.mancel01.webframework.WebFramework;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -32,17 +33,6 @@ public class RequestCompiler {
 
     private static JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
     private static Map<File, Long> sourceFiles = new HashMap<File, Long>();
-
-    public static Class<?> getCompiledClass(Class<?> clazz) {
-        try {
-            ClassLoader loader = new WebFrameworkClassLoader(RequestCompiler.class.getClassLoader());
-            Class<?> loadedClazz = loader.loadClass(clazz.getName());
-            loader = null;
-            return loadedClazz;
-        } catch (ClassNotFoundException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
 
     public static boolean compile(String clazz) {
         return compileClassIfChanged(clazz);
@@ -78,7 +68,7 @@ public class RequestCompiler {
         return ret;
     }
 
-    public static void compileSources() {
+    public static void compileSources(List<String> classes) {
         try {
             ArrayList<String> args = new ArrayList<String>();
             args.add("-encoding");
@@ -87,25 +77,27 @@ public class RequestCompiler {
             args.add("1.6");
             args.add("-target");
             args.add("1.6");
+            args.add("-Xlint:none");
             args.add("-d");
             args.add(WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath());
             args.add("-classpath");
             args.add(WebFramework.classpath);
-            findClasses(args, WebFramework.JAVA_SOURCES); // TODO : remove app ...
+            args.addAll(classes);
             String[] argsTab = new String[args.size()];
             argsTab = args.toArray(argsTab);
             ErrorOutputStream err = new ErrorOutputStream();
             javac.run(null, null, err, argsTab);
             if (!err.toString().isEmpty()) {
-                if (!err.toString().contains("Note: Recompile with -Xlint")) // TODO : real analysis
+                if (!err.toString().contains("Note: Recompile with -Xlint")) {// TODO : real analysis
                     throw new CompilationException(err.toString());
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void findClasses(ArrayList<String> builder, File file) {
+    private static void findClasses(List<String> builder, File file) {
         final File[] children = file.listFiles();
         if (children != null) {
             for (File f : children) {
@@ -123,20 +115,13 @@ public class RequestCompiler {
 
     private static void compile(File source) {
         try {
-            //Process p = Runtime.getRuntime().exec(command);
-            //p.waitFor();
             ErrorOutputStream err = new ErrorOutputStream();
-            javac.run(null, null, err
-                    , "-encoding", "utf-8", "-source"
-                    , "1.6", "-target", "1.6"
-                    , "-d", WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath()
-                    , "-sourcepath", WebFramework.JAVA_SOURCES.getAbsolutePath()
-                    , "-classpath"
-                    , WebFramework.classpath
-                    , source.getAbsolutePath());
+            javac.run(null, null, err, "-encoding", "utf-8", "-source", "1.6", "-target", "1.6", "-Xlint:none", "-d", WebFramework.FWK_COMPILED_CLASSES_PATH.getAbsolutePath(), "-sourcepath", WebFramework.JAVA_SOURCES.getAbsolutePath(), "-classpath", WebFramework.classpath, source.getAbsolutePath());
             if (!err.toString().isEmpty()) {
                 if (!err.toString().contains("Note: Recompile with -Xlint")) // TODO : real analysis
+                {
                     throw new CompilationException(err.toString());
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
