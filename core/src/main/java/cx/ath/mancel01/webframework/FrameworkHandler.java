@@ -122,7 +122,7 @@ public class FrameworkHandler {
     public Response process(Request request) {
         try {
             if (started) {
-                //Thread.currentThread().setContextClassLoader(loader);
+                Thread.currentThread().setContextClassLoader(new WebFrameworkClassLoader());
                 WebFramework.logger.trace("asked resource => {}", request.path);
                 long start = System.currentTimeMillis();
                 Response res = Response.current.get();
@@ -182,10 +182,8 @@ public class FrameworkHandler {
                 throw new RuntimeException("Framework not started ...");
             }
         } catch (Throwable t) {
-            final Throwable ex = t;
-            t.printStackTrace();
             return new FrameworkPage("Error", "Ooops, an error occured : <br/><br/>"
-                    + ex.getMessage()).render();
+                   + getErrorMessage(t)).render();
         } finally {
             Session.current.remove();
         }
@@ -253,9 +251,30 @@ public class FrameworkHandler {
             }
         }
         if (cause == null) { // TODO : error page with stacktrace
-            return new FrameworkPage("Error",
-                    original.getMessage().replace("\n", "<br/>")).render();
+            return new FrameworkPage("Error", getErrorMessage(original)).render();
         }
         return new FrameworkPage("Compilation error", cause.getMessage().replace("\n", "<br/>")).render();
+    }
+
+    private String getErrorMessage(Throwable t) {
+        t.printStackTrace();
+        StringBuilder message = new StringBuilder();
+        Throwable tmp = t;
+        while (tmp != null) {
+            message.append("<b>");
+            message.append(tmp.getMessage());
+            message.append("</b><br/><br/>");
+            for (StackTraceElement elmt : tmp.getStackTrace()) {
+                if (!elmt.toString().contains("com.sun.grizzly")) {
+                    message.append(elmt.toString().replace("$", ""));
+                    message.append("<br/>");
+                }
+            }
+            message.append("<br/>");
+            tmp = tmp.getCause();
+            if (tmp != null)
+                message.append("<b>caused by : </b>");
+        }
+        return message.toString().replace("\n", "<br/>");
     }
 }
