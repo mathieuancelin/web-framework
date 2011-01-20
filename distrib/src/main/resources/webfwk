@@ -1,15 +1,6 @@
 #!/bin/bash
 
 APP_PATH=`pwd`
-echo " "
-echo "|==========================================|"
-echo "|                                          |"
-echo "| Welcome in the web-framework framework ! |"
-echo "|                                          |"
-echo "|       web-framework version 0.1a         |"
-echo "|                                          |"
-echo "|==========================================|"
-echo " "
 
 function compute_classpath()
 {
@@ -192,29 +183,84 @@ function createService()
 	return;
 }
 
+_foo() 
+{
+    local cur opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    opts="new run create-model create-controller create-binder create-service create-loginmodule --help"
+    COMPREPLY=( $(compgen -W "${opts}" ${cur}) )
+    return 0
+}
+
+function echoStart()
+{
+	echo " "
+	echo "|==========================================|"
+	echo "|                                          |"
+	echo "| Welcome in the web-framework framework ! |"
+	echo "|                                          |"
+	echo "|       web-framework version 0.1a         |"
+	echo "|                                          |"
+	echo "|==========================================|"
+	echo " "
+	return;
+}
+
+function displayHelp()
+{
+	echoStart
+	echo "You can use the following commands :"
+	echo " "
+	echo "  new 			create a new application"
+	echo "  run 			run the specified application"
+	echo "  create-model 		create a new entity in the app.model package"
+	echo "  create-controller 	create a new controller in the app.controller package"
+	echo "  create-binder 	create a new binder to configure dependency injection"
+	echo "  create-service 	create a new service in the app.services package"
+	echo "  create-loginmodule 	create a new service to implements authentication methods"
+	echo "  --help 		display help"
+	echo " "
+	echo "Have fun :)"
+	echo " "
+	return;
+}
+
 case $1 in
  new)
+  echoStart
   new $2
   ;;
  run)
+  echoStart
   launch $2
   ;;
  create-model)
+  echoStart
   createModel $2
   ;;
  create-binder)
+  echoStart
   createBinder $2
   ;;
  create-controller)
+  echoStart
   createController $2
   ;;
  create-loginmodule)
+  echoStart
   createLogin $2
   ;;
  create-service)
+  echoStart
   createService $2
   ;;
+ --help)
+  displayHelp
+  ;;
  *)
-  echo "display the help :)"
+  #echo "display the help :)"
   ;;
 esac
+
+complete -F _foo -o filenames webfwk

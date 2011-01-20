@@ -4,6 +4,8 @@ h1. How to use web-framework
 ** download the web-framework distribution (link below)
 ** set the WEBFWK_HOME environment variable to your distribution path
 ** add $WEBFWK_HOME/lib to your PATH
+** add the following line to your profile for completion
+*** source $WEBFWK_HOME/webfwk
 
 * Use web-framework
 ** create a new project with command 
