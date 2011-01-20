@@ -183,7 +183,7 @@ function createService()
 	return;
 }
 
-_foo() 
+_completion() 
 {
     local cur opts
     COMPREPLY=()
@@ -263,4 +263,4 @@ case $1 in
   ;;
 esac
 
-complete -F _foo -o filenames webfwk
+complete -F _completion -o filenames webfwk
