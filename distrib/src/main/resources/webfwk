@@ -119,12 +119,94 @@ function new()
 	return
 }
 
+function createController() 
+{
+	NAME=$1
+	TEMPLATES=$WEBFWK_HOME/templates	
+	OLD='${classname}'
+	LOWER=`echo $NAME | tr "[:upper:]" "[:lower:]"`
+	echo "creating src/main/java/app/controller/$NAME.java"
+	sed "s/$OLD/$NAME/g" $TEMPLATES/ControllerTemplate.java > src/main/java/app/controller/$NAME.java
+	echo "creating src/main/webapp/views/$LOWER"
+	mkdir src/main/webapp/views/$LOWER
+	echo "creating src/main/webapp/views/$LOWER/index.html"
+	cp $WEBFWK_HOME/new-project/src/main/webapp/views/mycontroller/index.html src/main/webapp/views/$LOWER/index.html
+	echo ""
+	return;
+}
+
+function createLogin() 
+{
+	NAME=$1
+	TEMPLATES=$WEBFWK_HOME/templates	
+	OLD='${classname}'
+	LOWER=`echo $NAME | tr "[:upper:]" "[:lower:]"`
+	mkdir src/main/java/app/services
+	echo "creating login module impl @ src/main/java/app/services/$NAME.java"
+	sed "s/$OLD/$NAME/g" $TEMPLATES/LoginModuleImplTemplate.java > src/main/java/app/services/$NAME.java
+	echo ""
+	return;
+}
+
+function createModel() 
+{
+	NAME=$1
+	TEMPLATES=$WEBFWK_HOME/templates	
+	OLD='${classname}'
+	LOWER=`echo $NAME | tr "[:upper:]" "[:lower:]"`
+	mkdir src/main/java/app/model
+	echo "creating model @ src/main/java/app/model/$NAME.java"
+	sed "s/$OLD/$NAME/g" $TEMPLATES/ModelTemplate.java > src/main/java/app/model/$NAME.java
+	echo ""
+	return;
+}
+
+function createBinder() 
+{
+	NAME=$1
+	TEMPLATES=$WEBFWK_HOME/templates	
+	OLD='${classname}'
+	LOWER=`echo $NAME | tr "[:upper:]" "[:lower:]"`
+	echo "creating binder @ src/main/java/app/binder/$NAME.java"
+	sed "s/$OLD/$NAME/g" $TEMPLATES/BinderTemplate.java > src/main/java/app/binder/$NAME.java
+	echo ""
+	return;
+}
+
+function createService() 
+{
+	NAME=$1
+	TEMPLATES=$WEBFWK_HOME/templates	
+	OLD='${classname}'
+	LOWER=`echo $NAME | tr "[:upper:]" "[:lower:]"`
+	mkdir src/main/java/app/services
+	echo "creating src/main/java/app/services/$NAME.java"
+	sed "s/$OLD/$NAME/g" $TEMPLATES/ServiceTemplate.java > src/main/java/app/services/$NAME.java
+	echo ""
+	return;
+}
+
 case $1 in
  new)
   new $2
   ;;
  run)
   launch $2
+  ;;
+ create-model)
+  createModel $2
+  ;;
+ create-binder)
+  createBinder $2
+  ;;
+ create-controller)
+  createController $2
+  ;;
+ create-loginmodule)
+  createLogin $2
+  ;;
+ create-service)
+  createService $2
   ;;
  *)
   echo "display the help :)"

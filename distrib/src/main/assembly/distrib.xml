@@ -83,6 +83,13 @@
             <directory>../empty/src</directory>
         </fileSet>
         <fileSet>
+            <outputDirectory>templates</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <directory>src/main/resources/templates</directory>
+        </fileSet>
+        <fileSet>
             <outputDirectory>web-framework/src</outputDirectory>
             <includes>
                 <include>**/*</include>
