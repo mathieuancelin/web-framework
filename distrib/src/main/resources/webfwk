@@ -131,6 +131,9 @@ function createController()
 	mkdir src/main/webapp/views/$LOWER
 	echo "creating src/main/webapp/views/$LOWER/index.html"
 	cp $WEBFWK_HOME/new-project/src/main/webapp/views/mycontroller/index.html src/main/webapp/views/$LOWER/index.html
+	sed "s/configureBindings() {/configureBindings() {registerController($NAME.class);/g" src/main/java/app/binder/AppBinder.java > src/main/java/app/binder/AppBinder2.java
+	mv -f src/main/java/app/binder/AppBinder2.java src/main/java/app/binder/AppBinder.java
+	rm -f src/main/java/app/binder/AppBinder2.java
 	echo ""
 	return;
 }
@@ -144,6 +147,9 @@ function createLogin()
 	mkdir src/main/java/app/services
 	echo "creating login module impl @ src/main/java/app/services/$NAME.java"
 	sed "s/$OLD/$NAME/g" $TEMPLATES/LoginModuleImplTemplate.java > src/main/java/app/services/$NAME.java
+	sed "s/configureBindings() {/configureBindings() {registerController(cx.ath.mancel01.webframework.security.SecurityController.class);bind(cx.ath.mancel01.webframework.security.LoginModule.class).to(app.services.$NAME.class);/g" src/main/java/app/binder/AppBinder.java > src/main/java/app/binder/AppBinder2.java
+	mv -f src/main/java/app/binder/AppBinder2.java src/main/java/app/binder/AppBinder.java
+	rm -f src/main/java/app/binder/AppBinder2.java
 	echo ""
 	return;
 }

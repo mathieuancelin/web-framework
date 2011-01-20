@@ -17,7 +17,7 @@
 
 package app.binder;
 
-import app.controller.MyController;
+import app.controller.*;
 import cx.ath.mancel01.webframework.integration.dependencyshot.WebBinder;
 
 /**
