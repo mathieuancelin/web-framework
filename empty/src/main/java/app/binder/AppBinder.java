@@ -29,5 +29,9 @@ public class AppBinder extends WebBinder {
     @Override
     public void configureBindings() {
         registerController(MyController.class);
+
+        // code generation
+
+        // ---------------
     }
 }
