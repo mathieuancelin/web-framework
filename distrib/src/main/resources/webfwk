@@ -183,47 +183,44 @@ function createService()
 	return;
 }
 
-function war()
-{
-	case $1 in
-	 "")
-	  APP_PATH=`pwd`
-	  ;;
-	 ".")
-	  APP_PATH=`pwd`
-	  ;;
-	 *)
-	  APP_PATH=$1
-	  ;;
-	esac	
-	compute_classpath
-	mkdir $APP_PATH/classes
-	javac -encoding utf-8 -source 1.6 -target 1.6 -d $APP_PATH/classes \
-	-classpath $RESOURCES:$CONF:$LIBS_CLASSPATH:$USER_LIBS_CLASSPATH $FILES
-	rm -rf $APP_PATH/war
-	mkdir $APP_PATH/war
-	cp -r $APP_PATH/src $APP_PATH/war/
-	mkdir $APP_PATH/war/META-INF
-	cp -r $APP_PATH/src/main/webapp/WEB-INF $APP_PATH/war/
-	rm -rf $APP_PATH/war/WEB-INF/classes
-	cp -r $APP_PATH/classes $APP_PATH/war/WEB-INF/classes
-	rm -rf $APP_PATH/classes
-	rm -rf $APP_PATH/war/WEB-INF/lib
-	cp -r $APP_PATH/lib $APP_PATH/war/WEB-INF/lib
-	cp -r $WEBFWK_HOME/lib $APP_PATH/war/WEB-INF/
-	cp -r $APP_PATH/src/main/resources $APP_PATH/war/META-INF
-	echo "creating war @" $APP_PATH/war
-	zip -9 -r $APP_PATH/application.war $APP_PATH/war
-	return;
-}
-
 _completion() 
 {
     local cur opts
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
-    opts="new run create-model create-controller create-binder create-service create-loginmodule war --help"
-    COMPREPLY=( $(compgen -W "${opts}" ${cur}) )
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="new run create-model create-controller create-binder create-service create-loginmodule --help"
+    case "${prev}" in
+		new)
+	        return 0
+            ;;
+	    run)
+		    COMPREPLY=( $(compgen -f ${cur}) )
+	        return 0
+	        ;;
+		create-model)
+	        return 0
+	        ;;
+		create-controller)
+			return 0
+			;;
+		create-binder)
+			return 0
+			;;
+		create-service)
+			return 0
+			;;
+		create-loginmodule)
+			return 0
+			;;
+		--help)
+			return 0
+			;;
+	    *)
+			COMPREPLY=( $(compgen -W "${opts}" ${cur}) )
+			return 0
+	    	;;
+	esac
     return 0
 }
 
@@ -253,7 +250,6 @@ function displayHelp()
 	echo "  create-binder 	create a new binder to configure dependency injection"
 	echo "  create-service 	create a new service in the app.services package"
 	echo "  create-loginmodule 	create a new service to implements authentication methods"
-	echo "  war 			create a war with the specified application"
 	echo "  --help 		display help"
 	echo " "
 	echo "Have fun :)"
@@ -289,10 +285,6 @@ case $1 in
  create-service)
   echoStart
   createService $2
-  ;;
- war)
-  echoStart
-  war $2
   ;;
  --help)
   displayHelp

@@ -12,6 +12,7 @@
 		<module>distrib</module>
 		<module>empty</module>
 		<module>sample</module>
+		<module>todo</module>
 	</modules>
     <licenses>
         <license>
