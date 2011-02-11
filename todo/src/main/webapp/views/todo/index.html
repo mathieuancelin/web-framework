@@ -1,0 +1,35 @@
+#{extends 'main.html' /}
+#{set title:'Todo' /}
+
+<h2 class="title"><a href="#">Todo list</a></h2>
+<div class="entry">
+<% if (tasks.empty) { %>
+    <div id="notask">
+        <p>No Tasks</p>
+    </div>
+    <ul></ul>
+<% } else { %>
+    <ul>
+        #{list items:tasks, as:'task'}
+            <li><input type="checkbox" id="${task.id}" ${task.done ? 'checked' : ''} /> ${task.title}</li>
+        #{/list}
+    </ul>
+<% } %>
+<p>
+    <a id="createTask" href="#">Create a new task</a>
+</p>
+<script type="text/javascript">
+    $('#createTask').click(function() {
+        $.post("@{'/todo/createTask'}", {title: prompt('task title')}, function(task) {
+            $('#notask').hide();
+            $('ul').prepend(
+                '<li><input type="checkbox" id="' + task.id + '"/>' + task.title + '</li>'
+            );
+        });
+    });
+    $('input').live('click', function() {
+        $.post("@{'/todo/change'}", {id: $(this).attr('id'), done: $(this).val()})
+    });
+</script>
+</div>
+<div class="byline" />
