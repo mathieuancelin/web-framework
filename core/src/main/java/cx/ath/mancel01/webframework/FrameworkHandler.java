@@ -86,9 +86,9 @@ public class FrameworkHandler {
     }
 
     public void start() {
-        WebFramework.init(rootDir, contextRoot);
-        publicResources = WebFramework.PUBLIC_RESOURCES;
         loader = new WebFrameworkClassLoader(getClass().getClassLoader());
+        WebFramework.init(rootDir, contextRoot, loader);
+        publicResources = WebFramework.PUBLIC_RESOURCES;
         try {
             this.binderClass =
                 (Class<? extends Binder>) loader.loadClass(binderClassName);
@@ -161,6 +161,7 @@ public class FrameworkHandler {
                     WebFrameworkClassLoader.setClassesNames(classes);
                     if (changed) {
                         stop();
+                        // clean classloader ?
                         start();
                     }
                     WebFramework.logger.trace("configuration bootstrap : {} ms.", (System.currentTimeMillis() - start));

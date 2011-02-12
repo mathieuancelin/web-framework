@@ -74,10 +74,10 @@ public class WebFramework {
 
     public static String contextRoot;
 
-    public static void init(File rootDir, String context) {
+    public static void init(File rootDir, String context, ClassLoader loader) {
         contextRoot = context;
         initFiles(rootDir);
-        findApplicationClasses();
+        findApplicationClasses(loader);
         initClasspath();
         initConfig();
         initLogger();
@@ -196,7 +196,7 @@ public class WebFramework {
         return applicationClasses.values();
     }
 
-    static void findApplicationClasses() {
+    static void findApplicationClasses(ClassLoader loader) {
         List<String> classesNames = new ArrayList<String>();
         findClasses(classesNames, WebFramework.JAVA_SOURCES);
         for(String className : classesNames) {
@@ -205,7 +205,7 @@ public class WebFramework {
         }
         for(String name : applicationClasses.keySet()) {
             try {
-                applicationClasses.put(name, Class.forName(name));
+                applicationClasses.put(name, loader.loadClass(name));
             } catch (ClassNotFoundException ex) {
                 ex.printStackTrace();
             }

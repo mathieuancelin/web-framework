@@ -53,8 +53,13 @@ public class WebFrameworkClassLoader extends ClassLoader {
         if (!WebFramework.dev) {
             return super.loadClass(name);
         }
-        if (name.startsWith("app.model")) {
+        if (name.startsWith("app.model")) { // TODO : fix that
             return super.loadClass(name);
+        }
+        Class<?> clazz = null;
+        clazz = findLoadedClass(name);
+        if (clazz != null) {
+            return clazz;
         }
         if (classesNames.contains(name)) {
             return findClass(name);
