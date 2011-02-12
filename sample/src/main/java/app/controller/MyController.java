@@ -47,10 +47,8 @@ import javax.ws.rs.core.MediaType;
 @Controller
 public class MyController {
 
-    private Service service = new ServiceImpl();
-
-//    @Inject
-//    private Service service;
+    @Inject
+    private Service service;
 
     @Inject
     private Request request;
@@ -60,6 +58,8 @@ public class MyController {
 
     @Path("/")
     public View index() {
+        Person p = new Person("john", "smith", "here");
+        em.persist(p);
         List<String> numbers = new ArrayList<String>();
         numbers.add("one");
         numbers.add("two");
