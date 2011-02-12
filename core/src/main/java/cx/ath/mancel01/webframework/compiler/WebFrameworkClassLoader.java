@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +34,8 @@ import java.util.logging.Logger;
  */
 public class WebFrameworkClassLoader extends ClassLoader {
 
+    private static List<String> classesNames = new ArrayList<String>();
+
     public WebFrameworkClassLoader() {
         super();
     }
@@ -40,21 +44,19 @@ public class WebFrameworkClassLoader extends ClassLoader {
         super(parent);
     }
 
+    public static void setClassesNames(List<String> classesNames) {
+        WebFrameworkClassLoader.classesNames = classesNames;
+    }
+
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         if (!WebFramework.dev) {
             return super.loadClass(name);
         }
-        if (!WebFramework.recompileServices) {
-            if (name.startsWith("app.services")) {
-                return super.loadClass(name);
-            }
-        }
         if (name.startsWith("app.model")) {
             return super.loadClass(name);
         }
-        //System.out.println("ask for class " + name);
-        if (name.startsWith("app.")) {
+        if (classesNames.contains(name)) {
             return findClass(name);
         } else {
             return super.loadClass(name);
@@ -63,15 +65,11 @@ public class WebFrameworkClassLoader extends ClassLoader {
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if (name.startsWith("app.")) {
-            String path = name.replace(".", "/");
-            RequestCompiler.compile(path);
-            File clazz = new File(WebFramework.FWK_COMPILED_CLASSES_PATH, path + ".class");
-            byte[] b = getClassDefinition(clazz);
-            return defineClass(name, b, 0, b.length);
-        } else {
-            return super.findClass(name);
-        }
+        String path = name.replace(".", "/");
+        RequestCompiler.compile(path);
+        File clazz = new File(WebFramework.FWK_COMPILED_CLASSES_PATH, path + ".class");
+        byte[] b = getClassDefinition(clazz);
+        return defineClass(name, b, 0, b.length);
     }
 
     private byte[] getClassDefinition(File file) {

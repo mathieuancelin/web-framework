@@ -22,6 +22,7 @@ import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.cache.CacheService;
 import cx.ath.mancel01.webframework.compiler.CompilationException;
+import cx.ath.mancel01.webframework.compiler.RequestCompiler;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.data.JPAService;
 import cx.ath.mancel01.webframework.http.Request;
@@ -37,6 +38,8 @@ import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -55,8 +58,7 @@ public class FrameworkHandler {
     private String binderClassName;
     private Router router;
     private FileGrabber viewGrabber;
-    //private AlphaClassloader loader;
-//    private Binding devControllerBinding;
+    private WebFrameworkClassLoader loader;
     private InjectorImpl devInjector;
 
     public FrameworkHandler(String binderClassName, String contextRoot,
@@ -85,17 +87,12 @@ public class FrameworkHandler {
 
     public void start() {
         WebFramework.init(rootDir, contextRoot);
-        //this.loader = new AlphaClassloader();
         publicResources = WebFramework.PUBLIC_RESOURCES;
+        loader = new WebFrameworkClassLoader(getClass().getClassLoader());
         try {
-            if (!WebFramework.dev) {
-                this.binderClass =
-                        (Class<? extends Binder>) Class.forName(binderClassName);
-            } else {
-                this.binderClass =
-                        (Class<? extends Binder>) //                    (Class<? extends Binder>) loader.loadClass(binderClassName);
-                        new WebFrameworkClassLoader(getClass().getClassLoader()).loadClass(binderClassName);
-            }
+            this.binderClass =
+                (Class<? extends Binder>) loader.loadClass(binderClassName);
+            this.router.reset();
             this.configBinder = (WebBinder) this.binderClass.newInstance();
             this.configBinder.setDispatcher(this);
             this.injector = DependencyShot.getInjector(configBinder);
@@ -122,7 +119,6 @@ public class FrameworkHandler {
     public Response process(Request request) {
         try {
             if (started) {
-                Thread.currentThread().setContextClassLoader(new WebFrameworkClassLoader());
                 WebFramework.logger.trace("asked resource => {}", request.path);
                 long start = System.currentTimeMillis();
                 Response res = Response.current.get();
@@ -148,26 +144,30 @@ public class FrameworkHandler {
                     res.out = new ByteArrayOutputStream();
                     return res;
                 }
-                Session.current.set(Session.restore());
-                WebMethod webMethod = null;
+
                 if (WebFramework.dev) {
-                    try {
-//                        devControllerBinding = null;
-                        devInjector = null;
-                        router.reset();
-                        Class devBinderClass = new WebFrameworkClassLoader().loadClass(binderClassName);
-                        //Class devBinderClass = loader.loadClass(binderClassName);
-                        WebBinder devBinder = (WebBinder) devBinderClass.newInstance();
-                        devBinder.setDispatcher(this);
-                        devInjector = DependencyShot.getInjector(devBinder);
-                        configureInjector(devInjector);
-                        //controllerClass = loader.loadClass(controllerClass.getName());
-                    } catch (Throwable ex) {
-                        return createErrorResponse(ex);
+                    List<String> classesNames = new ArrayList<String>();
+                    List<String> classes = new ArrayList<String>();
+                    WebFramework.findClasses(classesNames, WebFramework.JAVA_SOURCES);
+                    boolean changed = false;
+                    for(String className : classesNames) {
+                        String name = className.replace(WebFramework.JAVA_SOURCES.getAbsolutePath() + "/", "").replace(".java", "");
+                        classes.add(name.replace("/", "."));
+                        boolean tmp = RequestCompiler.compile(name);
+                        if (tmp) {
+                            changed = true;
+                        }
+                    }
+                    WebFrameworkClassLoader.setClassesNames(classes);
+                    if (changed) {
+                        stop();
+                        start();
                     }
                     WebFramework.logger.trace("configuration bootstrap : {} ms.", (System.currentTimeMillis() - start));
                     start = System.currentTimeMillis();
                 }
+                Session.current.set(Session.restore());
+                WebMethod webMethod = null;
                 try {
                     webMethod = router.route(request, contextRoot);
                 } catch (Throwable t) {
@@ -196,20 +196,7 @@ public class FrameworkHandler {
             long start = System.currentTimeMillis();
             JPAService.getInstance().startTx();
             start = System.currentTimeMillis();
-            Object controller = null;
-            if (WebFramework.dev) {
-                try {
-                    controllerClass = new WebFrameworkClassLoader().loadClass(controllerClass.getName());
-                    //devControllerBinding = new Binding(null, null, controllerClass, controllerClass, null, null);
-                    controller = devInjector.getInstance(controllerClass);
-                    //controller = devControllerBinding.getInstance(devInjector, null);
-                    //controller = controllerBinding.getInstance(injector, null);
-                } catch (Throwable ex) {
-                    return createErrorResponse(ex);
-                }
-            } else {
-                controller = injector.getInstance(controllerClass);
-            }
+            Object controller = injector.getInstance(controllerClass);
             WebFramework.logger.trace("controller injection : {} ms.", (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();
             Object ret = webMethod.invoke(request, controller);
@@ -224,7 +211,6 @@ public class FrameworkHandler {
             if (ret instanceof Renderable) {
                 Renderable renderable = (Renderable) ret;
                 if (renderable instanceof View) { // ok that's not really OO but what the hell !
-//                return ((View) renderable).render(methodName, controllerClass, WebFramework.grabber);
                     return ((View) renderable).render(methodName, controllerClass, viewGrabber);
                 }
                 return renderable.render();

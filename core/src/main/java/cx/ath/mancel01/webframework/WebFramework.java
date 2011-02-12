@@ -196,7 +196,7 @@ public class WebFramework {
         return applicationClasses.values();
     }
 
-    private static void findApplicationClasses() {
+    static void findApplicationClasses() {
         List<String> classesNames = new ArrayList<String>();
         findClasses(classesNames, WebFramework.JAVA_SOURCES);
         for(String className : classesNames) {
@@ -212,7 +212,7 @@ public class WebFramework {
         }
     }
 
-    private static void findClasses(List<String> builder, File file) {
+    static void findClasses(List<String> builder, File file) {
         final File[] children = file.listFiles();
         if (children != null) {
             for (File f : children) {
