@@ -24,7 +24,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -41,7 +40,6 @@ public class Person extends Model {
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
-    @Size(min=9)
     private String name;
     private String surname;
     private String address;
@@ -86,7 +84,7 @@ public class Person extends Model {
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     @Override
     public String toString() {
         return "Person{" + "id=" + id + ", name=" + name + ", surname=" + surname + ", address=" + address + '}';
