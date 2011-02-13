@@ -87,6 +87,7 @@ public class FrameworkHandler {
 
     public void start() {
         loader = new WebFrameworkClassLoader(getClass().getClassLoader());
+        Thread.currentThread().setContextClassLoader(loader);
         WebFramework.init(rootDir, contextRoot, loader);
         publicResources = WebFramework.PUBLIC_RESOURCES;
         try {
@@ -101,7 +102,7 @@ public class FrameworkHandler {
             throw new RuntimeException("Error at injector creation", e);
         }
         CacheService.start();
-        JPAService.start();
+        JPAService.start(loader);
         this.started = true;
     }
 
@@ -144,7 +145,7 @@ public class FrameworkHandler {
                     res.out = new ByteArrayOutputStream();
                     return res;
                 }
-
+                Thread.currentThread().setContextClassLoader(loader);
                 if (WebFramework.dev) {
                     List<String> classesNames = new ArrayList<String>();
                     List<String> classes = new ArrayList<String>();

@@ -19,6 +19,7 @@ package cx.ath.mancel01.webframework.data;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import cx.ath.mancel01.webframework.WebFramework;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -77,10 +78,10 @@ public class JPAService {
         return INSTANCE;
     }
 
-    public static synchronized void start() {
+    public static synchronized void start(ClassLoader loader) {
         JPAService service = getInstance();
         try {
-            service.launchJPA();
+            service.launchJPA(loader);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -153,7 +154,7 @@ public class JPAService {
 //        }
 //    }
 
-    public void launchJPA() throws Exception {
+    public void launchJPA(ClassLoader loader) throws Exception {
         if (!WebFramework.config.containsKey("db.mode")) {
             return;
         }
@@ -197,6 +198,13 @@ public class JPAService {
         }
         cfg.setProperty("javax.persistence.transactionType", "RESOURCE_LOCAL");
         Collection<Class<?>> classes = WebFramework.getApplicationClasses();
+        try {
+            Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
+            field.setAccessible(true);
+            field.set(cfg, loader);
+        } catch (Exception e) {
+            WebFramework.logger.error("Error trying to override the hibernate classLoader (new hibernate version ???)", e);
+        }
         for (Class<?> clazz : classes) {
             if (clazz.isAnnotationPresent(Entity.class)) {
                 cfg.addAnnotatedClass(clazz);

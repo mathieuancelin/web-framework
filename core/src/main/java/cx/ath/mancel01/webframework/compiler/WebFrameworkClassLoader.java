@@ -53,23 +53,23 @@ public class WebFrameworkClassLoader extends ClassLoader {
         if (!WebFramework.dev) {
             return super.loadClass(name);
         }
-        if (name.startsWith("app.model")) { // TODO : fix that
-            return super.loadClass(name);
-        }
         Class<?> clazz = null;
         clazz = findLoadedClass(name);
         if (clazz != null) {
             return clazz;
         }
         if (classesNames.contains(name)) {
-            return findClass(name);
+            try {
+                return findClassFromSources(name);
+            } catch (Throwable t) {
+                return super.loadClass(name);
+            }
         } else {
             return super.loadClass(name);
         }
     }
 
-    @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
+    protected Class<?> findClassFromSources(String name) throws ClassNotFoundException {
         String path = name.replace(".", "/");
         RequestCompiler.compile(path);
         File clazz = new File(WebFramework.FWK_COMPILED_CLASSES_PATH, path + ".class");
