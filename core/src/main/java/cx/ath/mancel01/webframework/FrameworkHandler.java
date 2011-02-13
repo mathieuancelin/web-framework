@@ -59,7 +59,6 @@ public class FrameworkHandler {
     private Router router;
     private FileGrabber viewGrabber;
     private WebFrameworkClassLoader loader;
-    private InjectorImpl devInjector;
 
     public FrameworkHandler(String binderClassName, String contextRoot,
             File rootDir, FileGrabber viewGrabber) {
