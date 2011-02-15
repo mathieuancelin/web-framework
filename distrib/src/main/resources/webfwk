@@ -253,7 +253,7 @@ function echoStart()
 	echo "       ;;;;;;/    |/       /   /      ';;;"
 	echo "       ';;;;/     |       /    |      ;;;"
 	echo "           --------      -------     ;'"
-	echo " 	      thanks to k.p for the avatar"
+	echo " 	       thanks kevin for the avatar"
 	echo " "
 	return;
 }
