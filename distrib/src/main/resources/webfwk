@@ -236,6 +236,12 @@ function echoStart()
 	echo "|                                          |"
 	echo "|==========================================|"
 	echo " "
+	return;
+}
+
+function displayHelp()
+{
+	echoStart
 	echo "           .,,."
 	echo "         ,;;;;;;;,"
 	echo "        .-'   -';;;."
@@ -256,12 +262,6 @@ function echoStart()
 	echo "           --------      -------     ;'"
 	echo " 	       thanks kevin for the avatar"
 	echo " "
-	return;
-}
-
-function displayHelp()
-{
-	echoStart
 	echo "You can use the following commands :"
 	echo " "
 	echo "  new 			create a new application"
