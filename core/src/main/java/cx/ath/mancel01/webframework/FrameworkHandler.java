@@ -40,9 +40,9 @@ import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.UnmodifiableClassException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
@@ -62,7 +62,7 @@ public class FrameworkHandler {
     private Router router;
     private FileGrabber viewGrabber;
     private WebFrameworkClassLoader loader;
-    private InjectorImpl devInjector;
+    private AtomicLong requestCount = new AtomicLong(0);
 
     public FrameworkHandler(String binderClassName, String contextRoot,
             File rootDir, FileGrabber viewGrabber) {
@@ -168,10 +168,18 @@ public class FrameworkHandler {
                     }
                     WebFrameworkClassLoader.setClassesNames(classes);
                     if (changed) {
-                        if (HotSwapAgent.enabled) {
-                            try {
-                                HotSwapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
-                            } catch (Exception e) {
+                        long count = requestCount.incrementAndGet();
+                        if (count > 2) {
+                            if (HotSwapAgent.enabled) {
+                                try {
+                                    HotSwapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    stop();
+                                    // clean classloader ?
+                                    start();
+                                }
+                            } else {
                                 stop();
                                 // clean classloader ?
                                 start();
