@@ -77,7 +77,7 @@ public class WebFrameworkClassLoader extends ClassLoader {
         return defineClass(name, b, 0, b.length);
     }
 
-    private byte[] getClassDefinition(File file) {
+    public static byte[] getClassDefinition(File file) {
         InputStream is = null;
         try {
             is = new FileInputStream(file);

@@ -33,6 +33,18 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                  <archive>
+                    <manifestEntries>
+                        <Premain-Class>cx.ath.mancel01.webframework.compiler.HotSwapAgent</Premain-Class>
+                        <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                    </manifestEntries>
+                  </archive>
+                </configuration>
+              </plugin>
         </plugins>
         <finalName>web-framework-core</finalName>
     </build>
