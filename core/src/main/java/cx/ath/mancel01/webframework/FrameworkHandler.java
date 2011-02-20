@@ -22,6 +22,7 @@ import cx.ath.mancel01.dependencyshot.graph.Binder;
 import cx.ath.mancel01.dependencyshot.injection.InjectorImpl;
 import cx.ath.mancel01.webframework.cache.CacheService;
 import cx.ath.mancel01.webframework.compiler.CompilationException;
+import cx.ath.mancel01.webframework.compiler.HotSwapAgent;
 import cx.ath.mancel01.webframework.compiler.RequestCompiler;
 import cx.ath.mancel01.webframework.compiler.WebFrameworkClassLoader;
 import cx.ath.mancel01.webframework.data.JPAService;
@@ -38,8 +39,10 @@ import cx.ath.mancel01.webframework.view.Renderable;
 import cx.ath.mancel01.webframework.view.View;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.lang.instrument.ClassDefinition;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
@@ -59,6 +62,7 @@ public class FrameworkHandler {
     private Router router;
     private FileGrabber viewGrabber;
     private WebFrameworkClassLoader loader;
+    private AtomicLong requestCount = new AtomicLong(0);
 
     public FrameworkHandler(String binderClassName, String contextRoot,
             File rootDir, FileGrabber viewGrabber) {
@@ -148,6 +152,7 @@ public class FrameworkHandler {
                 if (WebFramework.dev) {
                     List<String> classesNames = new ArrayList<String>();
                     List<String> classes = new ArrayList<String>();
+                    List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
                     WebFramework.findClasses(classesNames, WebFramework.JAVA_SOURCES);
                     boolean changed = false;
                     for(String className : classesNames) {
@@ -156,13 +161,34 @@ public class FrameworkHandler {
                         boolean tmp = RequestCompiler.compile(name);
                         if (tmp) {
                             changed = true;
+                            File clazz = new File(WebFramework.FWK_COMPILED_CLASSES_PATH, name + ".class");
+                            newDefinitions.add(new ClassDefinition(loader.loadClass(name.replace("/", ".")),
+                                    WebFrameworkClassLoader.getClassDefinition(clazz)));
                         }
                     }
                     WebFrameworkClassLoader.setClassesNames(classes);
                     if (changed) {
-                        stop();
-                        // clean classloader ?
-                        start();
+                        long count = requestCount.incrementAndGet();
+                        if (count > 2) {
+                            if (HotSwapAgent.enabled) {
+                                try {
+                                    HotSwapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    stop();
+                                    // clean classloader ?
+                                    start();
+                                }
+                            } else {
+                                stop();
+                                // clean classloader ?
+                                start();
+                            }
+                        } else {
+                            stop();
+                            // clean classloader ?
+                            start();
+                        }
                     }
                     WebFramework.logger.trace("configuration bootstrap : {} ms.", (System.currentTimeMillis() - start));
                     start = System.currentTimeMillis();

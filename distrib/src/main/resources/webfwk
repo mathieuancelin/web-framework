@@ -69,6 +69,7 @@ function launch()
 		## starting the Grizzly server
 		
 		java -agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n \
+		-javaagent:$LIBS/webframework-core-1.0-SNAPSHOT.jar \
 		-classpath $APP_PATH/target/classes:$APP_PATH/target/compclasses:$RESOURCES:$CONF:$LIBS_CLASSPATH:$USER_LIBS_CLASSPATH \
 		cx.ath.mancel01.webframework.integration.grizzly.GrizzlyServerLauncher $APP_PATH
 		
@@ -231,7 +232,7 @@ function echoStart()
 	echo "|                                          |"
 	echo "| Welcome in the web-framework framework ! |"
 	echo "|                                          |"
-	echo "|       web-framework version 0.1a         |"
+	echo "|    web-framework version 0.1a 'poney'    |"
 	echo "|                                          |"
 	echo "|==========================================|"
 	echo " "
@@ -241,6 +242,26 @@ function echoStart()
 function displayHelp()
 {
 	echoStart
+	echo "           .,,."
+	echo "         ,;;;;;;;,"
+	echo "        .-'   -';;;."
+	echo "       /'  .-.   ;;;"
+	echo "     .'    \d    \;;               .;;;,"
+	echo "    / o           \;             ,;;;;;;;,"
+	echo "    \__, _.__,'    \____....----.;;;;;;;;;;,"
+	echo "      "" ;;;\                        \ ';;;;;;"
+	echo "        ;;;;|                      |  ;;;;;;"
+	echo "        ;;;;|                      | ;;;;;;"
+ 	echo "       ;;;;;|                     / ;;;;;;"
+	echo "       ;;;;;/|    .-------\      / ;;;;;;;"
+	echo "      ;;;;;/ \    |        '.   (   ;;;;;;;"
+	echo "      ;;;;;'\ |   |          )   \   ;;;;;;"
+	echo "      ;;;;;;;\/   |\        /   /    ';;;;;"
+	echo "       ;;;;;;/    |/       /   /      ';;;"
+	echo "       ';;;;/     |       /    |      ;;;"
+	echo "           --------      -------     ;'"
+	echo " 	       thanks kevin for the avatar"
+	echo " "
 	echo "You can use the following commands :"
 	echo " "
 	echo "  new 			create a new application"

@@ -17,18 +17,25 @@
 
 package cx.ath.mancel01.webframework.compiler;
 
+import java.lang.instrument.ClassDefinition;
+import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
+
 /**
  *
  * @author mathieu
  */
-public class DelegateClassLoader extends ClassLoader {
+public class HotSwapAgent {
 
-    public DelegateClassLoader(ClassLoader parent) {
-        super(parent);
+    static Instrumentation instrumentation;
+    public static boolean enabled = false;
+
+    public static void premain(String agentArgs, Instrumentation instrumentation) {
+        HotSwapAgent.instrumentation = instrumentation;
+        HotSwapAgent.enabled = true;
     }
 
-    @Override
-    public Class<?> loadClass(String name) throws ClassNotFoundException {
-        return new WebFrameworkClassLoader().loadClass(name);
+    public static void reload(ClassDefinition... definitions) throws UnmodifiableClassException, ClassNotFoundException {
+        instrumentation.redefineClasses(definitions);
     }
 }

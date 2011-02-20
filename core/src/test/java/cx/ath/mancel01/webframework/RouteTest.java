@@ -16,7 +16,6 @@
  */
 package cx.ath.mancel01.webframework;
 
-import cx.ath.mancel01.webframework.compiler.AlphaClassloader;
 import cx.ath.mancel01.webframework.routing.Param;
 import org.junit.Test;
 
