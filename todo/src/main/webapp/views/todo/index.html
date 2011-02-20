@@ -22,7 +22,7 @@
     $('#createTask').click(function() {
         $.post("@{'/todo/createTask'}", {title: prompt('task title')}, function(task) {
             $('#notask').hide();
-            $('ul').prepend(
+            $('ul').append(
                 '<li><input type="checkbox" id="' + task.id + '"/>' + task.title + '</li>'
             );
         });
