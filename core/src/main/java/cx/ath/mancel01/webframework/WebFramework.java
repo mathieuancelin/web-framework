@@ -19,6 +19,7 @@ package cx.ath.mancel01.webframework;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 import cx.ath.mancel01.webframework.util.FileUtils.FileGrabber;
@@ -44,34 +45,26 @@ public class WebFramework {
 
     public static final Logger logger = LoggerFactory.getLogger(WebFramework.class);
     public static final Properties config = new Properties();
-
     public static File ROOT;
     public static File SOURCES;
     public static File TARGET;
-
     public static File WEB_SOURCES;
     public static File VIEWS;
     public static File CONF;
     public static File PUBLIC_RESOURCES;
     public static File JAVA_SOURCES;
     public static File RESOURCES;
-    
     public static File MVN_COMPILED_CLASSES_PATH;
     public static File FWK_COMPILED_CLASSES_PATH;
     public static File DB;
     public static File LOGS;
-
     public static boolean dev = false;
     public static boolean keepDefaultRoutes = true;
     public static boolean proxyInjectionForCompilation = false;
     public static boolean recompileServices = true;
     public static String classpath = "";
-
     public static FileGrabber grabber;
-
-    private static Map<String, Class<?>> applicationClasses
-            = new HashMap<String, Class<?>>();
-
+    private static Map<String, Class<?>> applicationClasses = new HashMap<String, Class<?>>();
     public static String contextRoot;
 
     public static void init(File rootDir, String context, ClassLoader loader) {
@@ -108,6 +101,7 @@ public class WebFramework {
         createDir(FWK_COMPILED_CLASSES_PATH);
         createDir(LOGS);
         grabber = new FileGrabber() {
+
             @Override
             public File getFile(String file) {
                 return new File(ROOT, file);
@@ -121,7 +115,7 @@ public class WebFramework {
         }
         return false;
     }
-    
+
     private static void initClasspath() {
         ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
         URL[] urls = ((URLClassLoader) sysClassLoader).getURLs();
@@ -164,9 +158,10 @@ public class WebFramework {
 
     private static void initLogger() {
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-        lc.stop(); lc.reset();
+        lc.stop();
+        lc.reset();
         ch.qos.logback.classic.Logger backLogger = (ch.qos.logback.classic.Logger) logger;
-        ConsoleAppender consoleAppender = new ConsoleAppender();
+        ANSIConsoleAppender consoleAppender = new ANSIConsoleAppender();
         consoleAppender.setContext(lc);
         PatternLayout pl = new PatternLayout();
         pl.setPattern("%d{HH:mm:ss.SSS} %-5level - %msg%n");
@@ -199,11 +194,11 @@ public class WebFramework {
     static void findApplicationClasses(ClassLoader loader) {
         List<String> classesNames = new ArrayList<String>();
         findClasses(classesNames, WebFramework.JAVA_SOURCES);
-        for(String className : classesNames) {
+        for (String className : classesNames) {
             String name = className.replace(WebFramework.JAVA_SOURCES.getAbsolutePath() + "/", "").replace("/", ".").replace(".java", "");
             applicationClasses.put(name, null);
         }
-        for(String name : applicationClasses.keySet()) {
+        for (String name : applicationClasses.keySet()) {
             try {
                 applicationClasses.put(name, loader.loadClass(name));
             } catch (ClassNotFoundException ex) {
@@ -228,8 +223,54 @@ public class WebFramework {
         }
     }
 
-    //public static String compile = "javac -encoding utf-8 -source 1.6 -target 1.6 -d {1} -classpath {2} {3}";
-    //public static String compile = "-encoding utf-8 -source 1.6 -target 1.6 -d {1} -classpath {2}";
-    //compile = compile.replace("{2}", classpath);
-    //compile = compile.replace("{1}", new File("target/compclasses").getAbsolutePath());
+    private static class ANSIConsoleAppender extends ConsoleAppender {
+
+        static final int NORMAL = 0;
+        static final int BRIGHT = 1;
+        static final int FOREGROUND_BLACK = 30;
+        static final int FOREGROUND_RED = 31;
+        static final int FOREGROUND_GREEN = 32;
+        static final int FOREGROUND_YELLOW = 33;
+        static final int FOREGROUND_BLUE = 34;
+        static final int FOREGROUND_MAGENTA = 35;
+        static final int FOREGROUND_CYAN = 36;
+        static final int FOREGROUND_WHITE = 37;
+        static final String PREFIX = "\u001b[";
+        static final String SUFFIX = "m";
+        static final char SEPARATOR = ';';
+        static final String END_COLOUR = PREFIX + SUFFIX;
+        static final String FATAL_COLOUR = PREFIX + BRIGHT + SEPARATOR + FOREGROUND_RED + SUFFIX;
+        static final String ERROR_COLOUR = PREFIX + NORMAL + SEPARATOR + FOREGROUND_RED + SUFFIX;
+        static final String WARN_COLOUR = PREFIX + NORMAL + SEPARATOR + FOREGROUND_YELLOW + SUFFIX;
+        static final String INFO_COLOUR = PREFIX + SUFFIX;
+        static final String DEBUG_COLOUR = PREFIX + NORMAL + SEPARATOR + FOREGROUND_CYAN + SUFFIX;
+        static final String TRACE_COLOUR = PREFIX + NORMAL + SEPARATOR + FOREGROUND_BLUE + SUFFIX;
+                                            
+        @Override
+        protected void append(Object eventObject) {
+            try {
+                LoggingEvent event = (LoggingEvent) eventObject;
+                this.getOutputStream().write(getColour(event.getLevel()).getBytes());
+                super.append(eventObject);
+                this.getOutputStream().write(END_COLOUR.getBytes());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        private String getColour(Level level) {
+            switch (level.toInt()) {
+                case Level.ERROR_INT:
+                    return ERROR_COLOUR;
+                case Level.WARN_INT:
+                    return WARN_COLOUR;
+                case Level.INFO_INT:
+                    return INFO_COLOUR;
+                case Level.DEBUG_INT:
+                    return DEBUG_COLOUR;
+                default:
+                    return TRACE_COLOUR;
+            }
+        }
+    }
 }
